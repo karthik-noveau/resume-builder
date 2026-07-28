@@ -1,0 +1,110 @@
+.card {
+  border-radius: var(--radius-large);
+  border: 1px solid rgb(var(--color-divider));
+  background-color: rgb(var(--color-surface));
+  transition: border-color var(--duration-fast);
+}
+
+.card:hover {
+  border-color: rgb(var(--color-primary) / 30%);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgb(var(--color-divider));
+}
+
+.revealable {
+  opacity: 0;
+  transition: opacity var(--duration-fast);
+}
+
+.card:hover .revealable {
+  opacity: 1;
+}
+
+.revealable:focus-visible {
+  opacity: 1;
+}
+
+.dragHandle {
+  padding: 4px;
+  cursor: grab;
+  color: rgb(var(--color-text-muted));
+  flex-shrink: 0;
+  border-radius: var(--radius-small);
+  background: none;
+  border: none;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.dragHandle:focus-visible,
+.visibilityButton:focus-visible,
+.deleteButton:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+}
+
+.titleGroup {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.titleGroupHidden {
+  opacity: 0.5;
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(var(--color-text-primary));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtitle {
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.visibilityButton {
+  padding: 6px;
+  color: rgb(var(--color-text-muted));
+  transition: color var(--duration-fast);
+  border-radius: var(--radius-small);
+  flex-shrink: 0;
+  background: none;
+  border: none;
+}
+
+.visibilityButton:hover {
+  color: rgb(var(--color-text-primary));
+}
+
+.deleteButton {
+  padding: 6px;
+  color: rgb(var(--color-text-muted));
+  transition: color var(--duration-fast), background-color var(--duration-fast);
+  border-radius: var(--radius-small);
+  flex-shrink: 0;
+  background: none;
+  border: none;
+}
+
+.deleteButton:hover {
+  color: rgb(var(--color-error));
+  background-color: rgb(var(--color-error) / 10%);
+}
+
+.body {
+  padding: 12px;
+}

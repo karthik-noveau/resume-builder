@@ -1,0 +1,208 @@
+.section {
+  position: relative;
+  overflow: hidden;
+  background-color: rgb(var(--color-background));
+}
+
+.blobLeft {
+  position: absolute;
+  top: -128px;
+  left: -128px;
+  width: 28rem;
+  height: 28rem;
+  border-radius: 9999px;
+  background-color: rgb(37 99 235 / 10%);
+  filter: blur(64px);
+  pointer-events: none;
+}
+
+.blobRight {
+  position: absolute;
+  top: 40px;
+  right: -160px;
+  width: 36rem;
+  height: 36rem;
+  border-radius: 9999px;
+  background-color: rgb(124 58 237 / 10%);
+  filter: blur(64px);
+  pointer-events: none;
+}
+
+.inner {
+  position: relative;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 64px 24px 96px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .inner {
+    grid-template-columns: repeat(2, 1fr);
+    padding-top: 80px;
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 9999px;
+  background-color: rgb(var(--color-primary) / 10%);
+  padding: 6px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(var(--color-primary));
+  letter-spacing: 0.025em;
+}
+
+.heading {
+  margin-top: 28px;
+  font-family: var(--font-heading, var(--font-sans));
+  font-size: 3rem;
+  font-weight: 800;
+  color: rgb(var(--color-text-primary));
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+@media (min-width: 640px) {
+  .heading {
+    font-size: 3.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .heading {
+    font-size: 4.75rem;
+  }
+}
+
+.gradientText {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.subtext {
+  margin-top: 24px;
+  font-size: 1.125rem;
+  color: rgb(var(--color-text-secondary));
+  max-width: 32rem;
+}
+
+.ctaRow {
+  margin-top: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+}
+
+.browseLink {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(var(--color-text-primary));
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgb(var(--color-divider));
+  transition: color var(--duration-fast), text-decoration-color var(--duration-fast);
+}
+
+.browseLink:hover {
+  color: rgb(var(--color-primary));
+  text-decoration-color: rgb(var(--color-primary));
+}
+
+.statsList {
+  margin-top: 48px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 32px;
+  row-gap: 12px;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(var(--color-text-muted));
+}
+
+.previewWrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  transform: scale(0.75);
+  transform-origin: center;
+}
+
+@media (min-width: 640px) {
+  .previewWrap {
+    transform: scale(0.9);
+  }
+}
+
+@media (min-width: 1024px) {
+  .previewWrap {
+    transform: scale(1);
+    justify-content: flex-end;
+  }
+}
+
+.previewGlow {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 320px;
+  height: 320px;
+  border-radius: 9999px;
+  filter: blur(64px);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.previewStack {
+  position: relative;
+  width: 240px;
+  height: 340px;
+}
+
+.previewBackLeft {
+  position: absolute;
+  top: 16px;
+  left: -64px;
+  transform: rotate(-6deg);
+}
+
+.previewBackRight {
+  position: absolute;
+  top: 16px;
+  right: -64px;
+  transform: rotate(6deg);
+}
+
+.previewFront {
+  position: relative;
+}
+
+.previewCard {
+  border-radius: var(--radius-medium);
+  /* Fixed-look brand element (a "printed page" mockup) — deliberately not
+     using the shared --shadow-level tokens or a theme color for the edge.
+     A white card on the light theme's near-white background needs a
+     stronger, self-contained shadow + hairline border to read at all;
+     --shadow-level-3 alone all but disappears there (it only looked fine
+     against the dark theme's navy background). */
+  box-shadow: 0 20px 40px -12px rgb(0 0 0 / 25%), 0 8px 16px -8px rgb(0 0 0 / 15%);
+  border: 4px solid #fff;
+  outline: 1px solid rgb(0 0 0 / 8%);
+  outline-offset: -1px;
+  background-color: #fff;
+}

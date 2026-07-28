@@ -1,0 +1,37 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.pillError {
+  background-color: rgb(var(--color-error) / 10%);
+  color: rgb(var(--color-error));
+}
+
+.pillNeutral {
+  background-color: rgb(var(--color-surface-elevated));
+  color: rgb(var(--color-text-muted));
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+.successIcon {
+  color: rgb(var(--color-success));
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "composite": true,
+    // composite requires emit, so restrict it to declarations — plain noEmit is
+    // illegal here, and full emit is what polluted the tree.
+    "emitDeclarationOnly": true,
+    // composite forces emit; send it outside the source tree so the build never
+    // leaves .d.ts files sitting next to the configs.
+    "outDir": "./node_modules/.tmp/node-types",
+    "strict": true
+  },
+  "include": ["vite.config.ts", "tailwind.config.ts", "eslint.config.js", "postcss.config.js"]
+}

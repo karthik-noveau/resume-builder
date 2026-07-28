@@ -1,0 +1,58 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px 10px 24px;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform var(--duration-fast);
+}
+
+.root:hover {
+  transform: scale(1.02);
+}
+
+.root:active {
+  transform: scale(0.98);
+}
+
+.brand {
+  color: #fff;
+  box-shadow: var(--shadow-glow-lift);
+}
+
+.inverted {
+  background-color: #fff;
+  color: #1a0f2e;
+}
+
+.inverted:focus-visible {
+  outline-color: #fff;
+}
+
+.iconCircle {
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform var(--duration-fast);
+}
+
+.root:hover .iconCircle {
+  transform: translateX(2px);
+}
+
+.iconCircleBrand {
+  background-color: #fff;
+  color: rgb(var(--color-primary));
+}
+
+.iconCircleInverted {
+  background-color: #1a0f2e;
+  color: #fff;
+}

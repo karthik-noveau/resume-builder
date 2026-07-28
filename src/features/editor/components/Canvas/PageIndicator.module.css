@@ -1,0 +1,42 @@
+.root {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-level-2);
+  padding: 6px 8px;
+}
+
+.button {
+  padding: 4px;
+  border-radius: var(--radius-small);
+  border: none;
+  background: transparent;
+  color: rgb(var(--color-text-muted));
+  cursor: pointer;
+  transition: color var(--duration-fast), background-color var(--duration-fast);
+}
+
+.button:hover:not(:disabled) {
+  color: rgb(var(--color-text-primary));
+  background-color: rgb(var(--color-surface-elevated));
+}
+
+.button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgb(var(--color-text-secondary));
+  font-variant-numeric: tabular-nums;
+  padding: 0 4px;
+}

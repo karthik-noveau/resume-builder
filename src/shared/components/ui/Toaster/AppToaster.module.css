@@ -1,0 +1,105 @@
+/* sonner ships its own palette, font stack and radii. Left alone it renders a
+   pale mint success toast in dark mode and uses ui-sans-serif rather than the
+   app's font — so every surface property is bound to a token here. The
+   attribute selector matches sonner's own specificity, and the extra
+   `[data-sonner-toast]` qualifier ensures these win. */
+.toast[data-sonner-toast] {
+  position: relative;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  padding: 12px 14px;
+  gap: 10px;
+  background-color: rgb(var(--color-surface));
+  color: rgb(var(--color-text-primary));
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-level-3);
+}
+
+/* Status reads from a leading accent rather than a wash of colour, so the toast
+   keeps the same surface as every other panel in the app.
+
+   This is an inset pseudo-element, not `border-left`: a coloured border follows
+   the 14px corner radius and renders as a crescent, and it would also make the
+   left edge 2px thicker than the other three, shifting the content across. */
+.toast[data-sonner-toast][data-type]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background-color: rgb(var(--color-text-muted));
+}
+
+.toast[data-sonner-toast][data-type='success']::before {
+  background-color: rgb(var(--color-success));
+}
+
+.toast[data-sonner-toast][data-type='error']::before {
+  background-color: rgb(var(--color-error));
+}
+
+.toast[data-sonner-toast][data-type='warning']::before {
+  background-color: rgb(var(--color-warning));
+}
+
+.toast[data-sonner-toast][data-type='info']::before {
+  background-color: rgb(var(--color-info));
+}
+
+.title {
+  font-weight: 600;
+  color: rgb(var(--color-text-primary));
+}
+
+.description {
+  color: rgb(var(--color-text-secondary));
+}
+
+.toast[data-sonner-toast][data-type='success'] .icon {
+  color: rgb(var(--color-success));
+}
+
+.toast[data-sonner-toast][data-type='error'] .icon {
+  color: rgb(var(--color-error));
+}
+
+.toast[data-sonner-toast][data-type='warning'] .icon {
+  color: rgb(var(--color-warning));
+}
+
+.toast[data-sonner-toast][data-type='info'] .icon {
+  color: rgb(var(--color-info));
+}
+
+/* sonner parks its close button outside the top-left corner by default, which
+   reads as a stray dot floating beside the toast. It also gives the button a
+   filled `--gray1` disc — invisible on a white toast, but a black circle in
+   dark mode — so the surface properties are overridden too. The descendant
+   selector is needed to outrank sonner's own `[data-sonner-toast] [data-close-button]`. */
+.toast[data-sonner-toast] .closeButton[data-close-button] {
+  right: 6px;
+  left: auto;
+  top: 6px;
+  transform: none;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background-color: transparent;
+  color: rgb(var(--color-text-muted));
+  opacity: 0;
+  transition: opacity var(--duration-fast), color var(--duration-fast), background-color var(--duration-fast);
+}
+
+.toast[data-sonner-toast]:hover .closeButton[data-close-button],
+.toast[data-sonner-toast] .closeButton[data-close-button]:focus-visible {
+  opacity: 1;
+}
+
+.toast[data-sonner-toast] .closeButton[data-close-button]:hover {
+  color: rgb(var(--color-text-primary));
+  background-color: rgb(var(--color-text-primary) / 8%);
+}

@@ -1,0 +1,13 @@
+[build]
+  command = "pnpm build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# react-router serves every route from the single entry point, so unknown paths
+# must fall through to index.html instead of 404ing on the CDN.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

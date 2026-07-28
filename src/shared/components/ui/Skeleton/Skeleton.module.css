@@ -1,0 +1,27 @@
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.root {
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: rgb(var(--color-divider));
+}
+
+.text {
+  border-radius: var(--radius-xs);
+  height: 16px;
+}
+
+.rect {
+  border-radius: var(--radius-medium);
+}
+
+.circle {
+  border-radius: 9999px;
+}

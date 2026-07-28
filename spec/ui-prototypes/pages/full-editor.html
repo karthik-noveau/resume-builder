@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Full Editor — Resume Studio Mockup</title>
+<link rel="stylesheet" href="../assets/css/mockups.css">
+</head>
+<body>
+<div class="reviewBar">
+  <span class="reviewBarLabel">Page Mockups</span>
+  <div class="tabs" role="tablist">
+    <a class="tabBtn" aria-selected="false" href="home.html">Home</a>
+    <a class="tabBtn" aria-selected="false" href="my-resumes.html">My Resumes</a>
+    <a class="tabBtn" aria-selected="false" href="templates.html">Templates</a>
+    <a class="tabBtn" aria-selected="false" href="settings.html">Settings</a>
+    <a class="tabBtn" aria-selected="false" href="guided-editor.html">Guided Editor</a>
+    <a class="tabBtn" aria-selected="true" href="full-editor.html">Full Editor</a>
+  </div>
+  <button class="themeToggle" id="themeToggleBtn">
+    <svg id="themeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    <span id="themeLabel">Dark mode</span>
+  </button>
+</div>
+
+<div class="stage" id="stage">
+
+<div class="screen active" id="screen-editor">
+  <p class="caption"><b>Full Editor</b> — canvas editor — <code>/editor/:id</code></p>
+  <div class="frame">
+    <div class="editor-shell">
+      <header class="editor-toolbar">
+        <div class="toolbarLeft">
+          <span class="brandMark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 4.1L6 9l4.1 1.9L12 15l1.9-4.1L18 9l-4.1-1.9L12 3Z"/></svg></span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:rgb(var(--color-text-muted))"><path d="m15 18-6-6 6-6"/></svg>
+          <span class="guided-title">Senior PM — Northwind</span>
+          <span class="savedTag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Saved</span>
+        </div>
+        <div class="toolbarCenter">
+          <div class="toolbarGroup">
+            <button class="toolbarIconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+            <button class="toolbarIconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 14 5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+          </div>
+          <div class="vDivider"></div>
+          <div class="toolbarGroup">
+            <button class="toolbarIconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M8 11h6M21 21l-4.3-4.3"/></svg></button>
+            <span class="zoomLabel">100%</span>
+            <button class="toolbarIconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M11 8v6M8 11h6M21 21l-4.3-4.3"/></svg></button>
+            <button class="toolbarIconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
+          </div>
+        </div>
+        <div class="toolbarRight">
+          <button class="toolbarIconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5h10M11 12h10M11 19h10M4 5a1 1 0 1 0 2 0 1 1 0 1 0-2 0Zm0 7a1 1 0 1 0 2 0 1 1 0 1 0-2 0Zm0 7a1 1 0 1 0 2 0 1 1 0 1 0-2 0Z"/></svg></button>
+          <button class="btn btn-primary" style="height:36px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 12-4-4m4 4 4-4M3 15v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"/></svg>Export PDF</button>
+        </div>
+      </header>
+      <div class="editor-body">
+        <aside class="editor-sidebar">
+          <div class="sidebarHeader">
+            <p class="sidebarHeading">Sections</p>
+            <div class="completenessRow"><span>Profile strength</span><span>100%</span></div>
+            <div class="completenessTrack"><div class="completenessFill"></div></div>
+          </div>
+          <div class="sectionList">
+            <div class="sectionRow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 10H3M21 6H3M21 14H3M17 18H3"/></svg>Summary<span class="sectionCount">1</span></div>
+            <div class="sectionRow selected"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Experience<span class="sectionCount">2</span></div>
+            <div class="sectionRow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Education<span class="sectionCount">1</span></div>
+            <div class="sectionRow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg>Skills<span class="sectionCount">2</span></div>
+            <div class="sectionRow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>Projects<span class="sectionCount">1</span></div>
+            <div class="sectionRow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 21v-4a4 4 0 0 0-8 0v4M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>Certifications<span class="sectionCount">1</span></div>
+          </div>
+          <a class="addSectionLink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5v14"/></svg>Add section</a>
+        </aside>
+        <div class="editor-canvas">
+          <div class="resumePage">
+            <p class="rp-name">Alex Morgan</p>
+            <p class="rp-headline">Senior Product Manager</p>
+            <p class="rp-contact">Austin, TX &middot; +1 (555) 123-4567 &middot; alex.morgan@example.com &middot; alexmorgan.dev</p>
+            <hr class="rp-hr">
+            <div class="rp-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>Summary</div>
+            <p class="rp-body-text">Product manager with 7+ years shipping enterprise SaaS products, leading cross-functional teams through discovery, delivery, and growth. Skilled at translating ambiguous customer problems into roadmaps that measurably move revenue and retention.</p>
+            <div class="rp-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Work Experience</div>
+            <div class="rp-block rp-block-selected">
+              <div class="rp-entry-row"><span class="rp-role">Senior Product Manager</span><span class="rp-date">Jan 2022 &ndash; Present</span></div>
+              <div class="rp-entry-row"><span class="rp-company">Northwind Systems</span><span class="rp-loc">Austin, TX</span></div>
+              <ul class="rp-bullets">
+                <li>Led a team of 4 designers and 12 engineers to launch a self-serve onboarding flow, reducing time-to-value from 14 days to 3 days.</li>
+                <li>Defined and drove the pricing strategy for a new tier, growing net revenue retention from 98% to 112% within two quarters.</li>
+                <li>Partnered with sales and support leadership to build a customer feedback loop that now informs every quarterly roadmap.</li>
+              </ul>
+            </div>
+            <div class="rp-entry-row" style="margin-top:16px"><span class="rp-role">Product Manager</span><span class="rp-date">Jun 2018 &ndash; Dec 2021</span></div>
+            <div class="rp-entry-row"><span class="rp-company">Delta Cloud</span><span class="rp-loc">Remote</span></div>
+            <ul class="rp-bullets">
+              <li>Owned the billing and subscriptions platform serving 50,000+ paying customers.</li>
+              <li>Shipped usage-based billing, unlocking a new enterprise segment worth $2.4M ARR in year one.</li>
+            </ul>
+            <div class="pagePill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>Page 1 of 2</div>
+          </div>
+        </div>
+        <aside class="editor-props">
+          <div class="inspectorTabs">
+            <button class="inspectorTab active" data-inspector-tab="content">Content</button>
+            <button class="inspectorTab" data-inspector-tab="design">Design</button>
+          </div>
+          <div class="inspectorPane active" data-inspector-pane="content">
+            <p class="inspectorContext">Editing <b>Work Experience</b> — selected on canvas and in the outline</p>
+            <div class="propsField"><label>Role title</label><div class="fakeInput">Senior Product Manager</div></div>
+            <div class="propsField"><label>Company</label><div class="fakeInput">Northwind Systems</div></div>
+            <div class="propsFieldRow">
+              <div class="propsField"><label>Start date</label><div class="fakeInput">Jan 2022</div></div>
+              <div class="propsField"><label>End date</label><div class="fakeInput">Present</div></div>
+            </div>
+            <div class="propsField"><label>Location</label><div class="fakeInput">Austin, TX</div></div>
+            <p class="propsSectionLabel">Bullet points</p>
+            <div class="bulletRow"><span class="bulletDot"></span><div class="fakeInput bulletInput">Led a team of 4 designers and 12 engineers to launch a self-serve onboarding flow, reducing time-to-value from 14 days to 3 days.</div></div>
+            <div class="bulletRow"><span class="bulletDot"></span><div class="fakeInput bulletInput">Defined and drove the pricing strategy for a new tier, growing net revenue retention from 98% to 112% within two quarters.</div></div>
+            <div class="bulletRow"><span class="bulletDot"></span><div class="fakeInput bulletInput">Partnered with sales and support leadership to build a customer feedback loop that now informs every quarterly roadmap.</div></div>
+            <button class="addBulletBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5v14"/></svg>Add bullet</button>
+          </div>
+          <div class="inspectorPane" data-inspector-pane="design">
+            <!-- Template first, and stacked with the rest rather than hidden
+                 behind its own tab: three short controls fit in the column, and
+                 tabs were hiding two thirds of the panel to save space it did
+                 not need. Browsing happens in the picker, where the previews
+                 are big enough to tell the templates apart. -->
+            <p class="propsSectionLabel">Template</p>
+            <div class="apprTemplateRow">
+              <div class="apprTemplateThumb">
+                <div class="mini-resume" style="width:56px;height:79px;border:0;border-radius:0;overflow:hidden;background:#fff;padding:5px 4px">
+                  <div style="font-weight:700;font-size:4px">Alex Morgan</div>
+                  <div style="font-size:3px;color:#594fe8">Senior Product Manager</div>
+                  <div class="ml w90" style="height:2px;margin-top:4px"></div>
+                  <div class="ml w70" style="height:2px"></div>
+                  <div class="ml w85" style="height:2px"></div>
+                </div>
+              </div>
+              <div>
+                <p class="apprTemplateName">Clarity</p>
+                <p class="apprTemplateLayout">One column</p>
+              </div>
+            </div>
+            <button class="btn btn-secondary apprChangeBtn" data-picker-open="editorTemplatePicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>Change template</button>
+
+            <p class="propsSectionLabel">Theme color</p>
+            <div class="designSwatchRow">
+              <span class="designSwatch active" style="background:#594fe8"></span>
+              <span class="designSwatch" style="background:#2563eb"></span>
+              <span class="designSwatch" style="background:#0f172a"></span>
+              <span class="designSwatch" style="background:#0ea5e9"></span>
+              <span class="designSwatch" style="background:#059669"></span>
+            </div>
+            <p class="propsSectionLabel">Font pairing</p>
+            <div class="fakeInput">Professional — Inter / Source Serif</div>
+            <p class="propsSectionLabel">Page size</p>
+            <div class="fakeInput">A4 (210 &times; 297mm)</div>
+            <p class="propsSectionLabel">Section spacing</p>
+            <div class="spacingToggle"><button>Compact</button><button class="active">Comfortable</button><button>Spacious</button></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<!-- Select then confirm: switching template reflows the whole resume, so it
+     must not happen while the user is still comparing options. The current
+     template is pilled rather than checked — the check means "what you just
+     picked", not "what you already have". -->
+<div class="pickerOverlay" id="editorTemplatePicker">
+  <div class="pickerCard">
+    <div class="pickerHead">
+      <div>
+        <p class="pickerTitle">Change template</p>
+        <p class="pickerIntro">Your content stays exactly as it is &mdash; only the layout changes.</p>
+      </div>
+      <button class="pickerClose" data-picker-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+
+    <div class="pickerGrid">
+      <button class="pickerOption">
+        <div class="pickerPreviewWrap">
+          <div class="mini-resume" style="width:200px;height:283px;display:flex;border:1px solid rgb(var(--color-divider));border-radius:4px;overflow:hidden;background:#fff;padding:0">
+            <div style="background:#1e293b;color:#fff;width:36%;padding:10px 7px;font-size:6px;flex-shrink:0">
+              <div style="font-weight:700;font-size:7px">Alex Morgan</div>
+              <div class="ms" style="color:#fff;margin-top:10px">Contact</div><div class="ml w70" style="background:rgb(255 255 255/25%)"></div>
+              <div class="ms" style="color:#fff">Skills</div><div class="ml w80" style="background:rgb(255 255 255/25%)"></div>
+            </div>
+            <div style="flex:1;padding:10px 8px;min-width:0">
+              <div class="ms">Work Experience</div><div class="ml w90"></div><div class="ml w70"></div>
+              <div class="ms">Education</div><div class="ml w60"></div>
+            </div>
+          </div>
+          <span class="pickerCheck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+        </div>
+        <span class="pickerName">Foundation</span><span class="pickerLayout">Two column</span>
+      </button>
+      <button class="pickerOption">
+        <div class="pickerPreviewWrap">
+          <div class="mini-resume" style="width:200px;height:283px;display:flex;border:1px solid rgb(var(--color-divider));border-radius:4px;overflow:hidden;background:#fff;padding:0">
+            <div style="background:#0f172a;color:#fff;width:34%;padding:10px 7px;font-size:6px;flex-shrink:0">
+              <div style="font-weight:700;font-size:7px">Alex Morgan</div>
+              <div class="ms" style="color:#fff;margin-top:10px">Skills</div><div class="ml w80" style="background:rgb(255 255 255/25%)"></div>
+            </div>
+            <div style="flex:1;padding:10px 8px;min-width:0">
+              <div class="ms">Work Experience</div><div class="ml w90"></div><div class="ml w80"></div>
+              <div class="ms">Projects</div><div class="ml w70"></div>
+            </div>
+          </div>
+          <span class="pickerCheck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+        </div>
+        <span class="pickerName">Spectrum</span><span class="pickerLayout">Two column</span>
+      </button>
+      <button class="pickerOption">
+        <div class="pickerPreviewWrap">
+          <div class="mini-resume" style="width:200px;height:283px;border:1px solid rgb(var(--color-divider));border-radius:4px;overflow:hidden;background:#fff;padding:12px 11px">
+            <div style="font-weight:700;font-size:8px">Alex Morgan</div>
+            <div style="font-size:6px;color:#594fe8">Senior Product Manager</div>
+            <div class="ms">Summary</div><div class="ml w90"></div><div class="ml w80"></div>
+            <div class="ms">Work Experience</div><div class="ml w90"></div><div class="ml w70"></div><div class="ml w85"></div>
+            <div class="ms">Education</div><div class="ml w60"></div>
+          </div>
+          <span class="pickerCheck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span class="pickerCurrentPill">Current</span>
+        </div>
+        <span class="pickerName">Clarity</span><span class="pickerLayout">One column</span>
+      </button>
+      <button class="pickerOption">
+        <div class="pickerPreviewWrap">
+          <div class="mini-resume" style="width:200px;height:283px;display:flex;border:1px solid rgb(var(--color-divider));border-radius:4px;overflow:hidden;background:#fff;padding:0">
+            <div style="background:#594fe8;color:#fff;width:32%;padding:10px 7px;font-size:6px;flex-shrink:0">
+              <div style="font-weight:700;font-size:9px">AM</div>
+              <div class="ms" style="color:#fff;margin-top:10px">Contact</div><div class="ml w70" style="background:rgb(255 255 255/25%)"></div>
+            </div>
+            <div style="flex:1;padding:10px 8px;min-width:0">
+              <div class="ms">Summary</div><div class="ml w90"></div>
+              <div class="ms">Experience</div><div class="ml w85"></div><div class="ml w70"></div>
+            </div>
+          </div>
+          <span class="pickerCheck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+        </div>
+        <span class="pickerName">Monogram</span><span class="pickerLayout">Two column</span>
+      </button>
+    </div>
+
+    <div class="pickerFooter">
+      <button class="btn btn-secondary" data-picker-close>Cancel</button>
+      <button class="btn btn-primary" data-picker-confirm disabled>Use template</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/mockups.js"></script>
+</body>
+</html>

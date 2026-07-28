@@ -1,0 +1,7 @@
+/* 12, not the sidebar's 20px block inset: each row already carries 8px of its
+   own padding below its label, so 12 + 8 lands the last row 20px above the
+   divider — the same gap every other block closes with. Nothing on top, since
+   the heading above supplies the heading-to-content gap. */
+.list {
+  padding: 0 0 12px;
+}

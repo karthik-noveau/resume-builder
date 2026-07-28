@@ -1,0 +1,29 @@
+.group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.button {
+  padding: 6px;
+  border-radius: var(--radius-small);
+  color: rgb(var(--color-text-secondary));
+  transition: color var(--duration-fast), background-color var(--duration-fast);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  color: rgb(var(--color-primary));
+  background-color: rgb(var(--color-primary) / 10%);
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.button:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+}

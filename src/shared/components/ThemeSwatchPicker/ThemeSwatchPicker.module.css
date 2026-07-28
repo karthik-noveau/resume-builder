@@ -1,0 +1,63 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatchButton {
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color var(--duration-fast);
+}
+
+.swatchButton:hover {
+  border-color: rgb(var(--color-divider));
+}
+
+.swatchButtonActive,
+.swatchButtonActive:hover {
+  border-color: rgb(var(--color-primary));
+}
+
+.swatchInner {
+  border-radius: 9999px;
+  border: 1px solid rgb(var(--color-divider));
+}
+
+.customLabel {
+  position: relative;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color var(--duration-fast);
+}
+
+.customLabel:hover {
+  border-color: rgb(var(--color-divider));
+}
+
+.customLabelActive,
+.customLabelActive:hover {
+  border-color: rgb(var(--color-primary));
+}
+
+.customInner {
+  border-radius: 9999px;
+  border: 1px solid rgb(var(--color-divider));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.customIcon {
+  color: rgb(var(--color-text-muted));
+}
+

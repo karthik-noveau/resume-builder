@@ -1,0 +1,10 @@
+/* The width prop is applied inline by antd, so a wide modal (xl is 980px)
+   would overflow any viewport narrower than itself. This caps every size
+   without any of them needing to know the viewport. */
+.modal {
+  max-width: calc(100vw - 32px);
+}
+
+.body {
+  padding-top: 4px;
+}

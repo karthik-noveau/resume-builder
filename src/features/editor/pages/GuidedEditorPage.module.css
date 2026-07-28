@@ -1,0 +1,638 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background-color: rgb(var(--color-background));
+}
+
+.loading {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: rgb(var(--color-background));
+}
+
+/* Top bar */
+.header {
+  height: 64px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgb(var(--color-divider));
+  background-color: rgb(var(--color-surface));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  gap: 16px;
+  z-index: 20;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.brandLink {
+  display: none;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .brandLink {
+    display: flex;
+  }
+}
+
+.dividerDesktop {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .dividerDesktop {
+    display: block;
+  }
+}
+
+.dividerTall {
+  height: 24px;
+}
+
+.backLink {
+  padding: 6px;
+  border-radius: var(--radius-small);
+  color: rgb(var(--color-text-muted));
+  transition: color var(--duration-fast), background-color var(--duration-fast);
+  flex-shrink: 0;
+}
+
+.backLink:hover {
+  color: rgb(var(--color-primary));
+  background-color: rgb(var(--color-primary) / 10%);
+}
+
+.backLink:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(var(--color-text-primary));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}
+
+.autosaveWrap {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .autosaveWrap {
+    display: block;
+  }
+}
+
+.fullEditorLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius-large);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid rgb(var(--color-divider));
+  color: rgb(var(--color-text-secondary));
+  transition: color var(--duration-fast), background-color var(--duration-fast), border-color var(--duration-fast);
+  flex-shrink: 0;
+}
+
+.fullEditorLink:hover {
+  color: rgb(var(--color-text-primary));
+  background-color: rgb(var(--color-surface-elevated));
+  border-color: rgb(var(--color-primary) / 40%);
+}
+
+.fullEditorLink:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+}
+
+/* Overall progress bar */
+.progressTrack {
+  height: 4px;
+  background-color: rgb(var(--color-divider));
+  flex-shrink: 0;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: rgb(var(--color-primary));
+  transition: width var(--duration-normal);
+}
+
+/* Main area */
+.main {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+
+@media (min-width: 768px) {
+  .main {
+    flex-direction: row;
+  }
+}
+
+.wash {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.washBlobPrimary {
+  position: absolute;
+  top: -160px;
+  left: -160px;
+  width: 32rem;
+  height: 32rem;
+  border-radius: 9999px;
+  background-color: rgb(var(--color-primary) / 6%);
+  filter: blur(64px);
+}
+
+.washBlobAccent {
+  position: absolute;
+  bottom: -160px;
+  right: -160px;
+  width: 32rem;
+  height: 32rem;
+  border-radius: 9999px;
+  background-color: rgb(var(--color-accent) / 6%);
+  filter: blur(64px);
+}
+
+/* Stepper (mobile/tablet) */
+.mobileStepper {
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgb(var(--color-divider));
+  background-color: rgb(var(--color-surface));
+  overflow-x: auto;
+}
+
+.mobileStepperList {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 12px;
+  min-width: max-content;
+}
+
+.mobileStepButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  transition: color var(--duration-fast), background-color var(--duration-fast);
+  color: rgb(var(--color-text-secondary));
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mobileStepButton:hover {
+  background-color: rgb(var(--color-surface-elevated));
+}
+
+.mobileStepButtonActive {
+  background-color: rgb(var(--color-primary) / 10%);
+  color: rgb(var(--color-primary));
+  font-weight: 600;
+}
+
+.mobileStepButtonActive:hover {
+  background-color: rgb(var(--color-primary) / 10%);
+}
+
+.mobileStepNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  background-color: rgb(var(--color-surface-elevated));
+  color: rgb(var(--color-text-muted));
+  border: 1px solid rgb(var(--color-divider));
+}
+
+.mobileStepNumberActive {
+  background-color: rgb(var(--color-primary));
+  color: white;
+  border-color: transparent;
+}
+
+.mobileStepNumberDone {
+  background-color: rgb(var(--color-success));
+  color: white;
+  border-color: transparent;
+}
+
+/* Stepper (desktop) */
+/* Chrome, not canvas: surface + a divider, matching .header and .mobileStepper.
+   The centre column stays on --color-background so it reads as the work area. */
+.desktopStepper {
+  position: relative;
+  z-index: 10;
+  width: 300px;
+  flex-shrink: 0;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(var(--color-surface));
+  border-right: 1px solid rgb(var(--color-divider));
+}
+
+.desktopStepItem {
+  position: relative;
+}
+
+.desktopStepItemSpaced {
+  padding-bottom: 28px;
+}
+
+.desktopStepConnector {
+  position: absolute;
+  left: 20px;
+  top: 40px;
+  bottom: 0;
+  width: 1px;
+  background-color: rgb(var(--color-divider));
+}
+
+.desktopStepConnectorDone {
+  background-color: rgb(var(--color-success));
+}
+
+.desktopStepButton {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.desktopStepIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  transition: all var(--duration-fast);
+  background-color: rgb(var(--color-surface));
+  color: rgb(var(--color-text-muted));
+  border: 1px solid rgb(var(--color-divider));
+}
+
+.desktopStepButton:hover .desktopStepIconDefault {
+  border-color: rgb(var(--color-primary) / 40%);
+}
+
+.desktopStepIconActive {
+  background-color: rgb(var(--color-primary));
+  color: white;
+  box-shadow: var(--shadow-level-2);
+  border-color: transparent;
+}
+
+.desktopStepIconDone {
+  background-color: rgb(var(--color-success));
+  color: white;
+  border-color: transparent;
+}
+
+.desktopStepLabelWrap {
+  padding-top: 10px;
+  min-width: 0;
+}
+
+.desktopStepLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(var(--color-text-secondary));
+}
+
+.desktopStepLabelActive {
+  font-weight: 600;
+  color: rgb(var(--color-text-primary));
+}
+
+.desktopStepHint {
+  display: block;
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.autosaveNote {
+  margin-top: auto;
+  padding-top: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+}
+
+.autosaveNoteIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Current step form */
+.stepMain {
+  position: relative;
+  z-index: 10;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fills the column's height; the bottom padding stops the card short of the
+   pinned nav buttons (40px tall plus their offset, leaving a 32px gap) so the
+   two never overlap. Nothing scrolls here — the card body is the scroller. */
+.stepContent {
+  /* Above .wash, which is absolutely positioned within .stepMain. */
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-width: 44rem;
+  margin: 0 auto;
+  width: 100%;
+  padding: 32px 24px 96px;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .stepContent {
+    padding: 40px 32px 104px;
+  }
+}
+
+/* A fixed-height frame that fills the column: the header stays put and the
+   body below it scrolls. Padding lives on the header/body rather than here so
+   the body's scrollbar sits flush with the card's inner edge. */
+.stepCard {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: rgb(var(--color-surface));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-level-2);
+  border: 1px solid rgb(var(--color-divider));
+}
+
+.stepCardHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 24px 0;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 640px) {
+  .stepCardHeader {
+    padding: 32px 32px 0;
+  }
+}
+
+/* The scroll container. */
+.stepCardBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 24px 24px;
+}
+
+@media (min-width: 640px) {
+  .stepCardBody {
+    padding: 0 32px 32px;
+  }
+}
+
+.stepCardIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-large);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background-color: rgb(var(--color-primary));
+  color: white;
+}
+
+.stepCardTitle {
+  font-family: var(--font-heading, var(--font-sans));
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: rgb(var(--color-text-primary));
+  line-height: 1.2;
+}
+
+.stepCardCounter {
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+}
+
+/* Step nav — pinned bottom-right of the form column, over the scrolling form.
+   Centred on .stepMain so its content edge lands on the step card's right
+   edge, matching .stepContent's own centred 36rem box. */
+.stepActions {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  /* Must track .stepContent's max-width — this is what keeps the buttons
+     aligned to the card's right edge. */
+  max-width: 44rem;
+  padding: 0 24px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  z-index: 20;
+  /* Only the button cluster is clickable — the rest of this strip must not
+     swallow clicks meant for the form scrolling beneath it. */
+  pointer-events: none;
+}
+
+@media (min-width: 640px) {
+  .stepActions {
+    padding: 0 32px 32px;
+  }
+}
+
+/* Bare buttons — no container chrome. They sit below the card on the page
+   wash, so they need no backing to stay legible. */
+.stepActionsBar {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Quieter than the step buttons it shares the row with — it leaves the wizard
+   rather than advancing it. */
+.templateButton {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius-large);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid rgb(var(--color-divider));
+  background-color: rgb(var(--color-surface));
+  color: rgb(var(--color-text-secondary));
+  transition: color var(--duration-fast), background-color var(--duration-fast), border-color var(--duration-fast);
+}
+
+.templateButton:hover {
+  color: rgb(var(--color-text-primary));
+  border-color: rgb(var(--color-primary) / 40%);
+}
+
+.templateButton:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+}
+
+/* Live preview */
+/* Chrome — see .desktopStepper. */
+.previewAside {
+  position: relative;
+  z-index: 10;
+  width: 400px;
+  flex-shrink: 0;
+  padding: 32px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgb(var(--color-surface));
+  border-left: 1px solid rgb(var(--color-divider));
+}
+
+.previewProgress {
+  width: 100%;
+  max-width: 300px;
+}
+
+.previewProgressRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.previewProgressLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgb(var(--color-text-secondary));
+}
+
+.previewProgressValue {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(var(--color-text-primary));
+  font-variant-numeric: tabular-nums;
+}
+
+.previewProgressTrack {
+  height: 6px;
+  border-radius: 9999px;
+  background-color: rgb(var(--color-divider));
+  overflow: hidden;
+}
+
+.previewProgressFill {
+  height: 100%;
+  border-radius: 9999px;
+  background-color: rgb(var(--color-primary));
+  transition: width var(--duration-normal);
+}
+
+.previewWrap {
+  position: relative;
+  margin-top: 32px;
+}
+
+.previewGlow {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 280px;
+  height: 280px;
+  border-radius: 9999px;
+  background-color: rgb(var(--color-primary) / 20%);
+  filter: blur(64px);
+  pointer-events: none;
+}
+
+.previewCard {
+  position: relative;
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-level-3);
+  border: 4px solid white;
+  background-color: white;
+}
+
+.previewNote {
+  margin-top: 32px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+  max-width: 300px;
+}
+
+.previewNoteIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}

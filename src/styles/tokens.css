@@ -1,0 +1,94 @@
+/*
+ * Color values are space-separated RGB triplets (no `#`, no `rgb()` wrapper)
+ * so call sites can compose opacity on demand: rgb(var(--color-primary) / 10%).
+ */
+
+/* Light theme — default — neutral surfaces, navy-slate text, violet-600 accent.
+   This is the app's own UI-chrome brand color (nav, buttons, toolbar, focus
+   rings) — matches the marketing site's fixed brand gradient endpoint. It is
+   intentionally NOT read from theme.store.ts's AVAILABLE_THEMES: those Theme
+   objects also serve as resume color presets, and rebranding the app chrome
+   must not change what a user's exported resume looks like. See
+   theme.store.ts's applyThemeToDom, which deliberately skips primary/
+   primaryHover/primaryActive/accent for this reason. */
+:root {
+  --color-primary: 124 58 237;
+  --color-primary-hover: 109 40 217;
+  --color-primary-active: 91 33 182;
+
+  --color-background: 248 250 252;
+  --color-surface: 255 255 255;
+  --color-surface-elevated: 255 255 255;
+
+  --color-text-primary: 15 23 42;
+  --color-text-secondary: 71 85 105;
+  --color-text-muted: 100 116 139;
+
+  --color-success: 34 197 94;
+  --color-warning: 245 158 11;
+  --color-error: 239 68 68;
+  --color-info: 14 165 233;
+
+  --color-accent: 124 58 237;
+  --color-divider: 226 232 240;
+
+  /* Non-themed design tokens — shared across light/dark */
+  --radius-xs: 4px;
+  --radius-small: 6px;
+  --radius-medium: 10px;
+  --radius-large: 14px;
+  --radius-xl: 20px;
+
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+
+  /* Warm elevation scale: base layers use a fixed navy-slate (15 23 42 —
+     the same value as light mode's --color-text-primary, but written as a
+     literal here on purpose) instead of pure black — reads softer against
+     the cool-gray background. This must NOT reference --color-text-primary
+     itself: that token flips to near-white in dark mode for text contrast,
+     which would turn "shadows" into a pale glow instead of a dark occlusion
+     cue. level-2/3/4 add a faint violet-tinted layer via --color-primary
+     (which correctly lightens in dark mode) for a "soft branded depth" cue. */
+  --shadow-level-1: 0 1px 3px 0 rgb(15 23 42 / 6%), 0 1px 2px -1px rgb(15 23 42 / 6%);
+  --shadow-level-2: 0 4px 8px -2px rgb(15 23 42 / 10%), 0 2px 4px -2px rgb(15 23 42 / 8%), 0 4px 14px -6px rgb(var(--color-primary) / 12%);
+  --shadow-level-3: 0 12px 24px -6px rgb(15 23 42 / 16%), 0 4px 8px -4px rgb(15 23 42 / 10%), 0 10px 24px -6px rgb(var(--color-primary) / 18%);
+  --shadow-level-4: 0 24px 48px -12px rgb(15 23 42 / 24%), 0 8px 16px -8px rgb(15 23 42 / 14%), 0 14px 32px -8px rgb(var(--color-primary) / 22%);
+
+  /* Shared ring/glow vocabulary — replaces one-off hardcoded values that
+     were copy-pasted across Dashboard, TemplateGallery, StringListField,
+     ResumeCard, EditorLayout, PillCta, and NotFound. */
+  --shadow-focus-ring: 0 0 0 4px rgb(var(--color-primary) / 12%);
+  --shadow-focus-ring-inset: inset 0 0 0 2px rgb(var(--color-primary));
+  --shadow-glow: 0 0 20px 4px rgb(var(--color-primary) / 35%);
+  --shadow-glow-lift: 0 8px 24px -4px rgb(var(--color-primary) / 35%);
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  /* Manrope is already self-hosted for resume rendering (loaded unconditionally
+     on boot), so using it for chrome headings costs no new network request. */
+  --font-heading: 'Manrope', var(--font-sans);
+}
+
+/* Dark theme — violet-500 accent, lightened for contrast against the dark background */
+[data-theme='dark'] {
+  --color-primary: 139 92 246;
+  --color-primary-hover: 124 58 237;
+  --color-primary-active: 109 40 217;
+
+  --color-background: 15 15 31;
+  --color-surface: 26 26 51;
+  --color-surface-elevated: 36 36 74;
+
+  --color-text-primary: 241 245 249;
+  --color-text-secondary: 203 213 225;
+  --color-text-muted: 148 163 184;
+
+  --color-success: 74 222 128;
+  --color-warning: 251 191 36;
+  --color-error: 248 113 113;
+  --color-info: 56 189 248;
+
+  --color-accent: 139 92 246;
+  --color-divider: 46 46 82;
+}

@@ -1,0 +1,47 @@
+.group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.button {
+  padding: 6px;
+  border-radius: var(--radius-small);
+  color: rgb(var(--color-text-secondary));
+  transition: color var(--duration-fast), background-color var(--duration-fast);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  color: rgb(var(--color-primary));
+  background-color: rgb(var(--color-primary) / 10%);
+}
+
+.button:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+}
+
+.zoomLabel {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-family: ui-monospace, monospace;
+  color: rgb(var(--color-text-secondary));
+  border-radius: var(--radius-small);
+  transition: color var(--duration-fast), background-color var(--duration-fast);
+  min-width: 3.5rem;
+  text-align: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.zoomLabel:hover {
+  color: rgb(var(--color-primary));
+  background-color: rgb(var(--color-primary) / 10%);
+}
+
+.zoomLabel:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+}

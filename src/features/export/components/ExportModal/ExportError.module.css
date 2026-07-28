@@ -1,0 +1,49 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+  gap: 16px;
+  text-align: center;
+}
+
+.iconWrap {
+  padding: 12px;
+  background-color: rgb(var(--color-error) / 10%);
+  border-radius: 9999px;
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+  color: rgb(var(--color-error));
+}
+
+.textGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-weight: 600;
+  color: rgb(var(--color-text-primary));
+}
+
+.message {
+  font-size: 0.875rem;
+  color: rgb(var(--color-text-muted));
+  max-width: 280px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  padding-top: 8px;
+}
+
+.actionButton {
+  flex: 1;
+}

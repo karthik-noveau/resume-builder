@@ -1,0 +1,227 @@
+.root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 4px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgb(var(--color-text-primary));
+}
+
+.reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-small);
+  font-size: 0.6875rem;
+  color: rgb(var(--color-text-muted));
+  cursor: pointer;
+  transition: color var(--duration-fast), background-color var(--duration-fast);
+}
+
+.reset:hover {
+  color: rgb(var(--color-primary));
+  background-color: rgb(var(--color-primary) / 10%);
+}
+
+.reset:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+}
+
+/* Trigger — shows what is currently applied, so the panel still answers "which
+   icon is this section using?" without the popover being opened. */
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: var(--radius-medium);
+  border: 1px solid rgb(var(--color-divider));
+  background-color: rgb(var(--color-surface));
+  color: rgb(var(--color-text-primary));
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--duration-fast), background-color var(--duration-fast);
+}
+
+.trigger:hover {
+  border-color: rgb(var(--color-primary) / 40%);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 1px;
+}
+
+.triggerGlyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-small);
+  background-color: rgb(var(--color-primary) / 10%);
+  color: rgb(var(--color-primary));
+}
+
+.triggerName {
+  flex: 1 1 auto;
+  font-size: 0.8125rem;
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.defaultTag {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background-color: rgb(var(--color-surface-elevated));
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgb(var(--color-text-muted));
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: rgb(var(--color-text-muted));
+  transition: transform var(--duration-fast);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* Anchored to the trigger and overlaid, so opening the library never reflows
+   the controls below it in the properties panel. */
+.popover {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-large);
+  border: 1px solid rgb(var(--color-divider));
+  background-color: rgb(var(--color-surface));
+  box-shadow: var(--shadow-level-3);
+  overflow: hidden;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgb(var(--color-divider));
+}
+
+.searchIcon {
+  flex-shrink: 0;
+  color: rgb(var(--color-text-muted));
+}
+
+.searchInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  background: none;
+  font-size: 0.8125rem;
+  color: rgb(var(--color-text-primary));
+}
+
+.searchInput::placeholder {
+  color: rgb(var(--color-text-muted));
+}
+
+.searchInput:focus {
+  outline: none;
+}
+
+/* Capped so a long library scrolls inside the popover instead of running off
+   the bottom of the viewport. */
+.scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 12px 10px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.groupLabel {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--color-text-muted));
+}
+
+.grid {
+  display: grid;
+  /* auto-fill keeps the swatches from stretching when the panel is narrow */
+  grid-template-columns: repeat(auto-fill, minmax(34px, 1fr));
+  gap: 6px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-height: 34px;
+  border-radius: var(--radius-medium);
+  border: 1px solid rgb(var(--color-divider));
+  background-color: rgb(var(--color-surface));
+  color: rgb(var(--color-text-secondary));
+  cursor: pointer;
+  transition: color var(--duration-fast), border-color var(--duration-fast), background-color var(--duration-fast);
+}
+
+.option:hover {
+  color: rgb(var(--color-primary));
+  border-color: rgb(var(--color-primary) / 40%);
+}
+
+.option:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 1px;
+}
+
+.optionActive {
+  color: rgb(var(--color-primary));
+  border-color: rgb(var(--color-primary));
+  background-color: rgb(var(--color-primary) / 10%);
+}
+
+.empty {
+  padding: 8px 2px;
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+}

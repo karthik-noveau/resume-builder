@@ -1,0 +1,63 @@
+.root {
+  min-height: 100vh;
+  background-color: rgb(var(--color-background));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.card {
+  max-width: 28rem;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.textGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: rgb(var(--color-text-primary));
+}
+
+.description {
+  font-size: 0.875rem;
+  color: rgb(var(--color-text-secondary));
+}
+
+.errorMessage {
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+  font-family: monospace;
+  background-color: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: var(--radius-medium);
+  padding: 12px 16px;
+  text-align: left;
+  overflow-wrap: break-word;
+}
+
+.reloadButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  background-color: rgb(var(--color-primary));
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-medium);
+  transition: background-color var(--duration-fast);
+}
+
+.reloadButton:hover {
+  background-color: rgb(var(--color-primary-hover));
+}

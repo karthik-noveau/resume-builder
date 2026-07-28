@@ -1,0 +1,206 @@
+.loadingWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 96px 0;
+}
+
+.page {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 40px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.page::before {
+  content: '';
+  position: absolute;
+  top: -6rem;
+  right: -10rem;
+  width: 30rem;
+  height: 30rem;
+  border-radius: 9999px;
+  background-color: rgb(var(--color-primary) / 6%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 42rem);
+  gap: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 42rem) 1fr;
+  }
+}
+
+.aside {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .aside {
+    display: block;
+    position: sticky;
+    top: 96px;
+    align-self: start;
+  }
+}
+
+.previewCard {
+  background-color: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-level-1);
+  padding: 24px;
+}
+
+.previewLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: rgb(var(--color-text-muted));
+  margin-bottom: 16px;
+}
+
+.previewLine {
+  height: 10px;
+  border-radius: var(--radius-xs);
+  background-color: rgb(var(--color-divider));
+  margin-bottom: 10px;
+}
+
+.previewLineAccent {
+  /* --preview-accent is set inline from the selected theme's hex color
+     (theme.store.ts's AVAILABLE_THEMES colors are plain hex, not RGB
+     triplets, so this composes opacity via element opacity instead of
+     the rgb()/alpha trick the token-based colors use). */
+  background-color: var(--preview-accent, rgb(var(--color-primary)));
+  opacity: 0.45;
+}
+
+.previewCaption {
+  margin-top: 16px;
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+}
+
+.heading {
+  font-family: var(--font-heading, var(--font-sans));
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: rgb(var(--color-text-primary));
+  letter-spacing: -0.025em;
+}
+
+.subheading {
+  font-size: 0.875rem;
+  color: rgb(var(--color-text-secondary));
+  margin-top: 8px;
+}
+
+.sectionTitle {
+  margin-top: 40px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: rgb(var(--color-text-muted));
+}
+
+.sectionTitle:first-of-type {
+  margin-top: 32px;
+}
+
+.panel {
+  margin-top: 12px;
+  background-color: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-level-1);
+  overflow: hidden;
+}
+
+.panelDivided > :not(:last-child) {
+  border-bottom: 1px solid rgb(var(--color-divider));
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+}
+
+.rowIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-large);
+  background-color: rgb(var(--color-primary) / 10%);
+  color: rgb(var(--color-primary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rowBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.rowCaption {
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+  margin-top: 6px;
+}
+
+.themeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.themeLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(var(--color-text-primary));
+}
+
+.themeToggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: rgb(var(--color-surface-elevated));
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: 9999px;
+  padding: 4px;
+}
+
+.themeOption {
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(var(--color-text-secondary));
+  transition: color var(--duration-fast), background-color var(--duration-fast);
+}
+
+.themeOption:hover {
+  color: rgb(var(--color-text-primary));
+}
+
+.themeOptionActive,
+.themeOptionActive:hover {
+  background-color: rgb(var(--color-primary));
+  color: #fff;
+}

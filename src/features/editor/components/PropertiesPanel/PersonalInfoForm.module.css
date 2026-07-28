@@ -1,0 +1,76 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.photoRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 9999px;
+  background-color: rgb(var(--color-surface-elevated));
+  border: 1px solid rgb(var(--color-divider));
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarIcon {
+  color: rgb(var(--color-text-muted));
+}
+
+.photoActions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Pulled tighter than the form's 16px gap so it groups with the upload control
+   above it rather than reading as another field in the list. */
+.photoToggle {
+  margin-top: -8px;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.removeButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+  transition: color var(--duration-fast);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.removeButton:hover {
+  color: rgb(var(--color-error));
+}
+
+/* Shown in place of the photo toggle when the active template never draws a
+   profile photo, so the absence reads as intentional rather than missing. */
+.photoUnsupported {
+  margin-top: -8px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgb(var(--color-text-muted));
+}

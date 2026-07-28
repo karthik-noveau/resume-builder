@@ -1,0 +1,18 @@
+node_modules
+dist
+coverage
+.env
+.env.local
+.DS_Store
+*.tsbuildinfo
+test-results
+playwright-report
+
+# TypeScript build output — tsc must never emit into the source tree, but
+# guard against it: a stray .js next to a .tsx wins in Vite's resolver.
+src/**/*.js
+src/**/*.d.ts
+e2e/**/*.js
+e2e/**/*.d.ts
+*.config.d.ts
+playwright.config.js

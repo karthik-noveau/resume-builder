@@ -1,0 +1,84 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background-color: rgb(var(--color-background));
+}
+
+.header {
+  height: 64px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid rgb(var(--color-divider));
+  background-color: rgb(var(--color-surface) / 85%);
+  backdrop-filter: blur(12px);
+  z-index: 10;
+}
+
+.body {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  border-right: 1px solid rgb(var(--color-divider));
+  background-color: rgb(var(--color-surface));
+  overflow-y: auto;
+}
+
+.propertiesPanel {
+  width: 350px;
+  flex-shrink: 0;
+  border-left: 1px solid rgb(var(--color-divider));
+  background-color: rgb(var(--color-surface));
+  overflow-y: auto;
+}
+
+.sidebar:focus-visible,
+.propertiesPanel:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus-ring-inset);
+}
+
+.canvas {
+  flex: 1 1 auto;
+  overflow: hidden;
+  background-color: rgb(var(--color-background));
+}
+
+.mobileToggle {
+  position: absolute;
+  top: 12px;
+  z-index: 20;
+  padding: 8px;
+  border-radius: var(--radius-large);
+  background-color: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-divider));
+  box-shadow: var(--shadow-level-2);
+  color: rgb(var(--color-text-secondary));
+  transition: color var(--duration-fast), border-color var(--duration-fast);
+  cursor: pointer;
+}
+
+.mobileToggle:hover {
+  color: rgb(var(--color-text-primary));
+  border-color: rgb(var(--color-primary) / 40%);
+}
+
+.mobileToggle:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+}
+
+.mobileToggleLeft {
+  left: 12px;
+}
+
+.mobileToggleRight {
+  right: 12px;
+}

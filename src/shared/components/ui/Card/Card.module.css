@@ -1,0 +1,15 @@
+.paddingNone {
+  padding: 0 !important;
+}
+
+.paddingSm {
+  padding: 12px !important;
+}
+
+.paddingMd {
+  padding: 16px !important;
+}
+
+.paddingLg {
+  padding: 24px !important;
+}

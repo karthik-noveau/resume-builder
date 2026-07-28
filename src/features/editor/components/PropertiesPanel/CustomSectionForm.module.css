@@ -1,0 +1,65 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.itemsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.itemsLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(var(--color-text-primary));
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.itemInput {
+  height: 36px;
+  flex: 1 1 auto;
+  min-width: 0;
+  border-radius: var(--radius-medium);
+  border: 1px solid rgb(var(--color-divider));
+  background-color: rgb(var(--color-surface));
+  padding: 0 12px;
+  font-size: 0.875rem;
+  color: rgb(var(--color-text-primary));
+}
+
+.itemInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(var(--color-primary));
+  border-color: transparent;
+}
+
+.removeButton {
+  padding: 6px;
+  border-radius: var(--radius-small);
+  color: rgb(var(--color-text-muted));
+  transition: color var(--duration-fast), background-color var(--duration-fast);
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.removeButton:hover {
+  color: rgb(var(--color-error));
+  background-color: rgb(var(--color-error) / 10%);
+}
+
+.addButton {
+  width: 100%;
+}
+
+.addIcon {
+  margin-right: 4px;
+}

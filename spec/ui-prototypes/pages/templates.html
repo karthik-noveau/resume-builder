@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Templates — Resume Studio Mockup</title>
+<link rel="stylesheet" href="../assets/css/mockups.css">
+</head>
+<body>
+<div class="reviewBar">
+  <span class="reviewBarLabel">Page Mockups</span>
+  <div class="tabs" role="tablist">
+    <a class="tabBtn" aria-selected="false" href="home.html">Home</a>
+    <a class="tabBtn" aria-selected="false" href="my-resumes.html">My Resumes</a>
+    <a class="tabBtn" aria-selected="true" href="templates.html">Templates</a>
+    <a class="tabBtn" aria-selected="false" href="settings.html">Settings</a>
+    <a class="tabBtn" aria-selected="false" href="guided-editor.html">Guided Editor</a>
+    <a class="tabBtn" aria-selected="false" href="full-editor.html">Full Editor</a>
+  </div>
+  <button class="themeToggle" id="themeToggleBtn">
+    <svg id="themeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    <span id="themeLabel">Dark mode</span>
+  </button>
+</div>
+
+<div class="stage" id="stage">
+
+<div class="screen active" id="screen-templates">
+  <p class="caption"><b>Templates</b> — template library, redesigned — <code>/templates</code></p>
+  <div class="frame">
+    <header class="appHeader">
+      <div class="appLeftGroup">
+        <div class="brand"><span class="brandMark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 4.1L6 9l4.1 1.9L12 15l1.9-4.1L18 9l-4.1-1.9L12 3Z"/></svg></span>Resume Studio</div>
+        <nav class="desktopNav"><a class="navLink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>Home</a>
+<a class="navLink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>My Resumes</a>
+<a class="navLink active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="7" x="3" y="3" rx="1"/><rect width="9" height="7" x="3" y="14" rx="1"/><rect width="5" height="7" x="16" y="14" rx="1"/></svg>Templates</a>
+<a class="navLink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>Settings</a>
+</nav>
+      </div>
+      <div class="appRightGroup"><button class="iconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button></div>
+    </header>
+    <div class="tplStudio">
+      <div class="tplStudioHeader">
+        <div>
+          <span class="eyebrow-label">Template Library</span>
+          <h1 class="tplStudioTitle">Find your resume's shape.</h1>
+          <p class="tplStudioSub">Four layouts, each built for a different career moment. Compare them here — open any one for a full-size look.</p>
+        </div>
+        <div class="tpl-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search templates..." /></div>
+      </div>
+
+      <div class="tplStudioCats">
+        <button class="catBtn active" data-tpl-filter="all">All Templates</button>
+        <button class="catBtn" data-tpl-filter="single">One Column</button>
+        <button class="catBtn" data-tpl-filter="two">Two Column</button>
+        <span class="resultCount">4 templates</span>
+      </div>
+
+      <div class="tplCardsGrid">
+        <button class="tplGridCard" data-tpl-open="foundation" data-tpl-layout="two" data-tpl-select="Foundation" data-tpl-layout-label="Two column">
+          <div class="tplGridThumbWrap"><div class="mini-resume" style="width:172px;height:243px;display:flex;border:1px solid rgb(var(--color-divider));border-radius:4px;overflow:hidden;background:#fff;padding:0">
+      <div style="background:#1e293b;color:#fff;width:36%;padding:10px 7px;font-size:6px;flex-shrink:0">
+        <div style="font-weight:700;font-size:7px">Alex Morgan</div>
+        <div class="ms" style="color:#fff;margin-top:10px">Contact</div>
+        <div class="ml w70" style="background:rgb(255 255 255/25%)"></div>
+        <div class="ms" style="color:#fff">Skills</div>
+        <div class="ml w80" style="background:rgb(255 255 255/25%)"></div>
+      </div>
+      <div style="flex:1;padding:10px 8px;min-width:0">
+        <div class="ms">Work Experience</div><div class="ml w90"></div><div class="ml w70"></div><div class="ml w80"></div>
+        <div class="ms">Education</div><div class="ml w60"></div>
+      </div>
+    </div></div>
+          <div class="tplGridBody">
+            <div class="tplGridTop"><span class="tplGridName">Foundation</span><span class="tplCatTag">Fresher</span></div>
+            <p class="tplGridDesc">Dark photo sidebar with contact, skills, languages and hobbies — built for first resumes.</p>
+            <div class="tplGridFooter"><span class="tplGridAts">ATS <b>62%</b></span><span class="tplGridPreviewLink">Preview<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+          </div>
+        </button>
+
+        <button class="tplGridCard" data-tpl-open="spectrum" data-tpl-layout="two" data-tpl-select="Spectrum" data-tpl-layout-label="Two column">
+          <div class="tplGridThumbWrap"><div class="mini-resume" style="width:172px;height:243px;border:2px dashed rgb(var(--color-info));border-radius:4px;padding:10px;background:#fff">
+      <span class="mn" style="color:rgb(var(--color-info))">ALEX MORGAN</span><br><span class="mh" style="color:#334155">Senior Product Manager</span>
+      <div class="ms" style="margin-top:8px">Work Experience</div><div class="ml w90"></div><div class="ml w70"></div>
+      <div class="ms">Projects</div><div class="ml w80"></div>
+    </div></div>
+          <div class="tplGridBody">
+            <div class="tplGridTop"><span class="tplGridName">Spectrum</span><span class="tplCatTag">Fresher</span></div>
+            <p class="tplGridDesc">Decorative diagonal border frame with skill rating bars — a confident first-resume look.</p>
+            <div class="tplGridFooter"><span class="tplGridAts">ATS <b>48%</b></span><span class="tplGridPreviewLink">Preview<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+          </div>
+        </button>
+
+        <button class="tplGridCard" data-tpl-open="clarity" data-tpl-layout="single" data-tpl-select="Clarity" data-tpl-layout-label="One column">
+          <div class="tplGridThumbWrap">
+            <div class="mini-resume" style="width:172px;height:243px;background:#fff;border:1px solid rgb(var(--color-divider));border-radius:4px;padding:10px;font-size:7px">
+      <span class="mn">Alex Morgan</span><br><span class="mh">Senior Product Manager</span>
+      <hr>
+      <div class="ms">Summary</div><div class="ml w90"></div><div class="ml w80"></div>
+      <div class="ms">Work Experience</div><div class="ml w70"></div><div class="ml w90"></div><div class="ml w60"></div>
+      <div class="ms">Education</div><div class="ml w80"></div>
+    </div>
+          </div>
+          <div class="tplGridBody">
+            <div class="tplGridTop"><span class="tplGridName">Clarity</span><span class="tplCatTag">Experienced</span></div>
+            <p class="tplGridDesc">Clean single-column layout with icon-labeled sections — built for seasoned professionals.</p>
+            <div class="tplGridFooter"><span class="tplGridAts">ATS <b>92%</b></span><span class="tplGridPreviewLink">Preview<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+          </div>
+        </button>
+
+        <button class="tplGridCard" data-tpl-open="monogram" data-tpl-layout="two" data-tpl-select="Monogram" data-tpl-layout-label="Two column">
+          <div class="tplGridThumbWrap"><div class="mini-resume" style="width:172px;height:243px;display:flex;border:1px solid rgb(var(--color-divider));border-radius:4px;overflow:hidden;background:#fff;padding:0">
+      <div style="background:rgb(var(--color-primary));color:#fff;width:32%;padding:10px 7px;font-size:6px;flex-shrink:0">
+        <div style="width:22px;height:22px;border-radius:9999px;background:rgb(255 255 255/25%);display:flex;align-items:center;justify-content:center;font-weight:700;margin-bottom:8px;font-size:6px">AM</div>
+        <div style="font-weight:700;font-size:7px">Alex Morgan</div>
+        <div style="opacity:.85;margin-top:2px;font-size:5.5px">Senior PM</div>
+        <div class="ml" style="width:70%;background:rgb(255 255 255/30%);margin-top:10px"></div>
+        <div class="ml" style="width:50%;background:rgb(255 255 255/30%)"></div>
+      </div>
+      <div style="flex:1;padding:10px 8px;min-width:0">
+        <div class="ms">Experience</div><div class="ml w90"></div><div class="ml w70"></div>
+        <div class="ms">Education</div><div class="ml w80"></div>
+      </div>
+    </div></div>
+          <div class="tplGridBody">
+            <div class="tplGridTop"><span class="tplGridName">Monogram</span><span class="tplCatTag">Experienced</span></div>
+            <p class="tplGridDesc">Bold color sidebar with a monogram mark, built for quantified, metrics-driven experience.</p>
+            <div class="tplGridFooter"><span class="tplGridAts">ATS <b>68%</b></span><span class="tplGridPreviewLink">Preview<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Commit action. Nothing is selected on arrival, so this starts
+           disabled: a card wearing a checkmark before the user has picked
+           anything would claim a choice they did not make. This page only ever
+           starts a NEW resume — restyling one already in progress happens in
+           the editor, behind "Change template". -->
+      <div class="tplActionBar">
+        <div class="tplActionInner">
+          <div class="tplActionText">
+            <p class="tplActionTitle"><span class="tplActionEmpty">No template selected</span></p>
+            <p class="tplActionEffect">Pick one above to get started</p>
+          </div>
+          <button class="btn btn-primary" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8L4 10.7l5.8 1.9L11.7 18l1.9-5.8L19 10.3l-5.8-1.9Z"/></svg>
+            Create Resume
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full-detail overlay: opens on top of the grid, never replaces it.
+         Redesigned as a full-page "template selected" state: a large,
+         accurate-proportion preview instead of a thumbnail, a switcher
+         in the header to jump between templates without backing out,
+         and font pairing alongside accent color so the choice you're
+         making here is the whole visual identity, not just a hue. -->
+    <div class="tplModalOverlay" id="tplModalOverlay">
+      <div class="tplDetailCard">
+        <header class="tplDetailHeader">
+          <button class="tplDetailBack" data-tpl-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All templates</button>
+          <div class="tplDetailSwitcher" id="tplDetailSwitcher">
+            <button class="tplSwitchBtn active" data-tpl-switch="foundation"><span class="tplSwitchDot" style="background:#1e293b"></span>Foundation</button>
+            <button class="tplSwitchBtn" data-tpl-switch="spectrum"><span class="tplSwitchDot" style="background:#0ea5e9"></span>Spectrum</button>
+            <button class="tplSwitchBtn" data-tpl-switch="clarity"><span class="tplSwitchDot" style="background:#7c3aed"></span>Clarity</button>
+            <button class="tplSwitchBtn" data-tpl-switch="monogram"><span class="tplSwitchDot" style="background:#7c3aed"></span>Monogram</button>
+          </div>
+          <button class="tplModalCloseX" data-tpl-close aria-label="Close preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+        </header>
+
+        <div class="tplDetailBody">
+
+        <div class="stagePanel active" data-tpl-panel="foundation">
+          <div class="stagePreviewWrap"><div style="width:378px;height:535px;overflow:hidden;position:relative;">
+      <div style="width:172px;height:243px;transform:scale(2.2);transform-origin:top left;">
+        <div class="mini-resume" style="width:172px;height:243px;display:flex;border:1px solid rgb(var(--color-divider));border-radius:4px;overflow:hidden;background:#fff;padding:0">
+      <div style="background:#1e293b;color:#fff;width:36%;padding:10px 7px;font-size:6px;flex-shrink:0">
+        <div style="font-weight:700;font-size:7px">Alex Morgan</div>
+        <div class="ms" style="color:#fff;margin-top:10px">Contact</div>
+        <div class="ml w70" style="background:rgb(255 255 255/25%)"></div>
+        <div class="ms" style="color:#fff">Skills</div>
+        <div class="ml w80" style="background:rgb(255 255 255/25%)"></div>
+      </div>
+      <div style="flex:1;padding:10px 8px;min-width:0">
+        <div class="ms">Work Experience</div><div class="ml w90"></div><div class="ml w70"></div><div class="ml w80"></div>
+        <div class="ms">Education</div><div class="ml w60"></div>
+      </div>
+    </div>
+      </div>
+    </div><span class="stagePreviewFoot">Page 1 of 1 · A4</span></div>
+          <div class="stageMeta">
+            <div class="stageMetaTop">
+              <div><h2 class="stageName">Foundation</h2><div class="stageCatRow"><span class="tplCatTag">Fresher / Entry-level</span></div></div>
+              <div class="atsGauge" style="--pct:62"><span class="atsGaugeInner"><span class="atsGaugeValue">62</span><span class="atsGaugeLabel">ATS</span></span></div>
+            </div>
+            <p class="stageDesc">Dark photo sidebar with contact, skills, languages and hobbies — built for first resumes that need to say a little more about who you are, not just what you've done.</p>
+            <p class="stageSectionLabel">Recommended for</p>
+            <div class="stageChips"><span class="chip">Internships</span><span class="chip">Campus hires</span><span class="chip">First job</span></div>
+            <p class="stageSectionLabel">Accent color</p>
+            <div class="stageSwatches"><span class="swatch active" style="background:#1e293b"></span><span class="swatch" style="background:#7c3aed"></span><span class="swatch" style="background:#0ea5e9"></span><span class="swatch" style="background:#059669"></span></div>
+            <p class="stageSectionLabel">Font pairing</p>
+            <div class="stageFontRow">
+              <button class="stageFontBtn active"><span class="stageFontGlyph" style="font-family:'Inter'">Aa</span><span class="stageFontName">Inter</span></button>
+              <button class="stageFontBtn"><span class="stageFontGlyph" style="font-family:'Manrope'">Aa</span><span class="stageFontName">Manrope</span></button>
+              <button class="stageFontBtn"><span class="stageFontGlyph" style="font-family:Georgia,serif">Aa</span><span class="stageFontName">Serif</span></button>
+            </div>
+            <div class="stageFooter"><button class="btn btn-primary">Use this template</button><button class="btn btn-secondary" data-tpl-close>Back to library</button></div>
+          </div>
+        </div>
+
+        <div class="stagePanel" data-tpl-panel="spectrum">
+          <div class="stagePreviewWrap"><div style="width:378px;height:535px;overflow:hidden;position:relative;">
+      <div style="width:172px;height:243px;transform:scale(2.2);transform-origin:top left;">
+        <div class="mini-resume" style="width:172px;height:243px;border:2px dashed rgb(var(--color-info));border-radius:4px;padding:10px;background:#fff">
+      <span class="mn" style="color:rgb(var(--color-info))">ALEX MORGAN</span><br><span class="mh" style="color:#334155">Senior Product Manager</span>
+      <div class="ms" style="margin-top:8px">Work Experience</div><div class="ml w90"></div><div class="ml w70"></div>
+      <div class="ms">Projects</div><div class="ml w80"></div>
+    </div>
+      </div>
+    </div><span class="stagePreviewFoot">Page 1 of 1 · A4</span></div>
+          <div class="stageMeta">
+            <div class="stageMetaTop">
+              <div><h2 class="stageName">Spectrum</h2><div class="stageCatRow"><span class="tplCatTag">Fresher / Entry-level</span></div></div>
+              <div class="atsGauge" style="--pct:48"><span class="atsGaugeInner"><span class="atsGaugeValue">48</span><span class="atsGaugeLabel">ATS</span></span></div>
+            </div>
+            <p class="stageDesc">Decorative diagonal border frame with skill rating bars — a confident first-resume look for portfolios where a little personality is an asset, not a risk.</p>
+            <p class="stageSectionLabel">Recommended for</p>
+            <div class="stageChips"><span class="chip">Career starters</span><span class="chip">Creative roles</span><span class="chip">Bootcamp grads</span></div>
+            <p class="stageSectionLabel">Accent color</p>
+            <div class="stageSwatches"><span class="swatch active" style="background:#0ea5e9"></span><span class="swatch" style="background:#7c3aed"></span><span class="swatch" style="background:#f59e0b"></span><span class="swatch" style="background:#ef4444"></span></div>
+            <p class="stageSectionLabel">Font pairing</p>
+            <div class="stageFontRow">
+              <button class="stageFontBtn active"><span class="stageFontGlyph" style="font-family:'Inter'">Aa</span><span class="stageFontName">Inter</span></button>
+              <button class="stageFontBtn"><span class="stageFontGlyph" style="font-family:'Manrope'">Aa</span><span class="stageFontName">Manrope</span></button>
+              <button class="stageFontBtn"><span class="stageFontGlyph" style="font-family:Georgia,serif">Aa</span><span class="stageFontName">Serif</span></button>
+            </div>
+            <div class="stageFooter"><button class="btn btn-primary">Use this template</button><button class="btn btn-secondary" data-tpl-close>Back to library</button></div>
+          </div>
+        </div>
+
+        <div class="stagePanel" data-tpl-panel="clarity">
+          <div class="stagePreviewWrap">
+            <div style="width:378px;height:535px;overflow:hidden;position:relative;">
+      <div style="width:172px;height:243px;transform:scale(2.2);transform-origin:top left;">
+        <div class="mini-resume" style="width:172px;height:243px;background:#fff;border:1px solid rgb(var(--color-divider));border-radius:4px;padding:10px;font-size:7px">
+      <span class="mn">Alex Morgan</span><br><span class="mh">Senior Product Manager</span>
+      <hr>
+      <div class="ms">Summary</div><div class="ml w90"></div><div class="ml w80"></div>
+      <div class="ms">Work Experience</div><div class="ml w70"></div><div class="ml w90"></div><div class="ml w60"></div>
+      <div class="ms">Education</div><div class="ml w80"></div>
+    </div>
+      </div>
+    </div>
+            <span class="stagePreviewFoot">Page 1 of 1 · A4</span>
+          </div>
+          <div class="stageMeta">
+            <div class="stageMetaTop">
+              <div><h2 class="stageName">Clarity</h2><div class="stageCatRow"><span class="tplCatTag">Experienced</span></div></div>
+              <div class="atsGauge" style="--pct:92"><span class="atsGaugeInner"><span class="atsGaugeValue">92</span><span class="atsGaugeLabel">ATS</span></span></div>
+            </div>
+            <p class="stageDesc">Clean single-column layout with icon-labeled sections — built for seasoned professionals whose experience should do the talking, not the layout.</p>
+            <p class="stageSectionLabel">Recommended for</p>
+            <div class="stageChips"><span class="chip">Product &amp; Engineering</span><span class="chip">Leadership</span><span class="chip">Consulting</span></div>
+            <p class="stageSectionLabel">Accent color</p>
+            <div class="stageSwatches"><span class="swatch active" style="background:#7c3aed"></span><span class="swatch" style="background:#2563eb"></span><span class="swatch" style="background:#0f172a"></span><span class="swatch" style="background:#059669"></span></div>
+            <p class="stageSectionLabel">Font pairing</p>
+            <div class="stageFontRow">
+              <button class="stageFontBtn active"><span class="stageFontGlyph" style="font-family:'Inter'">Aa</span><span class="stageFontName">Inter</span></button>
+              <button class="stageFontBtn"><span class="stageFontGlyph" style="font-family:'Manrope'">Aa</span><span class="stageFontName">Manrope</span></button>
+              <button class="stageFontBtn"><span class="stageFontGlyph" style="font-family:Georgia,serif">Aa</span><span class="stageFontName">Serif</span></button>
+            </div>
+            <div class="stageFooter"><button class="btn btn-primary">Use this template</button><button class="btn btn-secondary" data-tpl-close>Back to library</button></div>
+          </div>
+        </div>
+
+        <div class="stagePanel" data-tpl-panel="monogram">
+          <div class="stagePreviewWrap"><div style="width:378px;height:535px;overflow:hidden;position:relative;">
+      <div style="width:172px;height:243px;transform:scale(2.2);transform-origin:top left;">
+        <div class="mini-resume" style="width:172px;height:243px;display:flex;border:1px solid rgb(var(--color-divider));border-radius:4px;overflow:hidden;background:#fff;padding:0">
+      <div style="background:rgb(var(--color-primary));color:#fff;width:32%;padding:10px 7px;font-size:6px;flex-shrink:0">
+        <div style="width:22px;height:22px;border-radius:9999px;background:rgb(255 255 255/25%);display:flex;align-items:center;justify-content:center;font-weight:700;margin-bottom:8px;font-size:6px">AM</div>
+        <div style="font-weight:700;font-size:7px">Alex Morgan</div>
+        <div style="opacity:.85;margin-top:2px;font-size:5.5px">Senior PM</div>
+        <div class="ml" style="width:70%;background:rgb(255 255 255/30%);margin-top:10px"></div>
+        <div class="ml" style="width:50%;background:rgb(255 255 255/30%)"></div>
+      </div>
+      <div style="flex:1;padding:10px 8px;min-width:0">
+        <div class="ms">Experience</div><div class="ml w90"></div><div class="ml w70"></div>
+        <div class="ms">Education</div><div class="ml w80"></div>
+      </div>
+    </div>
+      </div>
+    </div><span class="stagePreviewFoot">Page 1 of 1 · A4</span></div>
+          <div class="stageMeta">
+            <div class="stageMetaTop">
+              <div><h2 class="stageName">Monogram</h2><div class="stageCatRow"><span class="tplCatTag">Experienced</span></div></div>
+              <div class="atsGauge" style="--pct:68"><span class="atsGaugeInner"><span class="atsGaugeValue">68</span><span class="atsGaugeLabel">ATS</span></span></div>
+            </div>
+            <p class="stageDesc">Bold color sidebar with a monogram mark, built for quantified, metrics-driven experience that wants to lead with a number, not a paragraph.</p>
+            <p class="stageSectionLabel">Recommended for</p>
+            <div class="stageChips"><span class="chip">Sales &amp; Growth</span><span class="chip">Operations</span><span class="chip">Data roles</span></div>
+            <p class="stageSectionLabel">Accent color</p>
+            <div class="stageSwatches"><span class="swatch active" style="background:#7c3aed"></span><span class="swatch" style="background:#dc2626"></span><span class="swatch" style="background:#0f172a"></span><span class="swatch" style="background:#0ea5e9"></span></div>
+            <p class="stageSectionLabel">Font pairing</p>
+            <div class="stageFontRow">
+              <button class="stageFontBtn active"><span class="stageFontGlyph" style="font-family:'Inter'">Aa</span><span class="stageFontName">Inter</span></button>
+              <button class="stageFontBtn"><span class="stageFontGlyph" style="font-family:'Manrope'">Aa</span><span class="stageFontName">Manrope</span></button>
+              <button class="stageFontBtn"><span class="stageFontGlyph" style="font-family:Georgia,serif">Aa</span><span class="stageFontName">Serif</span></button>
+            </div>
+            <div class="stageFooter"><button class="btn btn-primary">Use this template</button><button class="btn btn-secondary" data-tpl-close>Back to library</button></div>
+          </div>
+        </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script src="../assets/js/mockups.js"></script>
+</body>
+</html>

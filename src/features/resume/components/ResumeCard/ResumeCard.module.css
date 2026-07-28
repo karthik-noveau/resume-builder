@@ -1,0 +1,141 @@
+.card {
+  position: relative;
+  background-color: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-level-1);
+  cursor: pointer;
+  overflow: hidden;
+  transition: box-shadow var(--duration-normal), transform var(--duration-normal), border-color var(--duration-normal);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-level-3);
+  transform: translateY(-4px);
+  border-color: rgb(var(--color-primary) / 30%);
+}
+
+.thumbnail {
+  height: 176px;
+  background-color: rgb(var(--color-surface-elevated));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid rgb(var(--color-divider));
+  overflow: hidden;
+}
+
+.previewShadow {
+  box-shadow: var(--shadow-level-2);
+}
+
+.info {
+  padding: 16px;
+}
+
+.titleInput {
+  width: 100%;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(var(--color-text-primary));
+  background-color: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-primary));
+  border-radius: var(--radius-small);
+  padding: 2px 6px;
+  margin: 0 -6px;
+}
+
+.titleInput:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus-ring);
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(var(--color-text-primary));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.updatedAt {
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+  margin-top: 2px;
+}
+
+.menuWrap {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.menuButton {
+  padding: 6px;
+  border-radius: var(--radius-small);
+  color: rgb(var(--color-text-muted));
+  background-color: rgb(var(--color-surface) / 80%);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity var(--duration-fast), color var(--duration-fast);
+}
+
+.menuButton:hover {
+  color: rgb(var(--color-text-primary));
+}
+
+.menuButton:focus-visible {
+  opacity: 1;
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 0;
+}
+
+.card:hover .menuButton,
+.menuButtonOpen {
+  opacity: 1;
+}
+
+.menuOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
+
+.menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background-color: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-level-2);
+  padding: 4px 0;
+  z-index: 20;
+  width: 160px;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  color: rgb(var(--color-text-secondary));
+}
+
+.menuItem:hover {
+  background-color: rgb(var(--color-surface-elevated));
+  color: rgb(var(--color-text-primary));
+}
+
+.menuItemDanger {
+  color: rgb(var(--color-error));
+}
+
+.menuItemDanger:hover {
+  background-color: rgb(var(--color-error) / 5%);
+  color: rgb(var(--color-error));
+}

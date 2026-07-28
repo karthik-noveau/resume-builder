@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resume Studio — UI Prototype</title>
+<link rel="stylesheet" href="assets/css/mockups.css">
+<style>
+  /* Entry page only. Every screen below is a standalone static page under
+     pages/ — this is the doorway into them, styled from the same tokens so it
+     reads as part of the prototype rather than a separate artefact. */
+  .protoShell {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 48px 24px 72px;
+    font-family: var(--font-sans);
+    color: rgb(var(--color-text-primary));
+  }
+  .protoTitle {
+    font-family: var(--font-heading, var(--font-sans));
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+  }
+  .protoLede {
+    font-size: 0.9375rem;
+    color: rgb(var(--color-text-secondary));
+    margin: 0 0 8px;
+    max-width: 60ch;
+    line-height: 1.6;
+  }
+  .protoNote {
+    font-size: 0.8125rem;
+    color: rgb(var(--color-text-muted));
+    margin: 0 0 36px;
+    max-width: 68ch;
+    line-height: 1.6;
+  }
+  .protoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .protoCard {
+    display: block;
+    padding: 20px;
+    border-radius: var(--radius-large);
+    border: 1px solid rgb(var(--color-divider));
+    background-color: rgb(var(--color-surface));
+    text-decoration: none;
+    color: inherit;
+    transition: border-color var(--duration-fast), transform var(--duration-fast), box-shadow var(--duration-fast);
+  }
+  .protoCard:hover {
+    border-color: rgb(var(--color-primary) / 45%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-level-2);
+  }
+  .protoCard:focus-visible {
+    outline: 2px solid rgb(var(--color-primary));
+    outline-offset: 2px;
+  }
+  .protoRoute {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: rgb(var(--color-primary));
+    background-color: rgb(var(--color-primary) / 10%);
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+  .protoName {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+  .protoDesc {
+    font-size: 0.8125rem;
+    color: rgb(var(--color-text-secondary));
+    line-height: 1.5;
+    margin: 0;
+  }
+  .protoSectionLabel {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(var(--color-text-muted));
+    margin: 40px 0 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="protoShell">
+  <h1 class="protoTitle">Resume Studio — UI Prototype</h1>
+  <p class="protoLede">
+    The approved UI, as static HTML. Every screen below is reachable, navigable
+    and responsive. No build step, no server, no dependencies — open any file
+    directly in a browser.
+  </p>
+  <p class="protoNote">
+    Each page carries a navigation bar across the top, so you can move between
+    screens without returning here. Interactions are UI-only (theme toggle,
+    tabs, dialogs, drawers, dropdowns); there is no application logic behind
+    them. React implementation must match these screens — if a design needs to
+    change, change it here first.
+  </p>
+
+  <p class="protoSectionLabel">Application screens</p>
+  <div class="protoGrid">
+    <a class="protoCard" href="pages/home.html">
+      <span class="protoRoute">/</span>
+      <p class="protoName">Home</p>
+      <p class="protoDesc">Marketing landing page — hero, feature grid, template showcase, privacy banner, footer.</p>
+    </a>
+    <a class="protoCard" href="pages/my-resumes.html">
+      <span class="protoRoute">/app</span>
+      <p class="protoName">My Resumes</p>
+      <p class="protoDesc">Dashboard: resume cards, search, sort, empty state, import and create actions.</p>
+    </a>
+    <a class="protoCard" href="pages/templates.html">
+      <span class="protoRoute">/templates</span>
+      <p class="protoName">Templates</p>
+      <p class="protoDesc">Template library: category filters, search, live previews, ATS badges, colour swatches.</p>
+    </a>
+    <a class="protoCard" href="pages/guided-editor.html">
+      <span class="protoRoute">/editor/:id/guided</span>
+      <p class="protoName">Guided Editor</p>
+      <p class="protoDesc">Five-step wizard with stepper rail, scrolling form card, live preview and profile strength.</p>
+    </a>
+    <a class="protoCard" href="pages/full-editor.html">
+      <span class="protoRoute">/editor/:id</span>
+      <p class="protoName">Full Editor</p>
+      <p class="protoDesc">Three-panel editor: section list, paginated canvas, properties inspector, appearance panel.</p>
+    </a>
+    <a class="protoCard" href="pages/settings.html">
+      <span class="protoRoute">/settings</span>
+      <p class="protoName">Settings</p>
+      <p class="protoDesc">Resume defaults (theme, font, page size) and interface appearance.</p>
+    </a>
+  </div>
+
+  <p class="protoSectionLabel">Reference</p>
+  <div class="protoGrid">
+    <a class="protoCard" href="pages/all-screens.html">
+      <span class="protoRoute">reference</span>
+      <p class="protoName">All screens, one file</p>
+      <p class="protoDesc">All six screens in a single self-contained document, switched with the tab bar — handy for sharing one file.</p>
+    </a>
+  </div>
+</div>
+
+</body>
+</html>

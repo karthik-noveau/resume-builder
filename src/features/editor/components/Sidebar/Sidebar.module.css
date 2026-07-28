@@ -1,0 +1,78 @@
+/* Scrolls as a whole. The Appearance panel below the section list is always
+   expanded and ~400px tall, so on a short viewport the column's natural height
+   exceeds the available space — without this it would silently overflow and
+   clip "Add section" off the bottom. */
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Every block in this column — Profile strength, Sections, Appearance, Add
+   section — opens and closes with 20px between its divider and its first or
+   last piece of ink. Where a block's edge element carries its own padding, the
+   figure here is reduced by that much so the *visual* gap still lands on 20. */
+.strength {
+  padding: 20px 16px;
+  border-bottom: 1px solid rgb(var(--color-divider));
+  flex-shrink: 0;
+}
+
+/* No border under this one: the rule belongs above a heading, not between a
+   heading and the list it names. 20px above is the shared block inset; the 12px
+   below is the heading-to-content gap, matching the Appearance panel. */
+.heading {
+  flex-shrink: 0;
+  padding: 20px 16px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(var(--color-text-muted));
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.completenessRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.completenessLabel {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: rgb(var(--color-text-secondary));
+}
+
+.completenessValue {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgb(var(--color-text-primary));
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  height: 6px;
+  border-radius: 9999px;
+  background-color: rgb(var(--color-surface-elevated));
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width var(--duration-normal);
+}
+
+.fillHigh {
+  background-color: rgb(var(--color-success));
+}
+
+.fillMedium {
+  background-color: rgb(var(--color-primary));
+}
+
+.fillLow {
+  background-color: rgb(var(--color-warning));
+}

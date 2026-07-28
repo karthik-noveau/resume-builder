@@ -1,0 +1,79 @@
+.root {
+  border-top: 1px solid rgb(var(--color-divider));
+  flex-shrink: 0;
+}
+
+/* Static label, not a control — the panel no longer collapses. Matches the
+   padding the toggle button used so the sidebar rhythm is unchanged. */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 20px 16px 12px;
+}
+
+.heading {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(var(--color-text-muted));
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.body {
+  padding: 4px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* One stacked group per control, mirroring the Properties panel's
+   label-above-field rhythm. */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgb(var(--color-text-secondary));
+}
+
+.templateRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.currentPreview {
+  border-radius: var(--radius-small);
+  border: 1px solid rgb(var(--color-divider));
+  box-shadow: var(--shadow-level-1);
+  flex-shrink: 0;
+}
+
+.templateMeta {
+  min-width: 0;
+}
+
+.currentName {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: rgb(var(--color-text-primary));
+}
+
+.currentLayout {
+  font-size: 0.6875rem;
+  color: rgb(var(--color-text-muted));
+}
+
+.changeButton {
+  width: 100%;
+}
+
+.customColorLabel {
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+  text-transform: uppercase;
+}

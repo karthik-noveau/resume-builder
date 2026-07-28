@@ -1,0 +1,38 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(var(--color-text-primary));
+}
+
+.footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.messages {
+  flex: 1;
+}
+
+.error {
+  font-size: 0.75rem;
+  color: rgb(var(--color-error));
+}
+
+.helper {
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+}
+
+.count {
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+  flex-shrink: 0;
+}

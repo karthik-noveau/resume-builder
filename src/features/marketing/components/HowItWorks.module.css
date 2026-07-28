@@ -1,0 +1,129 @@
+.section {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 96px 24px;
+}
+
+.header {
+  text-align: center;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgb(var(--color-primary));
+}
+
+.heading {
+  margin-top: 12px;
+  font-family: var(--font-heading, var(--font-sans));
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: rgb(var(--color-text-primary));
+  letter-spacing: -0.025em;
+}
+
+@media (min-width: 640px) {
+  .heading {
+    font-size: 2.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .heading {
+    font-size: 3rem;
+  }
+}
+
+.stepsGrid {
+  position: relative;
+  margin-top: 64px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+
+@media (min-width: 640px) {
+  .stepsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.connector {
+  display: none;
+  position: absolute;
+  top: 28px;
+  left: 16.66%;
+  right: 16.66%;
+  height: 1px;
+  background-color: rgb(var(--color-divider));
+}
+
+@media (min-width: 640px) {
+  .connector {
+    display: block;
+  }
+}
+
+.step {
+  position: relative;
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .step {
+    text-align: left;
+  }
+}
+
+.stepIconWrap {
+  position: relative;
+  z-index: 10;
+  width: 56px;
+  height: 56px;
+  border-radius: 9999px;
+  background-color: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-divider));
+  box-shadow: var(--shadow-level-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .stepIconWrap {
+    margin: 0;
+  }
+}
+
+.iconPrimary {
+  color: rgb(var(--color-primary));
+}
+
+.stepNumber {
+  margin-top: 16px;
+  display: block;
+  font-family: var(--font-heading, var(--font-sans));
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: rgb(var(--color-primary));
+  letter-spacing: 0.1em;
+}
+
+.stepTitle {
+  margin-top: 4px;
+  font-family: var(--font-heading, var(--font-sans));
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: rgb(var(--color-text-primary));
+}
+
+.stepDescription {
+  margin-top: 8px;
+  font-size: 0.875rem;
+  color: rgb(var(--color-text-secondary));
+  line-height: 1.625;
+}

@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Resumes — Resume Studio Mockup</title>
+<link rel="stylesheet" href="../assets/css/mockups.css">
+</head>
+<body>
+<div class="reviewBar">
+  <span class="reviewBarLabel">Page Mockups</span>
+  <div class="tabs" role="tablist">
+    <a class="tabBtn" aria-selected="false" href="home.html">Home</a>
+    <a class="tabBtn" aria-selected="true" href="my-resumes.html">My Resumes</a>
+    <a class="tabBtn" aria-selected="false" href="templates.html">Templates</a>
+    <a class="tabBtn" aria-selected="false" href="settings.html">Settings</a>
+    <a class="tabBtn" aria-selected="false" href="guided-editor.html">Guided Editor</a>
+    <a class="tabBtn" aria-selected="false" href="full-editor.html">Full Editor</a>
+  </div>
+  <button class="themeToggle" id="themeToggleBtn">
+    <svg id="themeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    <span id="themeLabel">Dark mode</span>
+  </button>
+</div>
+
+<div class="stage" id="stage">
+
+<div class="screen active" id="screen-dashboard">
+  <p class="caption"><b>My Resumes</b> — dashboard, populated state — <code>/app</code></p>
+  <div class="frame">
+    <header class="appHeader">
+      <div class="appLeftGroup">
+        <div class="brand"><span class="brandMark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 4.1L6 9l4.1 1.9L12 15l1.9-4.1L18 9l-4.1-1.9L12 3Z"/></svg></span>Resume Studio</div>
+        <nav class="desktopNav"><a class="navLink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>Home</a>
+<a class="navLink active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>My Resumes</a>
+<a class="navLink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="7" x="3" y="3" rx="1"/><rect width="9" height="7" x="3" y="14" rx="1"/><rect width="5" height="7" x="16" y="14" rx="1"/></svg>Templates</a>
+<a class="navLink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>Settings</a>
+</nav>
+      </div>
+      <div class="appRightGroup"><button class="iconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button></div>
+    </header>
+    <div class="page-pad">
+      <div class="dash-blob"></div>
+      <div class="page-header-row">
+        <div><h1 class="page-title">My Resumes</h1><p class="page-subtitle">3 resumes &middot; Last edited just now</p></div>
+        <div class="headerActions">
+          <button class="btn btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14a2 2 0 0 0 2-2v-1a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2Z"/></svg>Import Resume</button>
+          <button class="btn btn-primary" data-picker-open="newResumePicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5v14"/></svg>New Resume</button>
+        </div>
+      </div>
+      <div class="toolbarRow">
+        <div class="searchBox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search resumes..." /></div>
+        <div class="sortBox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h13M3 12h9M3 17h5"/></svg>Last updated</div>
+      </div>
+      <div class="resGrid">
+        <div class="resCard"><div class="resThumb"><div class="mini-resume" style="width:124px;height:175px;background:#fff;border:1px solid rgb(var(--color-divider));border-radius:4px;padding:10px;">
+      <span class="mn">Alex Morgan</span><br><span class="mh">Senior Product Manager</span>
+      <hr>
+      <div class="ms">Summary</div><div class="ml w90"></div><div class="ml w80"></div>
+      <div class="ms">Work Experience</div><div class="ml w70"></div><div class="ml w90"></div><div class="ml w60"></div>
+      <div class="ms">Education</div><div class="ml w80"></div>
+    </div></div><div class="resInfo"><p class="resTitle">Senior PM — Northwind</p><p class="resDate">Updated Jul 6, 2026</p></div></div>
+        <div class="resCard"><div class="resThumb"><div class="mini-resume" style="width:124px;height:175px;display:flex;border:1px solid rgb(var(--color-divider));border-radius:4px;overflow:hidden;background:#fff;padding:0">
+      <div style="background:rgb(var(--color-primary));color:#fff;width:32%;padding:10px 7px;font-size:6px;flex-shrink:0">
+        <div style="width:22px;height:22px;border-radius:9999px;background:rgb(255 255 255/25%);display:flex;align-items:center;justify-content:center;font-weight:700;margin-bottom:8px;font-size:6px">AM</div>
+        <div style="font-weight:700;font-size:7px">Alex Morgan</div>
+        <div style="opacity:.85;margin-top:2px;font-size:5.5px">Senior PM</div>
+        <div class="ml" style="width:70%;background:rgb(255 255 255/30%);margin-top:10px"></div>
+        <div class="ml" style="width:50%;background:rgb(255 255 255/30%)"></div>
+      </div>
+      <div style="flex:1;padding:10px 8px;min-width:0">
+        <div class="ms">Experience</div><div class="ml w90"></div><div class="ml w70"></div>
+        <div class="ms">Education</div><div class="ml w80"></div>
+      </div>
+    </div></div><div class="resInfo"><p class="resTitle">Alex Morgan — PM Resume (Copy)</p><p class="resDate">Updated Jul 5, 2026</p></div></div>
+        <div class="resCard"><div class="resThumb"><div class="mini-resume" style="width:124px;height:175px;display:flex;border:1px solid rgb(var(--color-divider));border-radius:4px;overflow:hidden;background:#fff;padding:0">
+      <div style="background:#1e293b;color:#fff;width:36%;padding:10px 7px;font-size:6px;flex-shrink:0">
+        <div style="font-weight:700;font-size:7px">Alex Morgan</div>
+        <div class="ms" style="color:#fff;margin-top:10px">Contact</div>
+        <div class="ml w70" style="background:rgb(255 255 255/25%)"></div>
+        <div class="ms" style="color:#fff">Skills</div>
+        <div class="ml w80" style="background:rgb(255 255 255/25%)"></div>
+      </div>
+      <div style="flex:1;padding:10px 8px;min-width:0">
+        <div class="ms">Work Experience</div><div class="ml w90"></div><div class="ml w70"></div><div class="ml w80"></div>
+        <div class="ms">Education</div><div class="ml w60"></div>
+      </div>
+    </div></div><div class="resInfo"><p class="resTitle">Untitled Resume</p><p class="resDate">Updated Jul 2, 2026</p></div></div>
+        <div class="resCard" style="display:flex;align-items:center;justify-content:center;border-style:dashed">
+          <div style="text-align:center;padding:24px;color:rgb(var(--color-text-muted))">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin:0 auto 10px;display:block"><path d="M5 12h14M12 5v14"/></svg>
+            <p style="font-size:0.8125rem;font-weight:600">Create another</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="caption" style="margin-top:28px"><b>My Resumes</b> — empty state</p>
+  <div class="frame">
+    <header class="appHeader">
+      <div class="appLeftGroup">
+        <div class="brand"><span class="brandMark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 4.1L6 9l4.1 1.9L12 15l1.9-4.1L18 9l-4.1-1.9L12 3Z"/></svg></span>Resume Studio</div>
+        <nav class="desktopNav"><a class="navLink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>Home</a>
+<a class="navLink active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>My Resumes</a>
+<a class="navLink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="7" x="3" y="3" rx="1"/><rect width="9" height="7" x="3" y="14" rx="1"/><rect width="5" height="7" x="16" y="14" rx="1"/></svg>Templates</a>
+<a class="navLink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>Settings</a>
+</nav>
+      </div>
+      <div class="appRightGroup"><button class="iconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button></div>
+    </header>
+    <div class="page-pad">
+      <div class="dash-blob"></div>
+      <div class="page-header-row">
+        <div><h1 class="page-title">My Resumes</h1><p class="page-subtitle">Create your first resume</p></div>
+        <div class="headerActions">
+          <button class="btn btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14a2 2 0 0 0 2-2v-1a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2Z"/></svg>Import Resume</button>
+          <button class="btn btn-primary" data-picker-open="newResumePicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5v14"/></svg>New Resume</button>
+        </div>
+      </div>
+      <div class="emptyState">
+        <div class="emptyIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg></div>
+        <h3 class="emptyTitle">No resumes yet</h3>
+        <p class="emptyDesc">Create your first resume to get started. It only takes a few minutes.</p>
+        <button class="btn btn-primary" style="margin-top:28px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5v14"/></svg>Create Resume</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<!-- "New Resume" chooses a template here rather than routing to /templates:
+     picking a layout was the only step that route ever added. Select then
+     confirm — nothing is created until the button is pressed. -->
+<div class="pickerOverlay" id="newResumePicker">
+  <div class="pickerCard">
+    <div class="pickerHead">
+      <div>
+        <p class="pickerTitle">Choose a template</p>
+        <p class="pickerIntro">Pick a layout to start from &mdash; you can change it any time while editing.</p>
+      </div>
+      <button class="pickerClose" data-picker-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+
+    <div class="pickerGrid">
+      <button class="pickerOption">
+        <div class="pickerPreviewWrap">
+          <div class="mini-resume" style="width:200px;height:283px;display:flex;border:1px solid rgb(var(--color-divider));border-radius:4px;overflow:hidden;background:#fff;padding:0">
+            <div style="background:#1e293b;color:#fff;width:36%;padding:10px 7px;font-size:6px;flex-shrink:0">
+              <div style="font-weight:700;font-size:7px">Alex Morgan</div>
+              <div class="ms" style="color:#fff;margin-top:10px">Contact</div><div class="ml w70" style="background:rgb(255 255 255/25%)"></div>
+              <div class="ms" style="color:#fff">Skills</div><div class="ml w80" style="background:rgb(255 255 255/25%)"></div>
+            </div>
+            <div style="flex:1;padding:10px 8px;min-width:0">
+              <div class="ms">Work Experience</div><div class="ml w90"></div><div class="ml w70"></div>
+              <div class="ms">Education</div><div class="ml w60"></div>
+            </div>
+          </div>
+          <span class="pickerCheck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+        </div>
+        <span class="pickerName">Foundation</span><span class="pickerLayout">Two column</span>
+      </button>
+
+      <button class="pickerOption">
+        <div class="pickerPreviewWrap">
+          <div class="mini-resume" style="width:200px;height:283px;display:flex;border:1px solid rgb(var(--color-divider));border-radius:4px;overflow:hidden;background:#fff;padding:0">
+            <div style="background:#0f172a;color:#fff;width:34%;padding:10px 7px;font-size:6px;flex-shrink:0">
+              <div style="font-weight:700;font-size:7px">Alex Morgan</div>
+              <div class="ms" style="color:#fff;margin-top:10px">Skills</div><div class="ml w80" style="background:rgb(255 255 255/25%)"></div>
+            </div>
+            <div style="flex:1;padding:10px 8px;min-width:0">
+              <div class="ms">Work Experience</div><div class="ml w90"></div><div class="ml w80"></div>
+              <div class="ms">Projects</div><div class="ml w70"></div>
+            </div>
+          </div>
+          <span class="pickerCheck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+        </div>
+        <span class="pickerName">Spectrum</span><span class="pickerLayout">Two column</span>
+      </button>
+
+      <button class="pickerOption">
+        <div class="pickerPreviewWrap">
+          <div class="mini-resume" style="width:200px;height:283px;border:1px solid rgb(var(--color-divider));border-radius:4px;overflow:hidden;background:#fff;padding:12px 11px">
+            <div style="font-weight:700;font-size:8px">Alex Morgan</div>
+            <div style="font-size:6px;color:#594fe8">Senior Product Manager</div>
+            <div class="ms">Summary</div><div class="ml w90"></div><div class="ml w80"></div>
+            <div class="ms">Work Experience</div><div class="ml w90"></div><div class="ml w70"></div><div class="ml w85"></div>
+            <div class="ms">Education</div><div class="ml w60"></div>
+          </div>
+          <span class="pickerCheck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+        </div>
+        <span class="pickerName">Clarity</span><span class="pickerLayout">One column</span>
+      </button>
+
+      <button class="pickerOption">
+        <div class="pickerPreviewWrap">
+          <div class="mini-resume" style="width:200px;height:283px;display:flex;border:1px solid rgb(var(--color-divider));border-radius:4px;overflow:hidden;background:#fff;padding:0">
+            <div style="background:#594fe8;color:#fff;width:32%;padding:10px 7px;font-size:6px;flex-shrink:0">
+              <div style="font-weight:700;font-size:9px">AM</div>
+              <div class="ms" style="color:#fff;margin-top:10px">Contact</div><div class="ml w70" style="background:rgb(255 255 255/25%)"></div>
+            </div>
+            <div style="flex:1;padding:10px 8px;min-width:0">
+              <div class="ms">Summary</div><div class="ml w90"></div>
+              <div class="ms">Experience</div><div class="ml w85"></div><div class="ml w70"></div>
+            </div>
+          </div>
+          <span class="pickerCheck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+        </div>
+        <span class="pickerName">Monogram</span><span class="pickerLayout">Two column</span>
+      </button>
+    </div>
+
+    <div class="pickerFooter">
+      <button class="btn btn-secondary" data-picker-close>Cancel</button>
+      <button class="btn btn-primary" data-picker-confirm disabled>Create resume</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/mockups.js"></script>
+</body>
+</html>

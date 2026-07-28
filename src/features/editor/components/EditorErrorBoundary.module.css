@@ -1,0 +1,42 @@
+.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 16rem;
+  background-color: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-error) / 20%);
+  border-radius: var(--radius-large);
+}
+
+.content {
+  text-align: center;
+  padding: 0 24px;
+}
+
+.content > * + * {
+  margin-top: 8px;
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(var(--color-text-primary));
+}
+
+.subtitle {
+  font-size: 0.75rem;
+  color: rgb(var(--color-text-muted));
+}
+
+.retryButton {
+  font-size: 0.75rem;
+  color: rgb(var(--color-primary));
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.retryButton:hover {
+  text-decoration: underline;
+}

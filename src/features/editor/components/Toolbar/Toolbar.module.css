@@ -1,0 +1,163 @@
+.root {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  gap: 16px;
+  overflow-x: auto;
+}
+
+/* Shrinkable, unlike the centre/right groups: when the toolbar runs out of room
+   the resume title truncates (it already has an ellipsis) rather than pushing
+   the export button off the edge. */
+.leftGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.brandLink {
+  display: none;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .brandLink {
+    display: flex;
+  }
+}
+
+.dividerDesktop {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .dividerDesktop {
+    display: block;
+  }
+}
+
+.dividerTall {
+  height: 24px;
+}
+
+.backLink {
+  padding: 6px;
+  border-radius: var(--radius-small);
+  color: rgb(var(--color-text-muted));
+  transition: color var(--duration-fast), background-color var(--duration-fast);
+  flex-shrink: 0;
+}
+
+.backLink:hover {
+  color: rgb(var(--color-primary));
+  background-color: rgb(var(--color-primary) / 10%);
+}
+
+.backLink:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(var(--color-text-primary));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+  /* Shrinks (with its ellipsis) under pressure, but never below this floor —
+     without it the title collapses to zero width at tablet sizes, where the
+     brand, autosave, zoom and nav controls are all visible at once. */
+  min-width: 4.5rem;
+  flex-shrink: 1;
+}
+
+@media (min-width: 640px) {
+  .title {
+    max-width: 240px;
+  }
+}
+
+.autosaveWrap {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .autosaveWrap {
+    display: block;
+  }
+}
+
+.centerGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.zoomWrap {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .zoomWrap {
+    display: flex;
+  }
+}
+
+.rightGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Mirrors the guided editor's "Full Editor" button, so the two modes link to
+   each other with the same affordance instead of a bare icon. */
+.guidedLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: var(--radius-large);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid rgb(var(--color-divider));
+  color: rgb(var(--color-text-secondary));
+  transition: color var(--duration-fast), background-color var(--duration-fast), border-color var(--duration-fast);
+  flex-shrink: 0;
+}
+
+.guidedLink:hover {
+  color: rgb(var(--color-text-primary));
+  background-color: rgb(var(--color-surface-elevated));
+  border-color: rgb(var(--color-primary) / 40%);
+}
+
+.guidedLink:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+}
+
+/* Collapses to icon-only below desktop, as .brandLink / .autosaveWrap do. The
+   aria-label carries the name when the text is hidden. The label only returns
+   at 1024px: at tablet widths the zoom controls have also appeared, and the
+   ~90px this frees is what keeps the resume title readable. */
+.guidedLinkLabel {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .guidedLink {
+    padding: 6px 14px;
+  }
+
+  .guidedLinkLabel {
+    display: inline;
+  }
+}
