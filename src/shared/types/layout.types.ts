@@ -131,6 +131,8 @@ export type PersonalInfoTextField =
   | 'github'
   | 'portfolio'
 
+export type PersonalInfoPanelField = PersonalInfoTextField | 'profileImage' | 'contactTitle'
+
 /**
  * Field-provenance tag enabling click-to-edit on canvas and entry-level
  * canvas selection. Purely additive metadata on the ephemeral LayoutTree —
@@ -202,6 +204,8 @@ export interface LayoutNode {
   editRef?: EditRef
   /** Opens a properties-panel destination without enabling inline editing. */
   panelTarget?: 'personal-info'
+  /** The control to reveal when a non-editable profile element is selected. */
+  panelField?: PersonalInfoPanelField
   /**
    * Stable identity for per-element styling, assigned by the style-override
    * pass. Unlike `id` — a render-order counter that shifts whenever a bullet is

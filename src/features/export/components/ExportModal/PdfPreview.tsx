@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
-import { Minus, Plus } from 'lucide-react'
-import { Spinner } from '@/shared/components/ui/Spinner/Spinner'
+import type { PDFDocumentProxy } from 'pdfjs-dist'
+import { Button } from '@/shared/components/ui/Button/Button'
+import { PreviewFrame } from './PreviewFrame'
 import styles from './PdfPreview.module.css'
 
 /**
@@ -23,7 +24,8 @@ const GUTTER_PX = 32
 
 interface PdfPreviewProps {
   /** Blob URL of the generated PDF. */
-  url: string
+  url: string | null
+  onRetry: () => void
 }
 
 /**
@@ -35,28 +37,54 @@ interface PdfPreviewProps {
  * this one, and different in every browser. pdf.js draws the pages to a canvas
  * so the surrounding UI is ours.
  */
-export function PdfPreview({ url }: PdfPreviewProps) {
+export function PdfPreview({ url, onRetry }: PdfPreviewProps) {
   const [pageCount, setPageCount] = useState(0)
   const [zoomIndex, setZoomIndex] = useState(DEFAULT_ZOOM_INDEX)
   const [failed, setFailed] = useState<string | null>(null)
   const [frame, setFrame] = useState<{ w: number; h: number }>()
   /** Page height ÷ width, read from the document rather than assumed. */
   const [aspect, setAspect] = useState<number>()
+  const [ready, setReady] = useState(false)
+  const renderedPages = useRef(new Set<number>())
+  const pendingLoad = useRef({ sequence: 0 })
   const frameRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const el = frameRef.current
     if (!el) return
-    const measure = () => setFrame({ w: el.clientWidth, h: el.clientHeight })
+    const load = pendingLoad.current
+    const measure = () => setFrame(current => {
+      const w = el.clientWidth
+      const h = el.clientHeight
+      return current?.w === w && current.h === h ? current : { w, h }
+    })
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(el)
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      load.sequence++
+    }
   }, [])
 
-  const onLoad = useCallback(({ numPages }: { numPages: number }) => {
-    setPageCount(numPages)
+  const onError = useCallback(() => {
+    setFailed('The PDF preview couldn’t load. Try generating it again.')
   }, [])
+
+  const onLoad = useCallback((pdf: PDFDocumentProxy) => {
+    const load = pendingLoad.current
+    const sequence = ++load.sequence
+    // Establish the real page ratio before mounting any canvases. Rendering
+    // once at the PDF's native size and then fitting it caused a visible jump.
+    void pdf.getPage(1).then(page => {
+      if (sequence !== load.sequence) return
+      const viewport = page.getViewport({ scale: 1 })
+      setAspect(viewport.height / viewport.width)
+      setPageCount(pdf.numPages)
+    }).catch(() => {
+      if (sequence === load.sequence) onError()
+    })
+  }, [onError])
 
   const zoom = ZOOM_STEPS[zoomIndex]
 
@@ -66,51 +94,38 @@ export function PdfPreview({ url }: PdfPreviewProps) {
    * alone made the default view a 2300px-tall page in a 685px frame — a
    * preview you had to scroll to see any of.
    */
-  const pageWidth = frame && aspect
-    ? Math.min(frame.w - GUTTER_PX, (frame.h - GUTTER_PX) / aspect) * zoom
+  const pageWidth = frame && frame.w > GUTTER_PX && frame.h > GUTTER_PX && aspect
+    ? Math.max(1, Math.min(frame.w - GUTTER_PX, (frame.h - GUTTER_PX) / aspect)) * zoom
     : undefined
 
   if (failed) {
-    return <p className={styles.failed}>{failed}</p>
+    return (
+      <PreviewFrame loading={false}>
+        <div className={styles.centered} role="alert">
+          <div className={styles.failure}>
+            <p className={styles.failed}>{failed}</p>
+            <Button onClick={onRetry}>Retry preview</Button>
+          </div>
+        </div>
+      </PreviewFrame>
+    )
   }
 
   return (
-    <div className={styles.root}>
-      <div className={styles.toolbar}>
-        <span className={styles.count} aria-live="polite">
-          {pageCount ? `${pageCount} page${pageCount === 1 ? '' : 's'}` : ' '}
-        </span>
-
-        <div className={styles.group}>
-          <button
-            type="button"
-            className={styles.control}
-            aria-label="Zoom out"
-            disabled={zoomIndex === 0}
-            onClick={() => setZoomIndex((i) => Math.max(0, i - 1))}
-          >
-            <Minus size={15} aria-hidden="true" />
-          </button>
-          <span className={styles.readout}>{Math.round(zoom * 100)}%</span>
-          <button
-            type="button"
-            className={styles.control}
-            aria-label="Zoom in"
-            disabled={zoomIndex === ZOOM_STEPS.length - 1}
-            onClick={() => setZoomIndex((i) => Math.min(ZOOM_STEPS.length - 1, i + 1))}
-          >
-            <Plus size={15} aria-hidden="true" />
-          </button>
-        </div>
-      </div>
-
-      <div className={styles.frame} ref={frameRef}>
+    <PreviewFrame frameRef={frameRef} loading={!ready} pageCount={pageCount} zoom={zoom}
+      onZoomOut={zoomIndex > 0 ? () => setZoomIndex(i => i - 1) : undefined}
+      onZoomIn={zoomIndex < ZOOM_STEPS.length - 1 ? () => setZoomIndex(i => i + 1) : undefined}>
+      {url && (
         <Document
           file={url}
+          // react-pdf 11 suspends and throws by default. Keep PDF loading and
+          // failures local to this dialog instead of the router error boundary.
+          suspense={false}
           onLoadSuccess={onLoad}
-          onLoadError={(e) => setFailed(e.message || 'Could not open the generated PDF.')}
-          loading={<div className={styles.centered}><Spinner /></div>}
-          error={<p className={styles.failed}>Could not open the generated PDF.</p>}
+          onSourceError={onError}
+          onLoadError={onError}
+          loading={null}
+          error={null}
           className={styles.document}
         >
           {/* Every page at once. A portrait sheet alone in a full-width dialog
@@ -118,19 +133,20 @@ export function PdfPreview({ url }: PdfPreviewProps) {
               hid the very thing a preview is for — whether the whole document
               breaks where you expect. They wrap and scroll when there are more
               than the width can hold. */}
-          {Array.from({ length: pageCount }, (_, i) => (
+          {pageWidth && Array.from({ length: pageCount }, (_, i) => (
           <Page
             key={i}
             pageNumber={i + 1}
+            suspense={false}
             width={pageWidth}
-            onLoadSuccess={(loaded) => {
-              // Guarded: this fires on every render of the page, and setting
-              // state unconditionally would spin.
-              const next = loaded.height / loaded.width
-              setAspect((current) => (current === next ? current : next))
+            onLoadError={onError}
+            onRenderError={onError}
+            onRenderSuccess={() => {
+              renderedPages.current.add(i)
+              if (renderedPages.current.size === pageCount) setReady(true)
             }}
             className={styles.page}
-            loading={<div className={styles.centered}><Spinner /></div>}
+            loading={null}
             /* Canvas only. The text and annotation layers need pdf.js's own
                viewer stylesheet, which is 160 kB and declares .dialog,
                .primaryButton and .secondaryButton globally — three names this
@@ -141,7 +157,7 @@ export function PdfPreview({ url }: PdfPreviewProps) {
           />
           ))}
         </Document>
-      </div>
-    </div>
+      )}
+    </PreviewFrame>
   )
 }

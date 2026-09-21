@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Modal } from '@/shared/components/ui/Modal/Modal'
-import { Spinner } from '@/shared/components/ui/Spinner/Spinner'
+import { PreviewFrame } from './PreviewFrame'
 import { ExportProgress } from './ExportProgress'
 import { ExportError } from './ExportError'
 import type { ExportStatus } from '@/shared/types/export.types'
@@ -52,20 +52,20 @@ export function ExportModal({
               ? 'PDF ready'
               : 'Preparing your PDF'
       }
-      maxWidth={previewUrl ? 'full' : 'md'}
+      maxWidth={mode === 'preview' ? 'full' : 'md'}
     >
       <div className={styles.body}>
-        {mode === 'preview' && isCompleted && previewUrl ? (
+        {mode === 'preview' ? (
           <div className={styles.preview}>
-            <Suspense
-              fallback={
-                <div className={styles.previewLoading}>
-                  <Spinner />
-                </div>
-              }
-            >
-              <PdfPreview url={previewUrl} />
-            </Suspense>
+            {isFailed ? (
+              <PreviewFrame loading={false}>
+                <ExportError message={error || 'An unexpected error occurred'} onRetry={onRetry} onClose={onClose} />
+              </PreviewFrame>
+            ) : (
+              <Suspense fallback={<PreviewFrame />}>
+                <PdfPreview key={previewUrl ?? 'preparing'} url={previewUrl} onRetry={onRetry} />
+              </Suspense>
+            )}
           </div>
         ) : isExporting || isCompleted ? (
           <ExportProgress status={status} />

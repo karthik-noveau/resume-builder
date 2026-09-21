@@ -48,6 +48,10 @@ export class ExportService {
   async generatePdf(resume: Resume): Promise<GeneratedPdf> {
     this.validateResume(resume)
 
+    // Let React paint the opening dialog before layout/font work occupies the
+    // main thread. This yields a task rather than adding a fixed loading delay.
+    await new Promise<void>(resolve => setTimeout(resolve, 0))
+
     const { template, theme, fontPreset } = this.getExportContext(resume)
 
     logger.debug('Rendering LayoutTree for export')

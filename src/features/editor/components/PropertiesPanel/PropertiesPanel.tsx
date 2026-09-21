@@ -49,6 +49,7 @@ export function PropertiesPanel({ resume, layoutTree, selectedSectionType, onCle
   const activeMode = tourStep === 'content' ? 'content'
     : tourStep === 'global-design' || tourStep === 'selected-design' ? 'design' : inspectorMode
   const personalInfoOpenRequest = useEditorStore((state) => state.personalInfoOpenRequest)
+  const personalInfoFocusTarget = useEditorStore((state) => state.personalInfoFocusTarget)
   const contactTitleEditRef = findSectionTitleEditRef(layoutTree, 'contact')
   const selectedTitleEditRef = selectedSectionType && selectedSectionType !== 'custom'
     ? findSectionTitleEditRef(layoutTree, selectedSectionType)
@@ -65,9 +66,29 @@ export function PropertiesPanel({ resume, layoutTree, selectedSectionType, onCle
   // the form out entirely. In Design the controls stay put and only their
   // target changes, so moving the panel would just lose the user's place.
   useEffect(() => {
-    if (activeMode !== 'content') return
-    panelRef.current?.scrollTo?.({ top: 0, behavior: 'smooth' })
-  }, [activeMode, selectedSectionType, personalInfoOpenRequest])
+    const panel = panelRef.current
+    if (activeMode !== 'content' || !panel || tourStep) return
+    if (!selectedSectionType && personalInfoFocusTarget) {
+      const group = panel.querySelector(`[data-personal-info-field="${personalInfoFocusTarget}"]`)
+      const field = panel.querySelector<HTMLElement>(`input[name="${personalInfoFocusTarget}"]`)
+        ?? group?.querySelector<HTMLElement>('input:checked')
+        ?? group?.querySelector<HTMLElement>('input:not([type="file"]):not(:disabled), button:not(:disabled)')
+      if (field) {
+        field.focus({ preventScroll: true })
+        // Scroll only the inspector, keeping the clicked resume content still.
+        // Immediate positioning avoids racing the old scroll-to-top animation.
+        const rect = field.getBoundingClientRect()
+        const headerHeight = panel.querySelector('header')?.getBoundingClientRect().height ?? 0
+        panel.scrollTo?.({
+          top: Math.max(0, panel.scrollTop + rect.top - panel.getBoundingClientRect().top
+            - Math.max(headerHeight + 24, (panel.clientHeight - rect.height) / 2)),
+          behavior: 'instant',
+        })
+        return
+      }
+    }
+    panel.scrollTo?.({ top: 0, behavior: 'instant' })
+  }, [activeMode, selectedSectionType, personalInfoOpenRequest, personalInfoFocusTarget, tourStep])
 
   return (
     <div ref={panelRef} className={clsx(styles.root, mobile.controls)} data-editor-tour-scroll="properties">

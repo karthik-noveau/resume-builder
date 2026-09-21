@@ -12,6 +12,7 @@ interface EditorLayoutProps {
   propertiesPanel: ReactNode
   tourOpen?: boolean
   propertiesRequest?: string
+  onPropertiesOpened?: () => void
 }
 
 /**
@@ -20,7 +21,7 @@ interface EditorLayoutProps {
  * (toggled by floating buttons) instead of fixed-width columns — there isn't
  * room for a 280px + flexible + 350px layout under ~1024px.
  */
-export function EditorLayout({ toolbar, sidebar, canvas, propertiesPanel, tourOpen = false, propertiesRequest }: EditorLayoutProps) {
+export function EditorLayout({ toolbar, sidebar, canvas, propertiesPanel, tourOpen = false, propertiesRequest, onPropertiesOpened }: EditorLayoutProps) {
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [mobilePropertiesOpen, setMobilePropertiesOpen] = useState(false)
@@ -102,6 +103,7 @@ export function EditorLayout({ toolbar, sidebar, canvas, propertiesPanel, tourOp
             </Drawer>
             <Drawer
               isOpen={mobilePropertiesOpen}
+              onAfterOpen={onPropertiesOpened}
               onClose={() => setMobilePropertiesOpen(false)}
               position="right"
               title="Properties"

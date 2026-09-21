@@ -160,6 +160,12 @@ export function EditorPage() {
       <Seo title={`Editing ${activeResume.title}`} description="Resume editor." noindex />
       <EditorLayout
         propertiesRequest={`${inspectorRequest}:${personalInfoRequest}`}
+        onPropertiesOpened={() => {
+          // The drawer focuses its container on opening. Restore the requested
+          // field once that focus transfer and the opening transition finish.
+          const editor = useEditorStore.getState()
+          if (editor.personalInfoFocusTarget) editor.openPersonalInfo(editor.personalInfoFocusTarget)
+        }}
         tourOpen={tour.isOpen}
         toolbar={
           <Toolbar

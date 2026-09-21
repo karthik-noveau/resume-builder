@@ -1,7 +1,7 @@
 import { safeLink } from '@/shared/utils/safeLink'
 import { useRef, useState, type CSSProperties } from 'react'
 import { ICON_PATHS, ICON_VIEWBOX_PX } from '@/features/templates/engine/icons'
-import type { LayoutNode, EditRef, IconName } from '@/shared/types/layout.types'
+import type { LayoutNode, EditRef, IconName, PersonalInfoPanelField } from '@/shared/types/layout.types'
 import { layoutStylesToCSS } from './canvas.utils'
 import { useResolvedImageUrl } from './useResolvedImageUrl'
 import { clipShapeRadius } from '@/shared/utils/clipShape'
@@ -42,7 +42,7 @@ export function CanvasLeaf({ node, interactive = true }: CanvasLeafProps) {
         )
       }
       if (node.panelTarget === 'personal-info') {
-        return <PanelLinkedLeaf displayContent={node.content ?? ''} css={css} />
+        return <PanelLinkedLeaf displayContent={node.content ?? ''} css={css} field={node.panelField} />
       }
       return (
         <div style={{ ...css, width: '100%', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
@@ -137,7 +137,7 @@ export function CanvasLeaf({ node, interactive = true }: CanvasLeafProps) {
       if (!node.iconName) return null
       if (!interactive) return <IconGlyph name={node.iconName} color={node.styles.color} />
       if (node.panelTarget === 'personal-info') {
-        return <PanelLinkedIcon name={node.iconName} color={node.styles.color} />
+        return <PanelLinkedIcon name={node.iconName} color={node.styles.color} field={node.panelField} />
       }
       return node.iconEditable ? (
         <EditableIcon name={node.iconName} color={node.styles.color} />
@@ -167,9 +167,9 @@ function IconGlyph({ name, color }: { name: IconName; color: string }) {
   )
 }
 
-function openPersonalInfo(e: React.MouseEvent | React.KeyboardEvent) {
+function openPersonalInfo(e: React.MouseEvent | React.KeyboardEvent, field?: PersonalInfoPanelField) {
   e.stopPropagation()
-  useEditorStore.getState().openPersonalInfo()
+  useEditorStore.getState().openPersonalInfo(field)
 }
 
 /** Keep direct canvas editing and the inspector in sync. Editable leaves stop
@@ -199,11 +199,11 @@ function openEditRefInPanel(editRef: EditRef) {
   }
 }
 
-function PanelLinkedLeaf({ displayContent, css }: { displayContent: string; css: CSSProperties }) {
+function PanelLinkedLeaf({ displayContent, css, field }: { displayContent: string; css: CSSProperties; field?: PersonalInfoPanelField }) {
   return (
     <button
       type="button"
-      onClick={openPersonalInfo}
+      onClick={(e) => openPersonalInfo(e, field)}
       aria-label={`Open ${displayContent} in Personal Info`}
       title="Open in Personal Info"
       className={styles.panelLinkedLeaf}
@@ -217,11 +217,11 @@ function PanelLinkedLeaf({ displayContent, css }: { displayContent: string; css:
   )
 }
 
-function PanelLinkedIcon({ name, color }: { name: IconName; color: string }) {
+function PanelLinkedIcon({ name, color, field }: { name: IconName; color: string; field?: PersonalInfoPanelField }) {
   return (
     <button
       type="button"
-      onClick={openPersonalInfo}
+      onClick={(e) => openPersonalInfo(e, field)}
       aria-label="Open Personal Info"
       title="Open Personal Info"
       className={styles.panelLinkedIcon}
@@ -486,7 +486,7 @@ function ImageLeaf({
   return (
     <button
       type="button"
-      onClick={openPersonalInfo}
+      onClick={(e) => openPersonalInfo(e, 'profileImage')}
       aria-label="Open profile photo in Personal Info"
       title="Open profile photo settings"
       className={styles.panelLinkedImage}

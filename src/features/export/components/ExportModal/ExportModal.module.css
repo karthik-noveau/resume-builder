@@ -14,13 +14,6 @@
      offset .fullModal sets, its header, and its own padding. Measured rather
      than guessed — the previous value ignored the offset entirely and ran the
      dialog past the bottom of the window. */
-  height: calc(100vh - 116px);
-  min-height: 320px;
-}
-
-.previewLoading {
-  display: grid;
-  place-items: center;
-  flex: 1;
-  min-height: 320px;
+  height: calc(var(--app-viewport-height, 100dvh) - 116px);
+  min-height: 200px;
 }

@@ -22,6 +22,22 @@ const FONT_FILES: Partial<Record<FontKey, string>> = {
   'IBMPlexSans-600': '/fonts/IBMPlexSans-SemiBold.woff',
 }
 
+// Custom typography can request every supported weight, while some families
+// only ship three cuts. Match the browser's available-face choice so layout
+// measurement and PDF embedding use the same font instead of Helvetica.
+const FONT_WEIGHT_ALIASES: Partial<Record<FontKey, FontWeight>> = {
+  'Manrope-500': 400,
+  'Manrope-800': 700,
+  'SourceSerifPro-500': 400,
+  'SourceSerifPro-800': 700,
+  'IBMPlexSans-700': 600,
+  'IBMPlexSans-800': 600,
+}
+
+function resolveFontKey(family: FontFamily, weight: FontWeight): FontKey {
+  return `${family}-${FONT_WEIGHT_ALIASES[`${family}-${weight}`] ?? weight}`
+}
+
 class FontRegistryImpl {
   private fonts = new Map<FontKey, ArrayBuffer>()
   private initialized = false
@@ -57,21 +73,21 @@ class FontRegistryImpl {
   }
 
   getFont(family: FontFamily, weight: FontWeight): ArrayBuffer {
-    const key: FontKey = `${family}-${weight}`
+    const key = resolveFontKey(family, weight)
     const buf = this.fonts.get(key)
     if (!buf) throw new Error(`Font not loaded: ${key}`)
     return buf
   }
 
   getFontPath(family: FontFamily, weight: FontWeight): string {
-    const key: FontKey = `${family}-${weight}`
+    const key = resolveFontKey(family, weight)
     const path = FONT_FILES[key]
     if (!path) throw new Error(`No font file registered for ${key}`)
     return path
   }
 
   hasFont(family: FontFamily, weight: FontWeight): boolean {
-    return this.fonts.has(`${family}-${weight}`)
+    return this.fonts.has(resolveFontKey(family, weight))
   }
 
   isReady(): boolean {

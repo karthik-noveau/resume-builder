@@ -120,6 +120,7 @@ export function renderEditorialLayout(
             imageId: resume.personalInfo.profileImage,
             clipShape: spec.photo,
             panelTarget: 'personal-info',
+            panelField: 'profileImage',
           }
         )
       )
@@ -143,7 +144,7 @@ export function renderEditorialLayout(
             lineHeight: 1.2,
             textAlign: 'center',
           },
-          { content: initials, panelTarget: 'personal-info' }
+          { content: initials, panelTarget: 'personal-info', panelField: 'profileImage' }
         )
       )
     }
@@ -247,6 +248,7 @@ export function renderEditorialLayout(
           {
             iconName: icons[item.field as keyof typeof icons] ?? 'globe',
             panelTarget: 'personal-info',
+            panelField: item.field,
           }
         )
       )

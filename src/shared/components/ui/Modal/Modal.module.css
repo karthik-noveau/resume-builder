@@ -10,6 +10,41 @@
   padding-bottom: var(--space-4);
 }
 
+/* A full-window preview only needs a small entrance, not the default 0.2x
+   zoom from the toolbar button across the entire screen. */
+.fullModal:global(.resume-preview-enter),
+.fullModal:global(.resume-preview-appear) {
+  animation: previewEnter 180ms ease-out both paused;
+}
+
+.fullModal:global(.resume-preview-leave) {
+  animation: previewLeave 140ms ease-in both paused;
+}
+
+.fullModal:global(.resume-preview-enter-active),
+.fullModal:global(.resume-preview-appear-active),
+.fullModal:global(.resume-preview-leave-active) {
+  animation-play-state: running;
+}
+
+@keyframes previewEnter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes previewLeave {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fullModal:global(.resume-preview-enter),
+  .fullModal:global(.resume-preview-appear),
+  .fullModal:global(.resume-preview-leave) {
+    animation-duration: 1ms;
+  }
+}
+
 .body {
   padding-top: var(--space-1);
 }

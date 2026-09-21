@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createSampleResume } from '@/features/resume/utils/resume.factory'
 import { useResumeStore } from '@/shared/stores/resume.store'
@@ -55,7 +55,7 @@ function renderNode(n: LayoutNode) {
 describe('CanvasNode stacking', () => {
   beforeEach(() => {
     useResumeStore.setState({ activeResume: createSampleResume('meridian'), isDirty: false })
-    useEditorStore.setState({ styleTarget: null, editingKey: null, selectedSectionId: null, selectedEntryId: null })
+    useEditorStore.setState({ styleTarget: null, editingKey: null, selectedSectionId: null, selectedSectionType: null, selectedEntryId: null, personalInfoOpenRequest: 0 })
   })
 
   it('paints decoration below content', () => {
@@ -83,5 +83,52 @@ describe('CanvasNode stacking', () => {
     useEditorStore.setState({ styleTarget: { key: 'personal:fullName', role: null, label: 'Name' } })
 
     expect(renderNode(heading).style.zIndex).toBe('2')
+  })
+
+  it.each(['fullName', 'headline', 'email', 'phone', 'location', 'website', 'linkedin', 'github', 'portfolio'] as const)(
+    'opens Personal Info on a single click on %s without editing the resume',
+    (field) => {
+      useEditorStore.getState().selectSection('experience', 'experience')
+      const before = useResumeStore.getState().activeResume
+      renderNode(node({
+        ...heading,
+        styleKey: `personal:${field}`,
+        editRef: { kind: 'personal-info', field },
+      }))
+
+      fireEvent.click(screen.getByRole('button', { name: `Edit ${field}` }))
+
+      const editor = useEditorStore.getState()
+      expect(editor.selectedSectionType).toBeNull()
+      expect(editor.personalInfoOpenRequest).toBe(1)
+      expect(editor.personalInfoFocusTarget).toBe(field)
+      expect(editor.styleTarget?.key).toBe(`personal:${field}`)
+      expect(document.querySelector('[contenteditable="true"]')).toBeNull()
+      expect(useResumeStore.getState().activeResume).toBe(before)
+    }
+  )
+
+  it('opens Personal Info from the contact heading', () => {
+    useEditorStore.getState().selectSection('skills', 'skills')
+    renderNode(node({
+      ...heading,
+      content: 'Contact',
+      editRef: { kind: 'section-title', sectionType: 'contact', defaultValue: 'Contact' },
+    }))
+    fireEvent.click(screen.getByRole('button', { name: 'Edit contact section title' }))
+    expect(useEditorStore.getState().selectedSectionType).toBeNull()
+    expect(useEditorStore.getState().personalInfoOpenRequest).toBe(1)
+    expect(useEditorStore.getState().personalInfoFocusTarget).toBe('contactTitle')
+  })
+
+  it('opens Personal Info with Space while preserving Enter for inline editing', () => {
+    renderNode(heading)
+    const name = screen.getByRole('button', { name: 'Edit fullName' })
+    fireEvent.keyDown(name, { key: ' ' })
+    expect(useEditorStore.getState().personalInfoOpenRequest).toBe(1)
+    expect(document.querySelector('[contenteditable="true"]')).toBeNull()
+
+    fireEvent.keyDown(name, { key: 'Enter' })
+    expect(screen.getByLabelText('Edit fullName')).toHaveAttribute('contenteditable', 'true')
   })
 })

@@ -155,6 +155,7 @@ export class LayoutBuilder {
       rotationDeg?: number
       editRef?: EditRef
       panelTarget?: 'personal-info'
+      panelField?: LayoutNode['panelField']
     } = {}
   ): LayoutNode {
     return {
@@ -176,6 +177,7 @@ export class LayoutBuilder {
       rotationDeg: opts.rotationDeg,
       editRef: opts.editRef,
       panelTarget: opts.panelTarget,
+      panelField: opts.panelField,
     }
   }
 

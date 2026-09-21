@@ -15,6 +15,7 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = 'md' }: Mod
       title={title}
       footer={null}
       width={widthByMaxWidth[maxWidth]}
+      transitionName={maxWidth === 'full' ? 'resume-preview' : undefined}
       className={clsx(styles.modal, mobile.controls, maxWidth === 'full' && styles.fullModal, maxWidth === 'xl' && styles.wideModal)}
       keyboard
       mask={{ closable: true }}

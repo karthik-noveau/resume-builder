@@ -97,11 +97,24 @@ export function CanvasNode({
     transform: node.rotationDeg ? `rotate(${node.rotationDeg}deg)` : undefined,
   }
 
-  const activate = interactive && isSection && node.sectionType
-    ? () => onSectionClick(node.id, node.sectionType!)
-    : interactive && entryRef
-      ? () => onEntryClick(entryRef.entryId, entryRef.sectionType)
-      : undefined
+  // Profile fields live outside section/entry containers, so their clicks
+  // have no enclosing section to open the inspector. Handle them here while
+  // retaining capture-phase style selection and the leaf's inline editing.
+  const isPersonalInfo = node.editRef?.kind === 'personal-info'
+    || (node.editRef?.kind === 'section-title' && node.editRef.sectionType === 'contact')
+    || node.panelTarget === 'personal-info'
+
+  const activate = interactive && isPersonalInfo
+    ? () => useEditorStore.getState().openPersonalInfo(
+        node.editRef?.kind === 'personal-info' ? node.editRef.field
+          : node.editRef?.kind === 'section-title' ? 'contactTitle'
+          : node.panelField
+      )
+    : interactive && isSection && node.sectionType
+      ? () => onSectionClick(node.id, node.sectionType!)
+      : interactive && entryRef
+        ? () => onEntryClick(entryRef.entryId, entryRef.sectionType)
+        : undefined
 
   const handleClick = activate
     ? (e: React.MouseEvent) => {

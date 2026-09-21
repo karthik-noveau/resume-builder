@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { SectionType, ResumeSnapshot } from '@/shared/types/resume.types'
 import type { StyleRole } from '@/shared/types/style.types'
+import type { PersonalInfoPanelField } from '@/shared/types/layout.types'
 
 const MAX_UNDO_STACK = 100
 const ZOOM_MIN = 0.5
@@ -32,6 +33,7 @@ interface EditorState {
   undoStack: ResumeSnapshot[]
   redoStack: ResumeSnapshot[]
   personalInfoOpenRequest: number
+  personalInfoFocusTarget: PersonalInfoPanelField | null
 }
 
 interface EditorActions {
@@ -41,7 +43,7 @@ interface EditorActions {
   selectStyleTarget(target: StyleTarget): void
   clearStyleTarget(): void
   setEditingKey(key: string | null): void
-  openPersonalInfo(): void
+  openPersonalInfo(field?: PersonalInfoPanelField): void
   setZoom(level: number): void
   zoomIn(): void
   zoomOut(): void
@@ -70,18 +72,19 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   undoStack: [],
   redoStack: [],
   personalInfoOpenRequest: 0,
+  personalInfoFocusTarget: null,
 
   // ─── Selection ──────────────────────────────────────────────────────────────
   selectSection(id, type) {
-    set({ selectedSectionId: id, selectedSectionType: type, selectedEntryId: null })
+    set({ selectedSectionId: id, selectedSectionType: type, selectedEntryId: null, personalInfoFocusTarget: null })
   },
 
   selectEntry(entryId, type) {
-    set({ selectedSectionId: null, selectedSectionType: type, selectedEntryId: entryId })
+    set({ selectedSectionId: null, selectedSectionType: type, selectedEntryId: entryId, personalInfoFocusTarget: null })
   },
 
   clearSelection() {
-    set({ selectedSectionId: null, selectedSectionType: null, selectedEntryId: null, styleTarget: null, editingKey: null })
+    set({ selectedSectionId: null, selectedSectionType: null, selectedEntryId: null, styleTarget: null, editingKey: null, personalInfoFocusTarget: null })
   },
 
   selectStyleTarget(target) {
@@ -96,12 +99,13 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     set({ editingKey: key })
   },
 
-  openPersonalInfo() {
+  openPersonalInfo(field) {
     set((state) => ({
       selectedSectionId: null,
       selectedSectionType: null,
       selectedEntryId: null,
       personalInfoOpenRequest: state.personalInfoOpenRequest + 1,
+      personalInfoFocusTarget: field ?? null,
     }))
   },
 

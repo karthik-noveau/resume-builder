@@ -11,10 +11,12 @@ export function Drawer({
   children,
   width = '320px',
   flush = false,
+  onAfterOpen,
 }: DrawerProps) {
   return (
     <AntDrawer
       open={isOpen}
+      afterOpenChange={(open) => { if (open) onAfterOpen?.() }}
       onClose={onClose}
       placement={position}
       title={title}

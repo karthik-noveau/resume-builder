@@ -94,7 +94,7 @@ export function PersonalInfoForm({ resumeId, personalInfo, contactTitleEditRef }
 
   return (
     <form className={styles.form} aria-label="Personal information" onSubmit={(e) => e.preventDefault()}>
-      <fieldset className={styles.photoFieldset}>
+      <fieldset className={styles.photoFieldset} data-personal-info-field="profileImage">
         <legend className={styles.photoLegend}>Profile image</legend>
         <div className={styles.photoOptions}>
           <label className={styles.photoOption}>
@@ -219,7 +219,9 @@ export function PersonalInfoForm({ resumeId, personalInfo, contactTitleEditRef }
       )}
 
       {activeResume && contactTitleEditRef && (
-        <SectionTitleField resume={activeResume} editRef={contactTitleEditRef} />
+        <div data-personal-info-field="contactTitle">
+          <SectionTitleField resume={activeResume} editRef={contactTitleEditRef} />
+        </div>
       )}
 
       <ControlledInput control={control} name="fullName" label="Full name" required={!!guided} error={errors.fullName?.message} onSaved={onSaved} />

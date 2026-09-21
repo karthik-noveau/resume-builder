@@ -8,7 +8,7 @@ export function applyProfileAvatarStyle(tree: LayoutTree, resume: Resume): Layou
   const backgroundColor = getAvatarBackground(resume.settings.profileImageBackground)
   const replace = (nodes: LayoutNode[]): LayoutNode[] => nodes.flatMap((node): LayoutNode[] => {
     if (node.type === 'image' && node.imageId === resume.personalInfo.profileImage) {
-      const base = { ...node, imageId: undefined, children: [], panelTarget: 'personal-info' as const }
+      const base = { ...node, imageId: undefined, children: [], panelTarget: 'personal-info' as const, panelField: 'profileImage' as const }
       const background: LayoutNode = {
         ...base, id: `${node.id}-avatar-background`, type: 'rect', styles: { ...node.styles, backgroundColor },
       }

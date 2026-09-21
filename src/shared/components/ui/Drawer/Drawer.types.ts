@@ -10,4 +10,5 @@ export interface DrawerProps {
   children: ReactNode
   width?: string
   flush?: boolean
+  onAfterOpen?: () => void
 }

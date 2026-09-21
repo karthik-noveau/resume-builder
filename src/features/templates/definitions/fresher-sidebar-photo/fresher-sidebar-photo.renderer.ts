@@ -2,7 +2,7 @@ import type { Resume, SectionType, SkillSection, CertificationSection } from '@/
 import type { TemplateDefinition } from '@/shared/types/template.types'
 import type { Theme, ThemeColors } from '@/shared/types/theme.types'
 import type { FontPreset } from '@/shared/types/font.types'
-import type { LayoutTree, LayoutNode, LayoutNodeType, LayoutStyles, IconName, EditRef } from '@/shared/types/layout.types'
+import type { LayoutTree, LayoutNode, LayoutNodeType, LayoutStyles, IconName, EditRef, PersonalInfoTextField } from '@/shared/types/layout.types'
 import { tintColor, CUSTOM_THEME_ID } from '@/shared/stores/theme.store'
 import { getTemplateColorConfiguration, resolveTemplateColors, type TemplateColorValues } from '@/shared/utils/templateColors'
 import { LayoutBuilder } from '../../engine/layout.builder'
@@ -206,17 +206,19 @@ function contactRow(
   icon: IconName,
   label: string,
   w: number,
-  colors: ResolvedColors
+  colors: ResolvedColors,
+  field: PersonalInfoTextField
 ): EntryResult {
   const rowH = Math.max(14, estimateTextHeight(label, w - 18, 8.5, 1.5))
   const nodes: LayoutNode[] = [
     b.node('icon', 0, 1, 12, 12, { color: colors.panelText }, {
       iconName: icon,
       panelTarget: 'personal-info',
+      panelField: field,
     }),
     b.node('text', 18, 0, w - 18, rowH, {
       fontFamily: 'Inter', fontSize: 8.5, fontWeight: 400, color: colors.panelSecondaryText, lineHeight: 1.5, textAlign: 'left',
-    }, { content: label, panelTarget: 'personal-info' }),
+    }, { content: label, panelTarget: 'personal-info', panelField: field }),
   ]
   return { nodes, height: rowH + 7 }
 }
@@ -229,12 +231,12 @@ function contactRow(
 function renderContactBlock(b: LayoutBuilder, resume: Resume, x: number, w: number, y: number, colors: ResolvedColors): number {
   const info = resume.personalInfo
   const rows: EntryResult[] = []
-  if (info.phone) rows.push(contactRow(b, 'phone', info.phone, w, colors))
-  if (info.email) rows.push(contactRow(b, 'mail', info.email, w, colors))
-  if (info.location) rows.push(contactRow(b, 'map-pin', info.location, w, colors))
-  if (info.website) rows.push(contactRow(b, 'globe', displayUrl(info.website), w, colors))
-  if (info.linkedin) rows.push(contactRow(b, 'linkedin', displayUrl(info.linkedin), w, colors))
-  if (info.github) rows.push(contactRow(b, 'github', displayUrl(info.github), w, colors))
+  if (info.phone) rows.push(contactRow(b, 'phone', info.phone, w, colors, 'phone'))
+  if (info.email) rows.push(contactRow(b, 'mail', info.email, w, colors, 'email'))
+  if (info.location) rows.push(contactRow(b, 'map-pin', info.location, w, colors, 'location'))
+  if (info.website) rows.push(contactRow(b, 'globe', displayUrl(info.website), w, colors, 'website'))
+  if (info.linkedin) rows.push(contactRow(b, 'linkedin', displayUrl(info.linkedin), w, colors, 'linkedin'))
+  if (info.github) rows.push(contactRow(b, 'github', displayUrl(info.github), w, colors, 'github'))
   if (!rows.length) return y
 
   const contactTitle = resume.sectionTitles?.contact ?? 'Contact'
