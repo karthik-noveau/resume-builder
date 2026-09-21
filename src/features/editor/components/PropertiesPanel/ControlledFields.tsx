@@ -1,4 +1,6 @@
 import { Controller, type Control, type FieldPath, type FieldValues } from 'react-hook-form'
+import { useContext } from 'react'
+import { GuidedFormContext } from '../../hooks/useGuidedForm'
 import { Input } from '@/shared/components/ui/Input/Input'
 import { Textarea } from '@/shared/components/ui/Textarea/Textarea'
 import { Checkbox } from '@/shared/components/ui/Checkbox/Checkbox'
@@ -33,6 +35,7 @@ export function ControlledInput<T extends FieldValues>({
   valueAsNumber,
   ...inputProps
 }: ControlledInputProps<T>) {
+  const guided = useContext(GuidedFormContext)
   return (
     <Controller
       name={name}
@@ -40,6 +43,8 @@ export function ControlledInput<T extends FieldValues>({
       render={({ field }) => (
         <Input
           {...inputProps}
+          error={inputProps.error || (inputProps.required && guided?.showErrors && !String(field.value ?? '').trim()
+            ? `${inputProps.label} is required.` : undefined)}
           name={field.name}
           value={field.value ?? ''}
           onChange={(e) => {
@@ -64,6 +69,7 @@ export function ControlledTextarea<T extends FieldValues>({
   onSaved,
   ...textareaProps
 }: ControlledTextareaProps<T>) {
+  const guided = useContext(GuidedFormContext)
   return (
     <Controller
       name={name}
@@ -71,6 +77,8 @@ export function ControlledTextarea<T extends FieldValues>({
       render={({ field }) => (
         <Textarea
           {...textareaProps}
+          error={textareaProps.error || (textareaProps.required && guided?.showErrors && !String(field.value ?? '').trim()
+            ? `${textareaProps.label} is required.` : undefined)}
           name={field.name}
           value={field.value ?? ''}
           onChange={field.onChange}

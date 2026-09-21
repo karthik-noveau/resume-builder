@@ -29,12 +29,12 @@
 }
 
 .description {
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   color: rgb(var(--color-text-secondary));
 }
 
 .errorMessage {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   color: rgb(var(--color-text-muted));
   font-family: monospace;
   background-color: rgb(var(--color-surface));
@@ -52,7 +52,7 @@
   padding: 10px 24px;
   background-color: rgb(var(--color-primary));
   color: #fff;
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   font-weight: 500;
   border-radius: var(--radius-medium);
   transition: background-color var(--duration-fast);

@@ -48,11 +48,14 @@ export interface ExportRules {
 }
 
 export type TemplateCategory = 'Fresher' | 'Experienced'
+export type TemplateDesignStyle = 'Simple' | 'Ultra Modern'
 
 export interface TemplateDefinition {
   id: string
   name: string
   category: TemplateCategory
+  /** Visual collection, independent of experience level or column layout. */
+  designStyle: TemplateDesignStyle
   version: number
   description: string
   thumbnail: string

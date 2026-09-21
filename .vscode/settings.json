@@ -1,3 +1,30 @@
 {
-  "liveServer.settings.port": 5501
+  "liveServer.settings.port": 5501,
+  "editor.accessibilitySupport": "auto",
+  "terminal.integrated.enablePersistentSessions": true,
+  "terminal.integrated.persistentSessionReviveProcess": "onExitAndWindowClose",
+  "terminal.integrated.hideOnStartup": "never",
+  "terminal.integrated.enableImages": false,
+  "terminal.integrated.gpuAcceleration": "auto",
+  "terminal.integrated.scrollback": 1000,
+  "terminal.integrated.smoothScrolling": false,
+  "terminal.integrated.cursorBlinking": false,
+  "terminal.integrated.tabs.enableAnimation": false,
+  "terminal.integrated.tabs.title": "${sequence}",
+  "terminal.integrated.profiles.osx": {
+    "Resume Builder (persistent)": {
+      "path": "/usr/bin/env",
+      "args": [
+        "python3",
+        "${workspaceFolder}/.vscode/terminal-session.py"
+      ],
+      "overrideName": false,
+      "icon": "terminal-tmux"
+    }
+  },
+  "terminal.integrated.defaultProfile.osx": "Resume Builder (persistent)",
+  "terminal.integrated.automationProfile.osx": {
+    "path": "/bin/zsh",
+    "args": ["-l"]
+  }
 }

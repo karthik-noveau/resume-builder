@@ -27,6 +27,10 @@ body {
   background-color: rgb(var(--color-background));
   color: rgb(var(--color-text-primary));
   font-family: var(--font-sans);
+  /* The UI baseline, set explicitly. Without it every element that forgets to
+     size itself renders at the browser's 16px reading default — which is how
+     form labels ended up at 16px/400 while the panel around them ran at 13px. */
+  font-size: var(--text-base);
   margin: 0;
   min-height: 100dvh;
   line-height: 1.5;
@@ -214,15 +218,60 @@ progress {
 
 ::-webkit-scrollbar-thumb {
   background-color: rgb(var(--color-divider));
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: rgb(var(--color-text-muted));
 }
 
-/* Fixed brand gradient for the logo mark and brand CTAs — literal hex, not
-   theme tokens, since these must look identical in light and dark mode. */
+/* The same accent treatment appears on every primary action in the app. */
 .bg-gradient-brand {
-  background-image: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  background-image: var(--gradient-brand);
+}
+
+.ant-btn.ant-btn-primary:not(.ant-btn-dangerous):not(:disabled):not(.ant-btn-disabled) {
+  background-image: var(--gradient-brand);
+  border-color: transparent;
+  color: rgb(var(--color-on-primary));
+  box-shadow:
+    0 3px 10px rgb(var(--color-primary) / 18%),
+    inset 0 1px 0 rgb(255 255 255 / 18%);
+}
+
+.ant-btn.ant-btn-primary:not(.ant-btn-dangerous):not(:disabled):not(.ant-btn-disabled):hover {
+  background-image: var(--gradient-brand-hover);
+}
+/* Startup, keyboard navigation and system accessibility preferences. */
+.app-loading {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: rgb(var(--color-background));
+}
+
+.skip-link {
+  position: fixed;
+  inset: 12px auto auto 12px;
+  z-index: 2000;
+  transform: translateY(-160%);
+  padding: 12px 18px;
+  border-radius: 10px;
+  background: rgb(var(--color-surface));
+  color: rgb(var(--color-primary));
+  box-shadow: var(--shadow-level-2);
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

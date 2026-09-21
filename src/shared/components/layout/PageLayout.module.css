@@ -1,4 +1,6 @@
 .root {
   flex: 1;
   background-color: rgb(var(--color-background));
+  background-image: var(--gradient-page);
+  background-repeat: no-repeat;
 }

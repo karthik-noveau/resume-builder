@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { ALL_TEMPLATES, templateRenderer } from '../registry/template.registry'
-import { createEmptyResume } from '@/features/resume/utils/resume.factory'
+import { createSampleResume } from '@/features/resume/utils/resume.factory'
 import { AVAILABLE_THEMES, AVAILABLE_FONT_PRESETS } from '@/shared/stores/theme.store'
 import type { Resume } from '@/shared/types/resume.types'
 import type { LayoutNode, LayoutPage } from '@/shared/types/layout.types'
@@ -10,7 +10,7 @@ const fp = AVAILABLE_FONT_PRESETS[0]
 
 /** Pads experience until the resume is guaranteed to span several pages. */
 function multiPageResume(templateId: string): Resume {
-  const r = createEmptyResume(templateId)
+  const r = createSampleResume(templateId)
   const base = r.experience[0]
   r.experience = Array.from({ length: 8 }, (_, i) => ({
     ...base,
@@ -32,10 +32,10 @@ function flatten(node: LayoutNode, out: LayoutNode[] = []): LayoutNode[] {
 
 const nodesOf = (page: LayoutPage) => page.nodes.flatMap((n) => flatten(n))
 
-/** A full-bleed rect anchored at x=0 spanning the page height is the sidebar panel. */
+/** A partial-width, full-height panel, not the full-page paper background. */
 function sidebarPanel(page: LayoutPage): LayoutNode | undefined {
   return nodesOf(page).find(
-    (n) => n.type === 'rect' && n.xPt === 0 && n.heightPt >= page.heightPt * 0.9 && n.widthPt > 40
+    (n) => n.type === 'rect' && n.heightPt >= page.heightPt * 0.9 && n.widthPt > 40 && n.widthPt < page.widthPt * 0.55
   )
 }
 
@@ -49,16 +49,12 @@ function luminance(hex: string): number {
 
 describe('sidebar templates across page breaks', () => {
   const sidebarTemplates = ALL_TEMPLATES.filter((tpl) => {
-    const tree = templateRenderer.render(createEmptyResume(tpl.id), tpl, theme, fp)
+    const tree = templateRenderer.render(createSampleResume(tpl.id), tpl, theme, fp)
     return !!sidebarPanel(tree.pages[0])
   })
 
-  // The shipped catalog is deliberately single column, so this currently
-  // matches nothing. The checks below are kept rather than deleted: they are
-  // the safety net for a sidebar template being added back, and they cost
-  // nothing while none exists.
   it('reports how many sidebar templates are in the catalog', () => {
-    expect(sidebarTemplates.length).toBeGreaterThanOrEqual(0)
+    expect(sidebarTemplates.length).toBeGreaterThan(0)
   })
 
   for (const tpl of sidebarTemplates) {
@@ -89,12 +85,12 @@ describe('sidebar templates across page breaks', () => {
       it('places every sidebar-column section on the first page', () => {
         // A section is "in the sidebar" by position, not by type — which types
         // live in the sidebar differs per template, but the x offset does not.
-        // Main-column sections legitimately flow onto later pages; sidebar ones
-        // must not, because the column is only laid out once.
-        const panelW = sidebarPanel(tree.pages[0])!.widthPt
+        // With this fixture only experience is expanded. Unchanged, short
+        // sidebar sections must not be delayed by the other column's overflow.
+        const panel = sidebarPanel(tree.pages[0])!
         const sidebarSectionsOn = (page: LayoutPage) =>
           nodesOf(page)
-            .filter((n) => n.type === 'section' && n.xPt < panelW)
+            .filter((n) => n.type === 'section' && n.xPt >= panel.xPt && n.xPt + n.widthPt <= panel.xPt + panel.widthPt)
             .map((n) => n.sectionType)
 
         const onFirst = new Set(sidebarSectionsOn(tree.pages[0]))

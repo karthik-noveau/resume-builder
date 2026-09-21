@@ -3,12 +3,10 @@ import { registerRenderer } from '../../engine/template.renderer'
 
 registerRenderer('cornerstone', createTemplateRenderer({
   id: 'cornerstone',
-  accent: '#111827',
   headingFamily: 'SourceSerifPro',
   bodyFamily: 'SourceSerifPro',
-  ink: '#111827',
-  muted: '#4b5563',
-  rule: '#d1d5db',
+  defaultScale: { name: 29, headline: 11.5, sectionTitle: 10, entryTitle: 11, body: 10, small: 9, caption: 8.5 },
+  defaultLineHeight: { heading: 1.2, body: 1.45 },
   marginMm: 19,
   header: 'rule',
   sectionHeader: 'caps-rule',

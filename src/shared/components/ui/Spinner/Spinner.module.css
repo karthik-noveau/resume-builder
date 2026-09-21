@@ -1,3 +1,63 @@
 .root {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(var(--color-primary));
+  line-height: 0;
+}
+
+.svg {
+  display: block;
+  animation: spin 900ms linear infinite;
+}
+
+/* The unlit remainder of the ring. Without it the arc appears to travel across
+   empty space; with it the motion reads as a ring filling, which is calmer. */
+.track {
+  opacity: 0.16;
+}
+
+/* Breathes as it turns, so the spinner has a pulse rather than a flat loop. */
+.arc {
+  animation: sweep 1600ms ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sweep {
+  0% {
+    stroke-dashoffset: 0;
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    /* One full circumference — the arc completes an extra lap against the
+       rotation, which is what gives the chase its acceleration. */
+    stroke-dashoffset: -100%;
+    opacity: 0.85;
+  }
+}
+
+/* Motion is the whole point of a spinner, so it cannot simply be removed: the
+   ring stays and pulses in place instead, which still says "working". */
+@media (prefers-reduced-motion: reduce) {
+  .svg {
+    animation: none;
+  }
+
+  .arc {
+    animation: fade 1400ms ease-in-out infinite;
+  }
+}
+
+@keyframes fade {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
 }

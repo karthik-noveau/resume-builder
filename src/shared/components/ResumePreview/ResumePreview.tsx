@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { FileText } from 'lucide-react'
 import type { LayoutTree } from '@/shared/types/layout.types'
 import { CanvasPage } from '@/features/editor/components/Canvas/CanvasPage'
@@ -17,8 +18,9 @@ const noop = () => {}
  * Renders a non-interactive, scaled-down preview of a resume's first page,
  * reusing the same CanvasPage the live editor renders with — so previews are
  * pixel-faithful to the real template instead of a generic placeholder.
+ * Memoization keeps selecting a card from re-rendering the entire catalog.
  */
-export function ResumePreview({ layoutTree, widthPx, aspectRatio = 1.414, className }: ResumePreviewProps) {
+export const ResumePreview = memo(function ResumePreview({ layoutTree, widthPx, aspectRatio = 1.414, className }: ResumePreviewProps) {
   const page = layoutTree?.pages[0]
   const heightPx = widthPx * (page ? page.heightPt / page.widthPt : aspectRatio)
 
@@ -56,6 +58,7 @@ export function ResumePreview({ layoutTree, widthPx, aspectRatio = 1.414, classN
             selectedEntryId={null}
             onSectionClick={noop}
             onEntryClick={noop}
+            interactive={false}
           />
         </div>
       ) : (
@@ -65,4 +68,4 @@ export function ResumePreview({ layoutTree, widthPx, aspectRatio = 1.414, classN
       )}
     </div>
   )
-}
+})

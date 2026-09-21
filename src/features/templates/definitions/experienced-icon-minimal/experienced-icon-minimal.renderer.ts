@@ -3,7 +3,8 @@ import type { TemplateDefinition } from '@/shared/types/template.types'
 import type { Theme, ThemeColors } from '@/shared/types/theme.types'
 import type { FontPreset } from '@/shared/types/font.types'
 import type { LayoutTree, LayoutNode, LayoutNodeType, LayoutStyles, IconName, EditRef } from '@/shared/types/layout.types'
-import { tintColor } from '@/shared/stores/theme.store'
+import { tintColor, CUSTOM_THEME_ID } from '@/shared/stores/theme.store'
+import { getTemplateColorConfiguration, resolveTemplateColors, type TemplateColorValues } from '@/shared/utils/templateColors'
 import { LayoutBuilder } from '../../engine/layout.builder'
 import {
   buildExperienceEntry,
@@ -15,7 +16,9 @@ import {
   type EntryResult,
   type SectionHeaderResult,
 } from '../../engine/section.renderers'
-import { estimateTextHeight, captionStyle, displayUrl} from '../../engine/layout.utils'
+import { applyResumeTypography, estimateTextHeight, estimateStyledTextHeight, captionStyle, resolveTemplateTypography, resumeSpacingMultiplier } from '../../engine/layout.utils'
+import { buildContactLineNodes, contactItems } from '../../engine/contact.layout'
+import { resolveSectionIcon } from '../../engine/icons'
 import { registerRenderer } from '../../engine/template.renderer'
 
 function t(
@@ -33,44 +36,52 @@ function t(
 }
 
 const COLORS: ThemeColors = {
-  primary: '#1e3a5f',
-  primaryHover: '#16324a',
-  primaryActive: '#0f2436',
+  primary: '#0061c4',
+  primaryHover: '#0054aa',
+  primaryActive: '#00478f',
   background: '#ffffff',
   surface: '#ffffff',
-  surfaceElevated: '#f8fafc',
+  surfaceElevated: '#eff6ff',
   textPrimary: '#111827',
-  textSecondary: '#374151',
-  textMuted: '#6b7280',
+  textSecondary: '#334155',
+  textMuted: '#475569',
   success: '#16a34a',
   warning: '#d97706',
   error: '#dc2626',
-  info: '#0284c7',
-  accent: '#1e3a5f',
-  divider: '#e2e8f0',
+  info: '#0061c4',
+  accent: '#0061c4',
+  divider: '#cbd5e1',
 }
 
 /** Keeps this template's own text/background/divider identity, but lets the
  * selected app theme drive the accent color so theme switching is visible. */
-function resolveColors(theme: Theme): ThemeColors {
+type ResolvedColors = ThemeColors & Pick<TemplateColorValues,
+  'sectionTitle' | 'sectionDescription' | 'sectionBorder' | 'sectionIcon' | 'sectionBackground'
+>
+
+function resolveColors(theme: Theme, resume: Resume): ResolvedColors {
+  const defaults = getTemplateColorConfiguration('experienced-icon-minimal').defaults
+  const selected = resolveTemplateColors(resume, {
+    ...defaults,
+    accent: theme.id === CUSTOM_THEME_ID ? theme.colors.primary : defaults.accent,
+  })
   return {
     ...COLORS,
-    primary: theme.colors.primary,
-    primaryHover: theme.colors.primaryHover,
-    primaryActive: theme.colors.primaryActive,
-    accent: theme.colors.accent,
-    divider: tintColor(theme.colors.primary, 0.85),
+    primary: selected.accent,
+    primaryHover: tintColor(selected.accent, -0.15),
+    primaryActive: tintColor(selected.accent, -0.3),
+    accent: selected.accent,
+    divider: selected.divider,
+    surfaceElevated: selected.softBackground,
+    textPrimary: selected.primaryText,
+    textSecondary: selected.sectionDescription,
+    textMuted: selected.mutedText,
+    sectionTitle: selected.sectionTitle,
+    sectionDescription: selected.sectionDescription,
+    sectionBorder: selected.sectionBorder,
+    sectionIcon: selected.sectionIcon,
+    sectionBackground: selected.sectionBackground,
   }
-}
-
-const SECTION_ICON: Partial<Record<SectionType, IconName>> = {
-  summary: 'user',
-  experience: 'briefcase',
-  education: 'graduation-cap',
-  skills: 'sliders',
-  projects: 'briefcase',
-  certifications: 'award',
-  custom: 'message-circle',
 }
 
 const TITLES: Record<SectionType, string> = {
@@ -91,23 +102,30 @@ const BODY_STYLE: Partial<LayoutStyles> = {
 
 function render(resume: Resume, template: TemplateDefinition, theme: Theme, fp: FontPreset): LayoutTree {
   const forceBlack = template.exportRules.forceBlackText
-  const colors = resolveColors(theme)
+  const colors = resolveColors(theme, resume)
+  const fpx = applyResumeTypography(resolveTemplateTypography(fp, {
+    headingFamily: 'Manrope',
+    bodyFamily: 'Inter',
+    scale: { name: 32, headline: 12, sectionTitle: 10.5, entryTitle: 11, body: 10, small: 9, caption: 8.5 },
+    lineHeight: { heading: 1.2, body: 1.45 },
+  }), resume.settings)
   const builder = new LayoutBuilder({
     resumeId: resume.id,
     templateId: template.id,
     themeId: theme.id,
     fontPresetId: fp.id,
     pageSize: resume.settings.pageSize,
-    marginMm: 16,
+    marginMm: resume.settings.margins ?? 16,
   })
 
-  renderHeader(builder, resume, fp, colors)
+  renderHeader(builder, resume, fpx, colors)
 
   const w = builder.contentW
   const x = builder.x
 
   for (const sectionType of resume.sectionOrder) {
-    renderSection(builder, sectionType, resume, x, w, fp, forceBlack, colors)
+    if (sectionType === 'custom') continue
+    renderSection(builder, sectionType, resume, template, x, w, fpx, forceBlack, colors)
   }
 
   return builder.build()
@@ -122,7 +140,7 @@ function renderHeader(b: LayoutBuilder, resume: Resume, fp: FontPreset, colors: 
 
   b.ensureSpace(90)
 
-  const nameH = fp.scale.name * fp.lineHeight.heading
+  const nameH = estimateStyledTextHeight(info.fullName || 'Your Name', textW, fp.scale.name, fp.lineHeight.heading, 0, fp.headingFamily, 700)
   b.currentPage.nodes.push(t(b, 'text', b.x, b.y, textW, nameH, {
     fontFamily: fp.headingFamily,
     fontSize: fp.scale.name,
@@ -141,7 +159,7 @@ function renderHeader(b: LayoutBuilder, resume: Resume, fp: FontPreset, colors: 
   b.advanceY(nameH + 4)
 
   if (info.headline) {
-    const hH = fp.scale.headline * fp.lineHeight.body
+    const hH = estimateTextHeight(info.headline, textW, fp.scale.headline, fp.lineHeight.body, fp.bodyFamily, 500)
     b.currentPage.nodes.push(t(b, 'text', b.x, b.y, textW, hH, {
       fontFamily: fp.bodyFamily,
       fontSize: fp.scale.headline,
@@ -153,65 +171,78 @@ function renderHeader(b: LayoutBuilder, resume: Resume, fp: FontPreset, colors: 
     b.advanceY(hH + 8)
   }
 
-  const contactText = [info.location, info.phone, info.email, displayUrl(info.website || info.linkedin)]
-    .filter(Boolean)
-    .join('   ·   ')
-  if (contactText) {
-    const cH = fp.scale.small * 1.5
-    b.currentPage.nodes.push(t(b, 'text', b.x, b.y, w, cH, {
-      ...captionStyle(COLORS, fp),
+  const primaryUrl = info.website ? 'website' : 'linkedin'
+  const contacts = contactItems(info, ['location', 'phone', 'email', primaryUrl])
+  if (contacts.length) {
+    const line = buildContactLineNodes(b, contacts, b.x, b.y, w, {
+      ...captionStyle(colors, fp),
       color: colors.textSecondary,
-    }, contactText))
-    b.advanceY(cH + 12)
+    })
+    b.currentPage.nodes.push(...line.nodes)
+    b.advanceY(line.height + 12)
   }
 
-  b.currentPage.nodes.push(t(b, 'divider', b.x, b.y, w, 1.5, { color: colors.primary }))
-  b.advanceY(28)
+  b.currentPage.nodes.push(t(b, 'divider', b.x, b.y, w, 0.7, { color: colors.divider }))
+  b.advanceY(16)
 }
 
 function iconHeader(
   b: LayoutBuilder,
-  sectionType: SectionType,
   title: string,
   w: number,
   fp: FontPreset,
   continued: boolean,
-  colors: ThemeColors
+  colors: ResolvedColors,
+  icon: IconName,
+  editRef?: EditRef
 ): SectionHeaderResult {
-  const titleH = fp.scale.sectionTitle * fp.lineHeight.heading
-  const iconSize = titleH * 0.95
+  const label = continued ? `${title} (continued)` : title
+  const iconSize = fp.scale.sectionTitle * fp.lineHeight.heading * 0.85
+  const titleH = estimateStyledTextHeight(label, w - iconSize - 8, fp.scale.sectionTitle, fp.lineHeight.heading, 0, fp.headingFamily, 700)
   const nodes: LayoutNode[] = [
-    b.node('icon', 0, (titleH - iconSize) / 2, iconSize, iconSize, { color: colors.primary }, {
-      iconName: SECTION_ICON[sectionType] ?? 'user',
+    b.node('icon', 0, (titleH - iconSize) / 2, iconSize, iconSize, { color: colors.sectionIcon }, {
+      iconName: icon,
+      iconEditable: true,
     }),
     t(b, 'text', iconSize + 8, 0, w - iconSize - 8, titleH, {
       fontFamily: fp.headingFamily,
       fontSize: fp.scale.sectionTitle,
       fontWeight: 700,
-      color: colors.textPrimary,
+      color: colors.sectionTitle,
       lineHeight: fp.lineHeight.heading,
       textAlign: 'left',
-    }, continued ? `${title} (continued)` : title),
+    }, label, continued ? undefined : editRef),
   ]
   const dividerY = titleH + 6
-  nodes.push(t(b, 'divider', 0, dividerY, w, 1, { color: colors.divider }))
-  return { nodes, height: dividerY + 18 }
+  nodes.push(t(b, 'divider', 0, dividerY, w, 0.6, { color: colors.sectionBorder }))
+  return { nodes, height: dividerY + 6 }
 }
 
 function renderSection(
   b: LayoutBuilder,
   sectionType: SectionType,
   resume: Resume,
+  template: TemplateDefinition,
   x: number,
   w: number,
   fp: FontPreset,
   forceBlack: boolean,
-  colors: ThemeColors
+  colors: ResolvedColors
 ): void {
-  const title = TITLES[sectionType]
-  const header = (continued: boolean) => iconHeader(b, sectionType, title, w, fp, continued, colors)
+  const spacing = resumeSpacingMultiplier(resume.settings)
+  const defaultTitle = TITLES[sectionType]
+  const title = sectionType === 'custom'
+    ? defaultTitle
+    : resume.sectionTitles?.[sectionType] ?? defaultTitle
+  const defaultIcon = template.sectionIcons?.[sectionType] ?? 'user'
+  const icon = resolveSectionIcon(resume, sectionType, defaultIcon)
+  const header = (continued: boolean) => iconHeader(
+    b, title, w, fp, continued, colors, icon,
+    sectionType === 'custom' ? undefined : { kind: 'section-title', sectionType, defaultValue: defaultTitle },
+  )
   const bodyStyleFor: Partial<LayoutStyles> = {
     ...BODY_STYLE,
+    color: colors.textPrimary,
     fontFamily: fp.bodyFamily,
     fontSize: fp.scale.body,
     lineHeight: fp.lineHeight.body,
@@ -220,48 +251,48 @@ function renderSection(
   switch (sectionType) {
     case 'summary': {
       if (!resume.summary.visible || !resume.summary.content) return
-      const h = estimateTextHeight(resume.summary.content, w, fp.scale.body, 1.5)
+      const h = estimateTextHeight(resume.summary.content, w, fp.scale.body, fp.lineHeight.body)
       const entries: EntryResult[] = [{
-        nodes: [t(b, 'text', 0, 0, w, h, { ...bodyStyleFor, lineHeight: 1.5, color: colors.textSecondary }, resume.summary.content, { kind: 'summary' })],
+        nodes: [t(b, 'text', 0, 0, w, h, { ...bodyStyleFor, color: colors.textSecondary }, resume.summary.content, { kind: 'summary' })],
         height: h,
       }]
       placeEntryBlock(b, 'summary', x, w, entries, 0, header, bodyStyleFor)
-      b.advanceY(26)
+      b.advanceY(16 * spacing)
       break
     }
     case 'experience': {
       const visible = resume.experience.filter((e) => e.visible)
       if (!visible.length) return
-      placeEntryBlock(b, 'experience', x, w, visible.map((e) => buildExperienceEntry(b, e, w, COLORS, fp, forceBlack)), 20, header, bodyStyleFor)
-      b.advanceY(26)
+      placeEntryBlock(b, 'experience', x, w, visible.map((e) => buildExperienceEntry(b, e, w, colors, fp, forceBlack)), 16 * spacing, header, bodyStyleFor)
+      b.advanceY(16 * spacing)
       break
     }
     case 'education': {
       const visible = resume.education.filter((e) => e.visible)
       if (!visible.length) return
-      placeEntryBlock(b, 'education', x, w, visible.map((e) => buildEducationEntry(b, e, w, COLORS, fp, forceBlack)), 16, header, bodyStyleFor)
-      b.advanceY(26)
+      placeEntryBlock(b, 'education', x, w, visible.map((e) => buildEducationEntry(b, e, w, colors, fp, forceBlack)), 16 * spacing, header, bodyStyleFor)
+      b.advanceY(16 * spacing)
       break
     }
     case 'skills': {
       const visible = resume.skills.filter((s) => s.visible)
       if (!visible.length) return
-      placeEntryBlock(b, 'skills', x, w, visible.map((s) => buildSkillPills(b, s, w, COLORS, fp, forceBlack)), 10, header, bodyStyleFor)
-      b.advanceY(26)
+      placeEntryBlock(b, 'skills', x, w, visible.map((s) => buildSkillPills(b, s, w, colors, fp, forceBlack)), 10 * spacing, header, bodyStyleFor)
+      b.advanceY(16 * spacing)
       break
     }
     case 'projects': {
       const visible = resume.projects.filter((p) => p.visible)
       if (!visible.length) return
-      placeEntryBlock(b, 'projects', x, w, visible.map((p) => buildProjectEntry(b, p, w, COLORS, fp, forceBlack)), 20, header, bodyStyleFor)
-      b.advanceY(26)
+      placeEntryBlock(b, 'projects', x, w, visible.map((p) => buildProjectEntry(b, p, w, colors, fp, forceBlack)), 20 * spacing, header, bodyStyleFor)
+      b.advanceY(16 * spacing)
       break
     }
     case 'certifications': {
       const visible = resume.certifications.filter((c) => c.visible)
       if (!visible.length) return
-      placeEntryBlock(b, 'certifications', x, w, visible.map((c) => buildCertEntry(b, c, w, COLORS, fp, forceBlack)), 12, header, bodyStyleFor)
-      b.advanceY(26)
+      placeEntryBlock(b, 'certifications', x, w, visible.map((c) => buildCertEntry(b, c, w, colors, fp, forceBlack)), 12 * spacing, header, bodyStyleFor)
+      b.advanceY(16 * spacing)
       break
     }
     case 'custom': {
@@ -272,8 +303,12 @@ function renderSection(
           nodes: [t(b, 'text', 0, 0, w, h, { ...bodyStyleFor, lineHeight: 1.5 }, text)],
           height: h,
         }]
-        placeEntryBlock(b, 'custom', x, w, entries, 0, (continued) => iconHeader(b, 'custom', cs.title, w, fp, continued, colors), bodyStyleFor)
-        b.advanceY(26)
+        const customIcon = resolveSectionIcon(resume, 'custom', defaultIcon, cs.id)
+        placeEntryBlock(b, 'custom', x, w, entries, 0, (continued) => iconHeader(
+          b, cs.title, w, fp, continued, colors, customIcon,
+          { kind: 'custom-section-title', sectionId: cs.id, defaultValue: cs.title },
+        ), bodyStyleFor)
+      b.advanceY(16 * spacing)
       }
       break
     }

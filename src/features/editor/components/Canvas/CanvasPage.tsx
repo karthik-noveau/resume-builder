@@ -10,6 +10,7 @@ interface CanvasPageProps {
   selectedEntryId: string | null
   onSectionClick: (id: string, type: SectionType) => void
   onEntryClick: (entryId: string, type: SectionType) => void
+  interactive?: boolean
 }
 
 export function CanvasPage({
@@ -19,6 +20,7 @@ export function CanvasPage({
   selectedEntryId,
   onSectionClick,
   onEntryClick,
+  interactive = true,
 }: CanvasPageProps) {
   return (
     <div
@@ -42,6 +44,7 @@ export function CanvasPage({
           selectedEntryId={selectedEntryId}
           onSectionClick={onSectionClick}
           onEntryClick={onEntryClick}
+          interactive={interactive}
         />
       ))}
     </div>

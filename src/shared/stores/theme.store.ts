@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Theme, ThemeColors } from '@/shared/types/theme.types'
 import type { FontPreset } from '@/shared/types/font.types'
+import { APP_THEME_COLORS } from '@/shared/theme/appTheme'
 
 // ─── Theme Definitions ───────────────────────────────────────────────────────
 
@@ -130,15 +131,12 @@ export const AVAILABLE_FONT_PRESETS: FontPreset[] = [
 
 // ─── Theme Application ────────────────────────────────────────────────────────
 
-// primary/primaryHover/primaryActive/accent are deliberately excluded here.
-// AVAILABLE_THEMES doubles as the set of resume color presets, so syncing
-// its primary color onto the app chrome's CSS vars would mean rebranding
-// the web app also silently changed every future resume's default accent
-// color. tokens.css defines --color-primary/-hover/-active/--color-accent
-// as static, independent values (one set under `:root`, one under
-// `[data-theme='dark']`) — setting `data-theme` below is enough for the
-// cascade to pick the right one; this map just doesn't touch them.
-const COLOR_KEY_TO_CSS_VAR: Partial<Record<keyof ThemeColors, string>> = {
+// Only interface colors reach the DOM. Resume presets remain document data.
+const COLOR_KEY_TO_CSS_VAR: Record<keyof ThemeColors, string> = {
+  primary: '--color-primary',
+  primaryHover: '--color-primary-hover',
+  primaryActive: '--color-primary-active',
+  accent: '--color-accent',
   background: '--color-background',
   surface: '--color-surface',
   surfaceElevated: '--color-surface-elevated',
@@ -167,9 +165,9 @@ function hexToRgbTriplet(hex: string): string {
 function applyThemeToDom(theme: Theme) {
   const root = document.documentElement
   root.setAttribute('data-theme', theme.id)
+  const colors = APP_THEME_COLORS[theme.id === 'dark' ? 'dark' : 'light']
   for (const [key, cssVar] of Object.entries(COLOR_KEY_TO_CSS_VAR)) {
-    if (!cssVar) continue
-    const color = theme.colors[key as keyof ThemeColors]
+    const color = colors[key as keyof ThemeColors]
     root.style.setProperty(cssVar, hexToRgbTriplet(color))
   }
 }

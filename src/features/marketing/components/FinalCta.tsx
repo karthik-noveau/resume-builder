@@ -1,31 +1,28 @@
-import { motion } from 'framer-motion'
+import { ArrowUpRight, Check } from 'lucide-react'
 import { PillCta } from './PillCta'
-import { fadeUp, viewportOnce, BRAND_GRADIENT } from './motion'
 import styles from './FinalCta.module.css'
 
 export function FinalCta() {
   return (
-    <section className={styles.section}>
-      <motion.div
-        className={styles.panel}
-        style={{ background: BRAND_GRADIENT }}
-        initial="hidden"
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={fadeUp}
-        transition={{ duration: 0.4 }}
-      >
-        <div className={styles.blurCircle} aria-hidden="true" />
-        <div className={styles.content}>
-          <h2 className={styles.heading}>
-            Ready to build your resume?
+    <section className={styles.section} aria-labelledby="cta-heading">
+      <div className={styles.panel}>
+        <div className={styles.copy}>
+          <p className={styles.eyebrow}>YOUR NEXT CHAPTER STARTS HERE</p>
+          <h2 id="cta-heading">
+            Ready for your
+            <br />
+            <span>next opportunity?</span>
           </h2>
-          <p className={styles.subtext}>It&apos;s free, it takes minutes, and it never leaves your device.</p>
-          <div className={styles.ctaWrap}>
-            <PillCta to="/app" variant="inverted">Start Building</PillCta>
-          </div>
+          <p className={styles.subtext}>Put your best work on paper. Make your next move.</p>
         </div>
-      </motion.div>
+        <div className={styles.action}>
+          <ArrowUpRight size={48} strokeWidth={1.3} className={styles.arrow} aria-hidden="true" />
+          <PillCta to="/templates?create=true">Build my resume</PillCta>
+          <p className={styles.note}>
+            <Check size={13} aria-hidden="true" /> Free to build. Free to download.
+          </p>
+        </div>
+      </div>
     </section>
   )
 }

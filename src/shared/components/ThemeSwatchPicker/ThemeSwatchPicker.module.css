@@ -5,7 +5,7 @@
 }
 
 .swatchButton {
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   border: 2px solid transparent;
   display: flex;
   align-items: center;
@@ -24,13 +24,13 @@
 }
 
 .swatchInner {
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgb(var(--color-divider));
 }
 
 .customLabel {
   position: relative;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   border: 2px solid transparent;
   display: flex;
   align-items: center;
@@ -50,7 +50,7 @@
 }
 
 .customInner {
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgb(var(--color-divider));
   display: flex;
   align-items: center;

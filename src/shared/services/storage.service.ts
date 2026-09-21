@@ -38,7 +38,10 @@ class StorageServiceImpl {
       if (!result.success) {
         const issues = result.error.issues
         logger.warn('Resume schema validation failed on read', { id, issues })
-        throw new ValidationError(`Resume ${id} failed schema validation`, issues.map(i => i.message))
+        throw new ValidationError(
+          `Resume ${id} failed schema validation`,
+          issues.map((i) => i.message)
+        )
       }
 
       return result.data
@@ -56,8 +59,14 @@ class StorageServiceImpl {
       for (const r of raw) {
         const result = resumeSchema.safeParse(r)
         if (!result.success) {
-          logger.warn('Resume schema validation failed on read', { id: r.id, issues: result.error.issues })
-          continue
+          logger.warn('Resume schema validation failed on read', {
+            id: r.id,
+            issues: result.error.issues,
+          })
+          throw new ValidationError(
+            'A saved resume could not be read. Your data has not been deleted.',
+            result.error.issues.map((issue) => issue.message)
+          )
         }
         resumes.push(result.data)
       }

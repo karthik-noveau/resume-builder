@@ -1,4 +1,5 @@
 import type { IconName } from './layout.types'
+import type { ResumeStyleOverrides } from './style.types'
 
 // ─── Section Type Discriminant ───────────────────────────────────────────────
 
@@ -10,6 +11,9 @@ export type SectionType =
   | 'projects'
   | 'certifications'
   | 'custom'
+
+/** Built-in headings users can rename directly on the resume canvas. */
+export type SectionTitleKey = Exclude<SectionType, 'custom'> | 'contact'
 
 // ─── Base Contract ────────────────────────────────────────────────────────────
 
@@ -145,7 +149,16 @@ export interface ResumeSettings {
   pageSize: 'A4' | 'LETTER'
   margins: MarginSettings
   showProfileImage: boolean
+  /** Missing on older resumes: use the uploaded photo or the built-in avatar. */
+  profileImageStyle?: 'avatar' | 'initials'
+  /** Cartoon character preference only; not the person's gender. */
+  profileAvatarVariant?: 'male' | 'female'
+  profileImageBackground?: string
   showSectionIcons: boolean
+  /** Optional for backward compatibility with resumes saved before design controls existed. */
+  typographyScale?: 'small' | 'standard' | 'large'
+  lineHeightDensity?: 'compact' | 'balanced' | 'relaxed'
+  spacingDensity?: 'compact' | 'balanced' | 'spacious'
 }
 
 // ─── Resume Metadata ──────────────────────────────────────────────────────────
@@ -155,6 +168,25 @@ export interface ResumeMetadata {
   pageCount: number
   lastExportedAt?: string
   lastOpenedAt?: string
+}
+
+/** Semantic colors owned by a resume template. Missing values use the
+ * template's carefully chosen default, which keeps old saved resumes valid. */
+export interface TemplateColorOverrides {
+  accent?: string
+  sectionTitle?: string
+  sectionDescription?: string
+  sectionBorder?: string
+  sectionIcon?: string
+  sectionBackground?: string
+  primaryText?: string
+  secondaryText?: string
+  mutedText?: string
+  divider?: string
+  softBackground?: string
+  panelBackground?: string
+  panelText?: string
+  panelSecondaryText?: string
 }
 
 // ─── Root Resume ──────────────────────────────────────────────────────────────
@@ -170,6 +202,8 @@ export interface Resume {
   fontPresetId: string
   /** Hex accent color used when themeId === 'custom'. */
   customPrimaryColor?: string
+  /** Per-resume, semantic template color customizations. */
+  templateColors?: TemplateColorOverrides
   personalInfo: PersonalInfo
   summary: SummarySection
   experience: ExperienceSection[]
@@ -180,12 +214,19 @@ export interface Resume {
   customSections: CustomSection[]
   /** User-defined ordering of section blocks in the canvas. */
   sectionOrder: SectionType[]
+  /** Optional per-resume labels for built-in section headings. */
+  sectionTitles?: Partial<Record<SectionTitleKey, string>>
   /**
    * Per-section icon overrides for templates that draw section-header icons.
    * Keyed by SectionType, or `custom:<id>` so each custom section can carry
    * its own. Absent means "use the template's default for that section".
    */
   sectionIcons?: Record<string, IconName>
+  /**
+   * Per-resume typography and colour overrides, at the text-style and the
+   * individual-element level. See style.types.ts for the two tiers.
+   */
+  styleOverrides?: ResumeStyleOverrides
   settings: ResumeSettings
   metadata: ResumeMetadata
 }
@@ -212,6 +253,7 @@ export interface AppSettings {
   /** Singleton record — always 'global'. */
   id: 'global'
   themeId: string
+  customPrimaryColor?: string
   fontPresetId: string
   pageSize: 'A4' | 'LETTER'
   language: string

@@ -1,7 +1,8 @@
 import type { LayoutTree } from '@/shared/types/layout.types'
-import { ALL_TEMPLATES, templateRenderer } from '@/features/templates/registry/template.registry'
-import { createEmptyResume } from '@/features/resume/utils/resume.factory'
+import { getTemplateById, templateRenderer } from '@/features/templates/registry/template.registry'
+import { createSampleResume } from '@/features/resume/utils/resume.factory'
 import { useThemeStore } from '@/shared/stores/theme.store'
+import { TEMPLATE_PORTRAIT_ID } from './templatePortrait'
 
 const cache = new Map<string, LayoutTree>()
 
@@ -18,10 +19,15 @@ export function getTemplatePreviewTree(templateId: string): LayoutTree | null {
   const cached = cache.get(cacheKey)
   if (cached) return cached
 
-  const template = ALL_TEMPLATES.find((t) => t.id === templateId)
+  const template = getTemplateById(templateId)
   if (!template) return null
 
-  const tree = templateRenderer.render(createEmptyResume(templateId), template, theme, fontPreset)
+  const sample = createSampleResume(templateId)
+  if (template.exportRules.includeProfileImage) {
+    sample.personalInfo.profileImage = TEMPLATE_PORTRAIT_ID
+    sample.settings.showProfileImage = true
+  }
+  const tree = templateRenderer.render(sample, template, theme, fontPreset)
   cache.set(cacheKey, tree)
   return tree
 }

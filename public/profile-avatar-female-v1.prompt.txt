@@ -1,0 +1,5 @@
+Generation mode: built-in image_gen tool (imagegen skill).
+Reference image: public/profile-avatar-cartoon-v1.png (existing male cartoon avatar).
+Purpose: matching female option for the profile avatar character selector.
+
+Create a matching female counterpart to this fictional 3D cartoon profile avatar. Keep the same premium animated-character illustration style, soft rounded features, matte shading, violet crew-neck shirt, plain pale lavender background, centered front-facing head-and-shoulders framing, and square composition. The new character is a friendly smiling adult woman with shoulder-length dark wavy hair, warm skin tone, expressive simplified eyes, and no facial hair. Keep her whole head visible with comfortable padding for circular and arch portrait crops. One character only; no text, logos, accessories, scenery, or watermark. The supplied image is a style and framing reference; create a distinct fictional female character, not a real photographic person.

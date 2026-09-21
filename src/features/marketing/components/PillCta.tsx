@@ -8,7 +8,7 @@ interface PillCtaProps {
   to: string
   children: ReactNode
   className?: string
-  /** 'brand': vivid gradient pill for light backgrounds. 'inverted': white pill for dark/gradient backgrounds. */
+  /** Theme-aware primary action; white for an inverse treatment. */
   variant?: 'brand' | 'inverted'
 }
 
@@ -17,15 +17,16 @@ export function PillCta({ to, children, className, variant = 'brand' }: PillCtaP
   return (
     <Link
       to={to}
-      className={clsx(
-        styles.root,
-        isBrand ? [styles.brand, 'bg-gradient-brand'] : styles.inverted,
-        className
-      )}
+      className={clsx(styles.root, isBrand ? styles.brand : styles.inverted, className)}
     >
       {children}
-      <span className={clsx(styles.iconCircle, isBrand ? styles.iconCircleBrand : styles.iconCircleInverted)}>
-        <ArrowRight size={14} aria-hidden="true" />
+      <span
+        className={clsx(
+          styles.iconCircle,
+          isBrand ? styles.iconCircleBrand : styles.iconCircleInverted
+        )}
+      >
+        <ArrowRight size={17} aria-hidden="true" />
       </span>
     </Link>
   )

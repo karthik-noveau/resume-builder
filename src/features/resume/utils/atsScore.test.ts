@@ -1,17 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import { calculateAtsScore, scoreTemplate, scoreContent, TEMPLATE_MAX, CONTENT_MAX } from './atsScore'
-import { createEmptyResume } from './resume.factory'
+import { createSampleResume } from './resume.factory'
 import { ALL_TEMPLATES } from '@/features/templates/registry/template.registry'
 import type { Resume } from '@/shared/types/resume.types'
 
 const singleColumn = ALL_TEMPLATES.find((t) => t.layout === 'single-column')!
 
-/**
- * Synthetic rather than taken from the catalog: every shipped template is
- * single column by design, but the scorer still has to grade a two-column one
- * correctly — that penalty is the reason the catalog looks the way it does, so
- * it needs testing whether or not such a template is currently shipped.
- */
+/** Keep every property except the column structure identical for comparison. */
 const twoColumn = { ...singleColumn, id: 'two-column-fixture', layout: 'two-column' as const }
 
 describe('scoreTemplate', () => {
@@ -40,7 +35,7 @@ describe('scoreTemplate', () => {
 })
 
 describe('scoreContent', () => {
-  const full = createEmptyResume(singleColumn.id)
+  const full = createSampleResume(singleColumn.id)
 
   it('scores the seeded resume highly', () => {
     expect(scoreContent(full).score).toBe(CONTENT_MAX)
@@ -71,6 +66,26 @@ describe('scoreContent', () => {
     expect(scoreContent(empty).score).toBe(0)
   })
 
+  it('does not count populated sections excluded from the rendered resume', () => {
+    expect(scoreContent({ ...full, sectionOrder: [] }).score).toBe(10)
+    expect(scoreContent({
+      ...full,
+      summary: { ...full.summary, visible: false },
+      experience: full.experience.map((entry) => ({ ...entry, visible: false })),
+      skills: full.skills.map((entry) => ({ ...entry, visible: false })),
+      education: full.education.map((entry) => ({ ...entry, visible: false })),
+    }).score).toBe(10)
+  })
+
+  it('does not reward whitespace-only contact details, roles, or skill names', () => {
+    expect(scoreContent({
+      ...full,
+      personalInfo: { ...full.personalInfo, fullName: ' ', email: ' ', phone: ' ', location: ' ' },
+      experience: full.experience.map((entry) => ({ ...entry, role: ' ', company: ' ', startDate: ' ', description: [] })),
+      skills: full.skills.map((entry) => ({ ...entry, skills: [{ id: 'blank', name: ' ' }] })),
+    }).score).toBe(10)
+  })
+
   it('explains every deduction', () => {
     const empty: Resume = { ...full, experience: [], education: [], skills: [] }
     for (const f of scoreContent(empty).factors) {
@@ -88,7 +103,7 @@ describe('calculateAtsScore', () => {
   })
 
   it('combines both halves when a resume is supplied', () => {
-    const resume = createEmptyResume(singleColumn.id)
+    const resume = createSampleResume(singleColumn.id)
     const r = calculateAtsScore(singleColumn, resume)
     expect(r.contentScore).not.toBeNull()
     expect(r.score).toBe(r.templateScore + (r.contentScore ?? 0))
@@ -96,15 +111,23 @@ describe('calculateAtsScore', () => {
   })
 
   it('gives the same resume a different score per template', () => {
-    const resume = createEmptyResume(singleColumn.id)
+    const resume = createSampleResume(singleColumn.id)
     expect(calculateAtsScore(singleColumn, resume).score)
       .not.toBe(calculateAtsScore(twoColumn, resume).score)
   })
 
   it('never exceeds 100', () => {
-    const resume = createEmptyResume(singleColumn.id)
+    const resume = createSampleResume(singleColumn.id)
     for (const tpl of ALL_TEMPLATES) {
       expect(calculateAtsScore(tpl, resume).score).toBeLessThanOrEqual(100)
     }
+  })
+
+  it('scores the actual profile-image setting instead of the template default', () => {
+    const withPhoto = { ...singleColumn, exportRules: { ...singleColumn.exportRules, includeProfileImage: true } }
+    const resume = createSampleResume(singleColumn.id)
+    expect(calculateAtsScore(withPhoto, resume).score).toBe(91)
+    expect(calculateAtsScore(withPhoto, { ...resume, settings: { ...resume.settings, showProfileImage: false } }).score).toBe(100)
+    expect(calculateAtsScore({ ...withPhoto, exportRules: { ...withPhoto.exportRules, includeProfileImage: false } }, resume).score).toBe(100)
   })
 })

@@ -1,11 +1,11 @@
 .group {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-0-5);
 }
 
 .button {
-  padding: 6px;
+  padding: var(--space-1-5);
   border-radius: var(--radius-small);
   color: rgb(var(--color-text-secondary));
   transition: color var(--duration-fast), background-color var(--duration-fast);
@@ -24,8 +24,8 @@
 }
 
 .zoomLabel {
-  padding: 4px 8px;
-  font-size: 0.75rem;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-sm);
   font-family: ui-monospace, monospace;
   color: rgb(var(--color-text-secondary));
   border-radius: var(--radius-small);

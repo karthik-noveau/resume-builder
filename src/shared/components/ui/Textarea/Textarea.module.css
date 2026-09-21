@@ -1,20 +1,26 @@
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--field-gap);
 }
 
+/* Quieter than the value it names: a step down in size and ink, so the eye
+   lands on the content first and the label is there when looked for. */
 .label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: rgb(var(--color-text-primary));
+  font-size: var(--field-label-size);
+  font-weight: var(--field-label-weight);
+  color: rgb(var(--color-text-secondary));
+}
+
+.required {
+  color: rgb(var(--color-error));
 }
 
 .footer {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .messages {
@@ -22,17 +28,17 @@
 }
 
 .error {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   color: rgb(var(--color-error));
 }
 
 .helper {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   color: rgb(var(--color-text-muted));
 }
 
 .count {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   color: rgb(var(--color-text-muted));
   flex-shrink: 0;
 }

@@ -56,8 +56,9 @@ export function SectionList({
   onReorderBlocks,
   onToggleVisibility,
 }: SectionListProps) {
+  const visibleSectionOrder = resume.sectionOrder.filter((type) => type !== 'custom')
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
@@ -78,9 +79,9 @@ export function SectionList({
       modifiers={[restrictToVerticalAxis]}
       onDragEnd={handleDragEnd}
     >
-      <SortableContext items={resume.sectionOrder} strategy={verticalListSortingStrategy}>
+      <SortableContext items={visibleSectionOrder} strategy={verticalListSortingStrategy}>
         <ul aria-label="Resume sections" className={styles.list}>
-          {resume.sectionOrder.map((type) => (
+          {visibleSectionOrder.map((type) => (
             <li key={type}>
               <SectionListItem
                 id={type}

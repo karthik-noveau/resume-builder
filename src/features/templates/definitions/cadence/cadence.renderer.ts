@@ -3,13 +3,8 @@ import { registerRenderer } from '../../engine/template.renderer'
 
 registerRenderer('cadence', createTemplateRenderer({
   id: 'cadence',
-  accent: '#2b3445',
   headingFamily: 'Inter',
   bodyFamily: 'Inter',
-  ink: '#1f2937',
-  muted: '#5b6472',
-  rule: '#dfe3e8',
-  band: '#f1f2f4',
   marginMm: 15,
   header: 'band-photo',
   body: 'sidebar-left',

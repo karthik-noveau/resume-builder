@@ -6,7 +6,9 @@
 .scrollArea {
   height: 100%;
   overflow: auto;
-  background-color: rgb(var(--color-background));
+  background-color: rgb(var(--color-canvas));
+  background-image: radial-gradient(rgb(var(--color-primary) / 15%) 0.7px, transparent 0.7px);
+  background-size: 20px 20px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -20,4 +22,193 @@
 
 .placeholder {
   box-shadow: var(--shadow-level-2);
+}
+
+/* A hover here sits inside a block that is already showing its own state, so it
+   stays a whisper: a wash and a hairline, no drop shadow. Three cues stacked on
+   one line of text was what made the canvas feel like a debug view. */
+.editableLeaf {
+  position: relative;
+  /* Inherits the node's grab. A text caret here would promise that clicking
+     places one, which it no longer does — editing is a double click. */
+  cursor: inherit;
+  border-radius: 4px;
+  outline: 1px solid transparent;
+  outline-offset: 2px;
+  transition:
+    background-color var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1),
+    outline-color var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.editableLeaf:hover {
+  z-index: 20;
+  outline-color: rgb(var(--color-primary) / 20%);
+  background-color: rgb(var(--color-primary) / 5%);
+}
+
+/* Keyboard focus is a commitment, not a passing cursor, so it reads closer to
+   the selected state than to hover. */
+.editableLeaf:focus-visible {
+  z-index: 20;
+  outline-color: rgb(var(--color-primary) / 55%);
+  background-color: rgb(var(--color-primary) / 6%);
+}
+
+.editableHint {
+  position: absolute;
+  top: -23px;
+  right: 0;
+  z-index: 30;
+  padding: 3px 7px;
+  border: 1px solid rgb(var(--color-primary) / 16%);
+  border-radius: var(--radius-pill);
+  background: rgb(var(--color-surface) / 96%);
+  color: rgb(var(--color-primary));
+  box-shadow: 0 2px 8px rgb(15 23 42 / 8%);
+  backdrop-filter: blur(6px);
+  font-family: Inter, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(3px) scale(0.96);
+  transform-origin: bottom right;
+  transition: opacity var(--duration-fast) ease, transform var(--duration-fast) ease;
+  white-space: nowrap;
+}
+
+.editableLeaf:hover .editableHint,
+.editableLeaf:focus-visible .editableHint {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Keep the template's measured title width intact. Reserving inline space for
+   editor chrome made short headings wrap and invalidated the renderer's layout
+   measurements. The affordance floats above the title only on interaction. */
+.editableSectionTitle {
+  box-sizing: border-box;
+}
+
+.editableSectionTitle .editableHint {
+  top: -23px;
+  right: 0;
+  padding: 3px 7px;
+  opacity: 0;
+  transform: translateY(3px) scale(0.96);
+}
+
+.editableSectionTitle:hover .editableHint,
+.editableSectionTitle:focus-visible .editableHint {
+  transform: translateY(0) scale(1);
+}
+
+/* The only ring on screen while typing — the enclosing node stands its own down
+   (see editingKey). Radius and offset match the node's state exactly, so the
+   shape does not shift as editing opens and closes. */
+.inlineEditor {
+  position: relative;
+  z-index: 40;
+  min-height: 100%;
+  padding: 1px 2px;
+  margin: -1px -2px;
+  border-radius: 5px;
+  outline: 1.5px solid rgb(var(--color-primary) / 85%);
+  outline-offset: 3px;
+  background: #ffffff;
+  /* A halo that starts where the ring ends: 1.5px stroke at 3px offset means
+     the ring's outer edge is 4.5px out, so the glow begins there instead of
+     sitting under the stroke and reading as a second, paler border. */
+  box-shadow: 0 0 0 4.5px rgb(var(--color-primary) / 10%), 0 4px 14px rgb(15 23 42 / 8%);
+  caret-color: rgb(var(--color-primary));
+  cursor: text;
+}
+
+.panelLinkedLeaf,
+.panelLinkedIcon,
+.panelLinkedImage {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  outline: 1px solid transparent;
+  outline-offset: 2px;
+  background: transparent;
+  color: inherit;
+  /* Draggable like everything else on the canvas. */
+  cursor: inherit;
+  text-align: inherit;
+  transition: background-color var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1), outline-color var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.panelLinkedIcon {
+  width: 100%;
+  height: 100%;
+}
+
+.panelLinkedImage {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.panelLinkedLeaf:hover,
+.panelLinkedIcon:hover,
+.panelLinkedImage:hover {
+  z-index: 20;
+  outline-color: rgb(var(--color-primary) / 20%);
+  background-color: rgb(var(--color-primary) / 5%);
+}
+
+.panelLinkedLeaf:focus-visible,
+.panelLinkedIcon:focus-visible,
+.panelLinkedImage:focus-visible {
+  z-index: 20;
+  outline-color: rgb(var(--color-primary) / 55%);
+  background-color: rgb(var(--color-primary) / 6%);
+}
+
+.panelLinkedHint {
+  position: absolute;
+  top: -23px;
+  right: 0;
+  z-index: 30;
+  padding: 3px 7px;
+  border: 1px solid rgb(var(--color-primary) / 16%);
+  border-radius: var(--radius-pill);
+  background: rgb(var(--color-surface) / 96%);
+  color: rgb(var(--color-primary));
+  box-shadow: 0 2px 8px rgb(15 23 42 / 8%);
+  backdrop-filter: blur(6px);
+  font-family: Inter, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(3px) scale(0.96);
+  transform-origin: bottom right;
+  transition: opacity var(--duration-fast) ease, transform var(--duration-fast) ease;
+  white-space: nowrap;
+}
+
+.panelLinkedLeaf:hover .panelLinkedHint,
+.panelLinkedLeaf:focus-visible .panelLinkedHint {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editableLeaf,
+  .editableHint,
+  .panelLinkedLeaf,
+  .panelLinkedIcon,
+  .panelLinkedImage,
+  .panelLinkedHint {
+    transition: none;
+  }
 }

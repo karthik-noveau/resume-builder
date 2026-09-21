@@ -15,7 +15,7 @@
   left: -8rem;
   width: 28rem;
   height: 28rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   background-color: rgb(37 99 235 / 10%);
   filter: blur(64px);
   pointer-events: none;
@@ -27,7 +27,7 @@
   right: -8rem;
   width: 28rem;
   height: 28rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   background-color: rgb(124 58 237 / 10%);
   filter: blur(64px);
   pointer-events: none;
@@ -60,7 +60,7 @@
 .description {
   margin-top: 8px;
   color: rgb(var(--color-text-secondary));
-  font-size: 0.875rem;
+  font-size: var(--text-base);
 }
 
 .cta {
@@ -69,8 +69,8 @@
   align-items: center;
   gap: 12px;
   padding: 10px 8px 10px 24px;
-  border-radius: 9999px;
-  font-size: 0.875rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-base);
   font-weight: 600;
   color: #fff;
   box-shadow: var(--shadow-glow);
@@ -88,7 +88,7 @@
 .ctaIconWrap {
   width: 32px;
   height: 32px;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   background-color: #fff;
   color: rgb(var(--color-primary));
   display: flex;

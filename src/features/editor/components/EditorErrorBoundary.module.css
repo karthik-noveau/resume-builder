@@ -14,22 +14,22 @@
 }
 
 .content > * + * {
-  margin-top: 8px;
+  margin-top: var(--space-2);
 }
 
 .title {
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   font-weight: 500;
   color: rgb(var(--color-text-primary));
 }
 
 .subtitle {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   color: rgb(var(--color-text-muted));
 }
 
 .retryButton {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   color: rgb(var(--color-primary));
   background: none;
   border: none;

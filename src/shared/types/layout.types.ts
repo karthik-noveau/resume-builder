@@ -1,5 +1,6 @@
 import type { FontFamily, FontWeight } from './font.types'
-import type { SectionType } from './resume.types'
+import type { StyleRole, TextTransform } from './style.types'
+import type { SectionTitleKey, SectionType } from './resume.types'
 
 export type LayoutNodeType =
   | 'page'
@@ -117,6 +118,18 @@ export type IconName =
 
 /** The section types that render as a list of ided entries with per-entry canvas nodes. */
 export type EntrySectionType = 'experience' | 'education' | 'projects' | 'certifications'
+export type ClipShape = 'circle' | 'rounded' | 'arch'
+
+export type PersonalInfoTextField =
+  | 'fullName'
+  | 'headline'
+  | 'email'
+  | 'phone'
+  | 'location'
+  | 'website'
+  | 'linkedin'
+  | 'github'
+  | 'portfolio'
 
 /**
  * Field-provenance tag enabling click-to-edit on canvas and entry-level
@@ -125,8 +138,10 @@ export type EntrySectionType = 'experience' | 'education' | 'projects' | 'certif
  * (pdf.generator.ts switches on `type` only).
  */
 export type EditRef =
-  | { kind: 'personal-info'; field: 'fullName' | 'headline' }
+  | { kind: 'personal-info'; field: PersonalInfoTextField }
   | { kind: 'summary' }
+  | { kind: 'section-title'; sectionType: SectionTitleKey; defaultValue: string }
+  | { kind: 'custom-section-title'; sectionId: string; defaultValue: string }
   | { kind: 'entry'; sectionType: EntrySectionType; entryId: string }
   | { kind: 'entry-field'; sectionType: EntrySectionType; entryId: string; field: string }
   | { kind: 'entry-list-item'; sectionType: 'experience'; entryId: string; field: 'description'; index: number }
@@ -141,6 +156,12 @@ export interface LayoutStyles {
   letterSpacing?: number
   textAlign: 'left' | 'center' | 'right'
   textDecoration?: 'none' | 'underline'
+  /**
+   * Applied to `content` by the style-override pass rather than at paint time,
+   * so the PDF exporter and the canvas agree without either knowing about it.
+   * Kept on the node so the inspector can show what is currently set.
+   */
+  textTransform?: TextTransform
   /** Set by metadataStyle for italic dates/locations, and read by the canvas. */
   fontStyle?: 'normal' | 'italic'
   paddingTopPt?: number
@@ -167,7 +188,7 @@ export interface LayoutNode {
   /** References ImageAsset.id stored in IndexedDB. */
   imageId?: string
   /** For type==='image': crop shape applied on top of the raster image. */
-  clipShape?: 'circle'
+  clipShape?: ClipShape
   /** For type==='icon': which glyph to draw, colored via styles.color. */
   iconName?: IconName
   /**
@@ -179,6 +200,20 @@ export interface LayoutNode {
   rotationDeg?: number
   /** Set when this node maps back to an editable Resume field or entry. */
   editRef?: EditRef
+  /** Opens a properties-panel destination without enabling inline editing. */
+  panelTarget?: 'personal-info'
+  /**
+   * Stable identity for per-element styling, assigned by the style-override
+   * pass. Unlike `id` — a render-order counter that shifts whenever a bullet is
+   * added — this is derived from the node's semantic position, so an override
+   * survives edits elsewhere on the resume. Absent on nodes with no addressable
+   * position (e.g. page decoration).
+   */
+  styleKey?: string
+  /** Which text style this node inherits from. Assigned by the same pass. */
+  styleRole?: StyleRole
+  /** Human-readable name for the element, shown in the style inspector. */
+  styleLabel?: string
 }
 
 export interface LayoutPage {

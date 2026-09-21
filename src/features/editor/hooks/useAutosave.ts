@@ -6,11 +6,13 @@ const DEBOUNCE_MS = 1000
 export function useAutosave() {
   const isDirty = useResumeStore((s) => s.isDirty)
   const isSaving = useResumeStore((s) => s.isSaving)
+  const error = useResumeStore((s) => s.error)
+  const activeResume = useResumeStore((s) => s.activeResume)
   const saveActiveResume = useResumeStore((s) => s.saveActiveResume)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    if (!isDirty || isSaving) return
+    if (!isDirty || isSaving || error) return
 
     if (timerRef.current) clearTimeout(timerRef.current)
 
@@ -21,7 +23,7 @@ export function useAutosave() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [isDirty, isSaving, saveActiveResume])
+  }, [isDirty, isSaving, error, activeResume, saveActiveResume])
 
   /**
    * Writes out any edit still sitting inside the debounce window.
@@ -36,8 +38,8 @@ export function useAutosave() {
    */
   useEffect(() => {
     const flush = () => {
-      const { isDirty: dirty, isSaving: saving, saveActiveResume: save } = useResumeStore.getState()
-      if (dirty && !saving) void save()
+      const { isDirty: dirty, saveActiveResume: save } = useResumeStore.getState()
+      if (dirty) void save()
     }
 
     const onVisibilityChange = () => {
@@ -46,10 +48,18 @@ export function useAutosave() {
 
     document.addEventListener('visibilitychange', onVisibilityChange)
     window.addEventListener('pagehide', flush)
+    const beforeUnload = (event: BeforeUnloadEvent) => {
+      if (!useResumeStore.getState().isDirty) return
+      flush()
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    window.addEventListener('beforeunload', beforeUnload)
 
     return () => {
       document.removeEventListener('visibilitychange', onVisibilityChange)
       window.removeEventListener('pagehide', flush)
+      window.removeEventListener('beforeunload', beforeUnload)
       // Unmount (in-app navigation) — the one case we can always complete.
       flush()
     }

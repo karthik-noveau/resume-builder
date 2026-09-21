@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { PanelLeft, PanelRight } from 'lucide-react'
 import { Drawer } from '@/shared/components/ui/Drawer/Drawer'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
@@ -10,6 +10,8 @@ interface EditorLayoutProps {
   sidebar: ReactNode
   canvas: ReactNode
   propertiesPanel: ReactNode
+  tourOpen?: boolean
+  propertiesRequest?: string
 }
 
 /**
@@ -18,13 +20,23 @@ interface EditorLayoutProps {
  * (toggled by floating buttons) instead of fixed-width columns — there isn't
  * room for a 280px + flexible + 350px layout under ~1024px.
  */
-export function EditorLayout({ toolbar, sidebar, canvas, propertiesPanel }: EditorLayoutProps) {
+export function EditorLayout({ toolbar, sidebar, canvas, propertiesPanel, tourOpen = false, propertiesRequest }: EditorLayoutProps) {
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [mobilePropertiesOpen, setMobilePropertiesOpen] = useState(false)
+  const previousRequest = useRef(propertiesRequest)
+
+  useEffect(() => {
+    if (propertiesRequest === previousRequest.current) return
+    previousRequest.current = propertiesRequest
+    if (!isDesktop && !tourOpen) {
+      setMobileSidebarOpen(false)
+      setMobilePropertiesOpen(true)
+    }
+  }, [propertiesRequest, isDesktop, tourOpen])
 
   return (
-    <div className={styles.root}>
+    <div className={styles.root} inert={tourOpen}>
       {/* Toolbar — 64px */}
       <header className={styles.header}>
         {toolbar}
@@ -63,6 +75,7 @@ export function EditorLayout({ toolbar, sidebar, canvas, propertiesPanel }: Edit
               type="button"
               onClick={() => setMobileSidebarOpen(true)}
               aria-label="Open sections panel"
+              data-editor-tour="sections-toggle"
               className={clsx(styles.mobileToggle, styles.mobileToggleLeft)}
             >
               <PanelLeft size={18} aria-hidden="true" />
@@ -71,6 +84,7 @@ export function EditorLayout({ toolbar, sidebar, canvas, propertiesPanel }: Edit
               type="button"
               onClick={() => setMobilePropertiesOpen(true)}
               aria-label="Open properties panel"
+              data-editor-tour="properties-toggle"
               className={clsx(styles.mobileToggle, styles.mobileToggleRight)}
             >
               <PanelRight size={18} aria-hidden="true" />
@@ -82,6 +96,7 @@ export function EditorLayout({ toolbar, sidebar, canvas, propertiesPanel }: Edit
               position="left"
               title="Sections"
               width="280px"
+              flush
             >
               {sidebar}
             </Drawer>
@@ -90,7 +105,8 @@ export function EditorLayout({ toolbar, sidebar, canvas, propertiesPanel }: Edit
               onClose={() => setMobilePropertiesOpen(false)}
               position="right"
               title="Properties"
-              width="320px"
+              width="384px"
+              flush
             >
               {propertiesPanel}
             </Drawer>

@@ -1,66 +1,51 @@
-import { motion } from 'framer-motion'
-import { LayoutTemplate, PenLine, Download } from 'lucide-react'
-import { fadeUp, staggerContainer, viewportOnce } from './motion'
+import { ArrowUpRight } from 'lucide-react'
+import { Link } from 'react-router'
 import styles from './HowItWorks.module.css'
 
 const STEPS = [
   {
     number: '01',
-    Icon: LayoutTemplate,
-    title: 'Pick a template',
-    description: 'Choose from templates built for different roles and experience levels.',
+    title: 'Choose your template.',
+    description: 'Pick a design that speaks to you. Classic, creative, or somewhere in between.',
   },
   {
     number: '02',
-    Icon: PenLine,
-    title: 'Fill in your details',
-    description: 'Add your experience, education, and skills — guided step-by-step, or free-form on the canvas.',
+    title: 'Add your experience.',
+    description:
+      'Add your experience with a little guidance. Refine every detail in the live editor.',
   },
   {
     number: '03',
-    Icon: Download,
-    title: 'Export your PDF',
-    description: 'Download a ready-to-send PDF in seconds.',
+    title: 'Download. Apply. Repeat.',
+    description: 'Download your finished PDF and send it out into the world. You’ve got this.',
   },
 ]
 
 export function HowItWorks() {
   return (
-    <section className={styles.section}>
-      <motion.div
-        className={styles.header}
-        initial="hidden"
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={fadeUp}
-        transition={{ duration: 0.4 }}
-      >
-        <span className={styles.eyebrow}>How it works</span>
-        <h2 className={styles.heading}>
-          Three steps to a finished resume
+    <section id="how-it-works" className={styles.section} aria-labelledby="steps-heading">
+      <div className={styles.header}>
+        <p className={styles.eyebrow}>FROM START TO SEND</p>
+        <h2 id="steps-heading">
+          Three steps. <em>You’re ready.</em>
         </h2>
-      </motion.div>
-
-      <motion.div
-        className={styles.stepsGrid}
-        initial="hidden"
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-      >
-        <div className={styles.connector} aria-hidden="true" />
-
-        {STEPS.map(({ number, Icon, title, description }) => (
-          <motion.div key={number} variants={fadeUp} transition={{ duration: 0.4 }} className={styles.step}>
-            <div className={styles.stepIconWrap}>
-              <Icon size={22} className={styles.iconPrimary} aria-hidden="true" />
-            </div>
-            <span className={styles.stepNumber}>{number}</span>
-            <h3 className={styles.stepTitle}>{title}</h3>
-            <p className={styles.stepDescription}>{description}</p>
-          </motion.div>
+        <p>A straightforward process for a resume that does you justice.</p>
+      </div>
+      <ol className={styles.steps}>
+        {STEPS.map(({ number, title, description }) => (
+          <li key={number}>
+            <span className={styles.number}>
+              {number}
+              <span aria-hidden="true" />
+            </span>
+            <h3>{title}</h3>
+            <p>{description}</p>
+          </li>
         ))}
-      </motion.div>
+      </ol>
+      <Link to="/templates?create=true" className={styles.startLink}>
+        Create your resume <ArrowUpRight size={16} aria-hidden="true" />
+      </Link>
     </section>
   )
 }

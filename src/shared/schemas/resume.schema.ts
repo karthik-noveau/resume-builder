@@ -56,6 +56,34 @@ const resumeMetadataSchema = z.object({
   lastOpenedAt: z.string().optional(),
 })
 
+/** A hex colour as the colour pickers emit it. */
+const hexColor = z.string().regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/)
+
+/**
+ * One style patch, at either tier. Bounds are the inspector's own limits:
+ * anything outside them came from a hand-edited or corrupted record, and
+ * letting it through would produce a resume that cannot be laid out.
+ */
+const elementStyleSchema = z.object({
+  fontFamily: z.enum(['Inter', 'SourceSerifPro', 'Manrope', 'IBMPlexSans']).optional(),
+  fontSize: z.number().min(4).max(96).optional(),
+  fontWeight: z.union([
+    z.literal(400), z.literal(500), z.literal(600), z.literal(700), z.literal(800),
+  ]).optional(),
+  color: hexColor.optional(),
+  backgroundColor: hexColor.optional(),
+  lineHeight: z.number().min(0.6).max(4).optional(),
+  letterSpacing: z.number().min(-0.2).max(1).optional(),
+  textAlign: z.enum(['left', 'center', 'right']).optional(),
+  textTransform: z.enum(['none', 'uppercase', 'lowercase', 'capitalize']).optional(),
+  fontStyle: z.enum(['normal', 'italic']).optional(),
+  textDecoration: z.enum(['none', 'underline']).optional(),
+  paddingTopPt: z.number().min(0).max(120).optional(),
+  paddingRightPt: z.number().min(0).max(120).optional(),
+  paddingBottomPt: z.number().min(0).max(120).optional(),
+  paddingLeftPt: z.number().min(0).max(120).optional(),
+})
+
 export const resumeSchema = z.object({
   id: z.string().min(1),
   schemaVersion: z.literal(1),
@@ -66,6 +94,22 @@ export const resumeSchema = z.object({
   themeId: z.string().min(1),
   fontPresetId: z.string().min(1),
   customPrimaryColor: z.string().optional(),
+  templateColors: z.object({
+    accent: z.string().optional(),
+    sectionTitle: z.string().optional(),
+    sectionDescription: z.string().optional(),
+    sectionBorder: z.string().optional(),
+    sectionIcon: z.string().optional(),
+    sectionBackground: z.string().optional(),
+    primaryText: z.string().optional(),
+    secondaryText: z.string().optional(),
+    mutedText: z.string().optional(),
+    divider: z.string().optional(),
+    softBackground: z.string().optional(),
+    panelBackground: z.string().optional(),
+    panelText: z.string().optional(),
+    panelSecondaryText: z.string().optional(),
+  }).optional(),
   personalInfo: personalInfoSchema,
   summary: summarySectionSchema,
   experience: z.array(experienceSectionSchema),
@@ -75,9 +119,23 @@ export const resumeSchema = z.object({
   certifications: z.array(certificationSectionSchema),
   customSections: z.array(customSectionSchema),
   sectionOrder: z.array(sectionTypeSchema),
+  sectionTitles: z.object({
+    summary: z.string().min(1).max(100).optional(),
+    experience: z.string().min(1).max(100).optional(),
+    education: z.string().min(1).max(100).optional(),
+    skills: z.string().min(1).max(100).optional(),
+    projects: z.string().min(1).max(100).optional(),
+    certifications: z.string().min(1).max(100).optional(),
+    contact: z.string().min(1).max(100).optional(),
+  }).optional(),
   // Keyed by SectionType or `custom:<id>`; values validated against the icon
   // library so a stale/unknown name can never reach the renderers.
   sectionIcons: z.record(z.string(), z.string().refine(isSelectableIcon)).optional(),
+  styleOverrides: z.object({
+    roles: z.record(z.string(), elementStyleSchema).optional(),
+    elements: z.record(z.string(), elementStyleSchema).optional(),
+    page: z.object({ backgroundColor: hexColor.optional() }).optional(),
+  }).optional(),
   settings: resumeSettingsSchema,
   metadata: resumeMetadataSchema,
 })

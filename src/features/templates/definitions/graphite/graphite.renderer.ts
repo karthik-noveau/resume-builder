@@ -3,17 +3,14 @@ import { registerRenderer } from '../../engine/template.renderer'
 
 registerRenderer('graphite', createTemplateRenderer({
   id: 'graphite',
-  accent: '#404040',
   headingFamily: 'IBMPlexSans',
   bodyFamily: 'IBMPlexSans',
-  ink: '#171717',
-  muted: '#404040',
-  rule: '#d4d4d4',
-  band: '#f5f5f5',
-  marginMm: 15,
+  defaultScale: { name: 30, headline: 11.5, sectionTitle: 9.5, entryTitle: 11, body: 10, small: 9, caption: 8 },
+  defaultLineHeight: { heading: 1.2, body: 1.45 },
+  marginMm: 18,
   header: 'monogram',
-  sectionHeader: 'boxed',
-  density: 'compact',
+  sectionHeader: 'plain',
+  density: 'regular',
   uppercaseSectionTitles: true,
   titles: { summary: 'About Me', experience: 'Experience' },
 }))

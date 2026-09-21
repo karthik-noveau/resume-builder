@@ -1,25 +1,35 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .skillsSection {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .skillsLabel {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: rgb(var(--color-text-secondary));
+}
+
+.required,
+.error {
+  color: rgb(var(--color-error));
+  font-size: var(--text-sm);
+}
+
+.skillInput[aria-invalid='true'] {
+  border-color: rgb(var(--color-error));
 }
 
 .skillRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .skillInput {
@@ -30,7 +40,7 @@
   border: 1px solid rgb(var(--color-divider));
   background-color: rgb(var(--color-surface));
   padding: 0 12px;
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   color: rgb(var(--color-text-primary));
 }
 
@@ -43,14 +53,14 @@
 .levelGroup {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-0-5);
   flex-shrink: 0;
 }
 
 .levelDot {
   width: 14px;
   height: 14px;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgb(var(--color-divider));
   background-color: transparent;
   transition: background-color var(--duration-fast), border-color var(--duration-fast);
@@ -64,7 +74,7 @@
 }
 
 .removeButton {
-  padding: 6px;
+  padding: var(--space-1-5);
   border-radius: var(--radius-small);
   color: rgb(var(--color-text-muted));
   transition: color var(--duration-fast), background-color var(--duration-fast);
@@ -84,5 +94,5 @@
 }
 
 .addIcon {
-  margin-right: 4px;
+  margin-right: var(--space-1);
 }

@@ -1,33 +1,34 @@
 import { Link } from 'react-router'
-import { Sparkles } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
+import { BrandLogo } from '@/shared/components/BrandMark/BrandMark'
 import styles from './SiteFooter.module.css'
-
-const FOOTER_LINKS = [
-  { to: '/app', label: 'My Resumes' },
-  { to: '/templates', label: 'Templates' },
-  { to: '/settings', label: 'Settings' },
-]
 
 export function SiteFooter() {
   return (
     <footer className={styles.footer}>
-      <div className={styles.inner}>
+      <div className={styles.main}>
         <div className={styles.brand}>
-          <Sparkles size={16} className={styles.iconPrimary} aria-hidden="true" />
-          Resume Studio
+          <Link to="/" aria-label="Resume Studio home">
+            <BrandLogo />
+          </Link>
+          <p>Built for your next move.</p>
         </div>
         <nav className={styles.nav} aria-label="Footer">
-          {FOOTER_LINKS.map(({ to, label }) => (
-            <Link
-              key={to}
-              to={to}
-              className={styles.navLink}
-            >
-              {label}
-            </Link>
-          ))}
+          <Link to="/templates">
+            The templates <ArrowUpRight size={12} aria-hidden="true" />
+          </Link>
+          <Link to="/app">
+            My resumes <ArrowUpRight size={12} aria-hidden="true" />
+          </Link>
+          <Link to="/settings">
+            Settings <ArrowUpRight size={12} aria-hidden="true" />
+          </Link>
         </nav>
-        <p className={styles.tagline}>Your resumes stay on your device.</p>
+      </div>
+      <div className={styles.bottom}>
+        <p>© {new Date().getFullYear()} Resume Studio</p>
+        <span>Create confidently. Keep your data.</span>
+        <a href="#top">Back to top ↑</a>
       </div>
     </footer>
   )

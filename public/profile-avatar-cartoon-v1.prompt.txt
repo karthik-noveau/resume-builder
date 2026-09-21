@@ -1,0 +1,4 @@
+Generation mode: built-in image_gen tool (imagegen skill).
+Purpose: replace the realistic default profile/catalog portrait; user uploads stay unchanged.
+
+Create one premium 3D cartoon profile avatar for a resume-builder app. A friendly smiling fictional adult character, head and shoulders, short dark wavy hair, simple violet shirt, soft rounded illustrated features and matte clay-like shading. Clearly a stylized animated character. Centered front-facing composition on a plain pale lavender background, with the whole head visible and enough padding for circular cropping. Square image, clean silhouette, no words, no logos, no extra objects.

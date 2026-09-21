@@ -1,7 +1,8 @@
 .root {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: var(--app-viewport-height, 100dvh);
+  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
   overflow: hidden;
   background-color: rgb(var(--color-background));
 }
@@ -17,22 +18,22 @@
 
 /* Top bar */
 .header {
-  height: 64px;
+  height: calc(64px + env(safe-area-inset-top));
   flex-shrink: 0;
   border-bottom: 1px solid rgb(var(--color-divider));
   background-color: rgb(var(--color-surface));
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  gap: 16px;
+  padding: env(safe-area-inset-top) 16px 0;
+  gap: var(--space-4);
   z-index: 20;
 }
 
 .headerLeft {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   min-width: 0;
 }
 
@@ -62,7 +63,7 @@
 }
 
 .backLink {
-  padding: 6px;
+  padding: var(--space-1-5);
   border-radius: var(--radius-small);
   color: rgb(var(--color-text-muted));
   transition: color var(--duration-fast), background-color var(--duration-fast);
@@ -79,7 +80,7 @@
 }
 
 .title {
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   font-weight: 600;
   color: rgb(var(--color-text-primary));
   white-space: nowrap;
@@ -101,10 +102,10 @@
 .fullEditorLink {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
+  gap: var(--space-2);
+  padding: var(--space-1-5) var(--space-3);
   border-radius: var(--radius-large);
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   font-weight: 600;
   border: 1px solid rgb(var(--color-divider));
   color: rgb(var(--color-text-secondary));
@@ -122,6 +123,11 @@
   outline: 2px solid rgb(var(--color-primary));
 }
 
+.fullEditorLink:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 /* Overall progress bar */
 .progressTrack {
   height: 4px;
@@ -137,6 +143,7 @@
 
 /* Main area */
 .main {
+  min-height: 0;
   position: relative;
   flex: 1 1 auto;
   display: flex;
@@ -145,7 +152,7 @@
 }
 
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) and (min-height: 600px) {
   .main {
     flex-direction: row;
   }
@@ -164,8 +171,8 @@
   left: -160px;
   width: 32rem;
   height: 32rem;
-  border-radius: 9999px;
-  background-color: rgb(var(--color-primary) / 6%);
+  border-radius: var(--radius-pill);
+  background-color: rgb(var(--color-primary) / 10%);
   filter: blur(64px);
 }
 
@@ -175,13 +182,15 @@
   right: -160px;
   width: 32rem;
   height: 32rem;
-  border-radius: 9999px;
-  background-color: rgb(var(--color-accent) / 6%);
+  border-radius: var(--radius-pill);
+  background-color: rgb(var(--color-accent) / 10%);
   filter: blur(64px);
 }
 
 /* Stepper (mobile/tablet) */
 .mobileStepper {
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
   position: relative;
   z-index: 10;
   flex-shrink: 0;
@@ -193,18 +202,18 @@
 .mobileStepperList {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 10px 12px;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-3);
   min-width: max-content;
 }
 
 .mobileStepButton {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: 9999px;
-  font-size: 0.75rem;
+  gap: var(--space-1-5);
+  padding: var(--space-1-5) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
   white-space: nowrap;
   transition: color var(--duration-fast), background-color var(--duration-fast);
   color: rgb(var(--color-text-secondary));
@@ -233,8 +242,8 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  border-radius: 9999px;
-  font-size: 0.625rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-2xs);
   font-weight: 600;
   flex-shrink: 0;
   background-color: rgb(var(--color-surface-elevated));
@@ -262,7 +271,7 @@
   z-index: 10;
   width: 300px;
   flex-shrink: 0;
-  padding: 24px;
+  padding: var(--space-6);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -297,7 +306,7 @@
   width: 100%;
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: var(--space-3);
   text-align: left;
   background: none;
   border: none;
@@ -310,7 +319,7 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   flex-shrink: 0;
   transition: all var(--duration-fast);
   background-color: rgb(var(--color-surface));
@@ -336,13 +345,13 @@
 }
 
 .desktopStepLabelWrap {
-  padding-top: 10px;
+  padding-top: var(--space-3);
   min-width: 0;
 }
 
 .desktopStepLabel {
   display: block;
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   font-weight: 500;
   color: rgb(var(--color-text-secondary));
 }
@@ -354,7 +363,7 @@
 
 .desktopStepHint {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   color: rgb(var(--color-text-muted));
   white-space: nowrap;
   overflow: hidden;
@@ -363,21 +372,22 @@
 
 .autosaveNote {
   margin-top: auto;
-  padding-top: 16px;
+  padding-top: var(--space-4);
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  font-size: 0.75rem;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
   color: rgb(var(--color-text-muted));
 }
 
 .autosaveNoteIcon {
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: var(--space-0-5);
 }
 
 /* Current step form */
 .stepMain {
+  min-width: 0;
   position: relative;
   z-index: 10;
   flex: 1 1 auto;
@@ -386,9 +396,7 @@
   flex-direction: column;
 }
 
-/* Fills the column's height; the bottom padding stops the card short of the
-   pinned nav buttons (40px tall plus their offset, leaving a 32px gap) so the
-   two never overlap. Nothing scrolls here — the card body is the scroller. */
+/* The card uses the space above the footer. Only its fields scroll. */
 .stepContent {
   /* Above .wash, which is absolutely positioned within .stepMain. */
   position: relative;
@@ -398,14 +406,14 @@
   max-width: 44rem;
   margin: 0 auto;
   width: 100%;
-  padding: 32px 24px 96px;
+  padding: 32px 24px 0;
   display: flex;
   flex-direction: column;
 }
 
 @media (min-width: 640px) {
   .stepContent {
-    padding: 40px 32px 104px;
+    padding: 40px 32px 0;
   }
 }
 
@@ -428,9 +436,9 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   padding: 24px 24px 0;
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 }
 
 @media (min-width: 640px) {
@@ -467,65 +475,101 @@
 
 .stepCardTitle {
   font-family: var(--font-heading, var(--font-sans));
-  font-size: 1.25rem;
+  font-size: var(--text-xl);
   font-weight: 700;
   color: rgb(var(--color-text-primary));
   line-height: 1.2;
 }
 
 .stepCardCounter {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   color: rgb(var(--color-text-muted));
 }
 
-/* Step nav — pinned bottom-right of the form column, over the scrolling form.
-   Centred on .stepMain so its content edge lands on the step card's right
-   edge, matching .stepContent's own centred 36rem box. */
+.requiredHint {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  color: rgb(var(--color-text-muted));
+}
+
+.requiredHint span {
+  color: rgb(var(--color-error));
+}
+
+.validationNotice {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid rgb(var(--color-error) / 20%);
+  border-radius: var(--radius-medium);
+  background-color: rgb(var(--color-error) / 5%);
+  color: rgb(var(--color-text-primary));
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+/* Natural footer height reserves space for every action at every breakpoint. */
 .stepActions {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
+  flex-shrink: 0;
   width: 100%;
   /* Must track .stepContent's max-width — this is what keeps the buttons
      aligned to the card's right edge. */
   max-width: 44rem;
-  padding: 0 24px 24px;
+  margin: 0 auto;
+  padding: 24px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
   z-index: 20;
-  /* Only the button cluster is clickable — the rest of this strip must not
-     swallow clicks meant for the form scrolling beneath it. */
-  pointer-events: none;
 }
 
 @media (min-width: 640px) {
   .stepActions {
-    padding: 0 32px 32px;
+    padding: 24px 32px 32px;
   }
 }
 
 /* Bare buttons — no container chrome. They sit below the card on the page
    wash, so they need no backing to stay legible. */
 .stepActionsBar {
-  pointer-events: auto;
-  display: inline-flex;
+  width: 100%;
+  display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-2);
 }
 
-/* Quieter than the step buttons it shares the row with — it leaves the wizard
-   rather than advancing it. */
+.backButton {
+  margin-inline-end: auto;
+}
+
+.stepActionsBar :global(.ant-btn) {
+  height: 38px;
+  padding-inline: 12px;
+  border-radius: var(--radius-control);
+}
+
+@media (max-width: 359px) {
+  .stepActionsBar {
+    gap: 6px;
+  }
+
+  .stepActionsBar :global(.ant-btn) {
+    padding-inline: 10px;
+    font-size: var(--text-sm);
+  }
+}
+
+/* Shared picker action in the preview rail and the compact-screen footer. */
 .templateButton {
   pointer-events: auto;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
+  gap: var(--space-2);
+  padding: var(--space-1-5) var(--space-3);
   border-radius: var(--radius-large);
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   font-weight: 600;
   border: 1px solid rgb(var(--color-divider));
   background-color: rgb(var(--color-surface));
@@ -549,7 +593,7 @@
   z-index: 10;
   width: 400px;
   flex-shrink: 0;
-  padding: 32px;
+  padding: var(--space-8);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -563,43 +607,9 @@
   max-width: 300px;
 }
 
-.previewProgressRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.previewProgressLabel {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: rgb(var(--color-text-secondary));
-}
-
-.previewProgressValue {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: rgb(var(--color-text-primary));
-  font-variant-numeric: tabular-nums;
-}
-
-.previewProgressTrack {
-  height: 6px;
-  border-radius: 9999px;
-  background-color: rgb(var(--color-divider));
-  overflow: hidden;
-}
-
-.previewProgressFill {
-  height: 100%;
-  border-radius: 9999px;
-  background-color: rgb(var(--color-primary));
-  transition: width var(--duration-normal);
-}
-
 .previewWrap {
   position: relative;
-  margin-top: 32px;
+  margin-top: var(--space-8);
 }
 
 .previewGlow {
@@ -608,7 +618,7 @@
   margin: auto;
   width: 280px;
   height: 280px;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   background-color: rgb(var(--color-primary) / 20%);
   filter: blur(64px);
   pointer-events: none;
@@ -622,17 +632,112 @@
   background-color: white;
 }
 
+.previewTemplateButton {
+  width: 100%;
+  max-width: 300px;
+  min-height: 40px;
+  flex-shrink: 0;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
 .previewNote {
-  margin-top: 32px;
+  margin-top: var(--space-8);
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  font-size: 0.75rem;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
   color: rgb(var(--color-text-muted));
   max-width: 300px;
 }
 
 .previewNoteIcon {
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: var(--space-0-5);
+}
+
+@media (max-width: 1023px), (pointer: coarse) {
+  .backLink {
+    display: grid;
+    place-items: center;
+  }
+
+  .stepContent {
+    padding: 16px 16px 0;
+  }
+
+  .stepCardHeader {
+    padding: 18px 16px 0;
+    margin-bottom: 18px;
+  }
+
+  .stepCardBody {
+    padding: 0 16px 16px;
+    overscroll-behavior: contain;
+  }
+
+  .stepActions {
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    gap: 8px;
+  }
+
+  .stepActionsBar :global(.ant-btn) {
+    height: 44px;
+  }
+
+  .mobileStepperList {
+    padding-block: 6px;
+  }
+}
+
+/* Short landscapes and the on-screen keyboard need one useful scrolling form,
+   not a fixed card squeezed between three pieces of navigation. */
+:global(html[data-compact-viewport]) .stepMain {
+    display: block;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-block: 12px 124px;
+}
+
+:global(html[data-compact-viewport]) .stepContent {
+    display: block;
+    padding: 12px 16px;
+}
+
+:global(html[data-compact-viewport]) .stepCard {
+    display: block;
+}
+
+:global(html[data-compact-viewport]) .stepCardHeader {
+    padding: 12px 16px 0;
+    margin-bottom: 12px;
+}
+
+:global(html[data-compact-viewport]) .stepCardBody {
+    overflow: visible;
+    padding: 0 16px 16px;
+}
+
+:global(html[data-compact-viewport]) .stepActions {
+    position: sticky;
+    bottom: 0;
+    max-width: none;
+    background: rgb(var(--color-surface));
+    border-top: 1px solid rgb(var(--color-divider));
+    padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 520px) {
+  :global(html[data-compact-viewport]) .stepActions {
+    flex-wrap: nowrap;
+  }
+
+  :global(html[data-compact-viewport]) .stepActionsBar {
+    width: auto;
+    flex: 1;
+  }
+
+  :global(html[data-compact-viewport]) .stepMain {
+    scroll-padding-bottom: 72px;
+  }
 }

@@ -6,6 +6,7 @@ import styles from './Input.module.css'
 
 export function Input({
   label,
+  required,
   error,
   helperText,
   showCharacterCount,
@@ -25,10 +26,12 @@ export function Input({
     <div className={styles.field}>
       <label htmlFor={id} className={styles.label}>
         {label}
+        {required && <span className={styles.required} aria-hidden="true"> *</span>}
       </label>
 
       <AntInput
         id={id}
+        required={required}
         value={value}
         maxLength={maxLength}
         status={error ? 'error' : undefined}

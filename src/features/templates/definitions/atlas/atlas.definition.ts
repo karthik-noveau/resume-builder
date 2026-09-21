@@ -2,10 +2,11 @@ import type { TemplateDefinition } from '@/shared/types/template.types'
 
 export const atlasDefinition: TemplateDefinition = {
   id: 'atlas',
+  designStyle: 'Simple',
   name: 'Atlas',
   category: 'Experienced',
-  version: 1,
-  description: 'Full-width accent banner over a calm body — a confident opener for senior applications.',
+  version: 2,
+  description: 'A tailored navy header with precise alignment and understated section markers.',
   thumbnail: '/thumbnails/placeholder.svg',
   tags: ['experienced', 'senior', 'bold', 'banner'],
   layout: 'single-column',

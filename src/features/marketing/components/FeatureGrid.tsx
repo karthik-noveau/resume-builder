@@ -1,84 +1,127 @@
-import { motion } from 'framer-motion'
-import { clsx } from 'clsx'
-import { LayoutTemplate, Palette, Download, Upload, Moon } from 'lucide-react'
-import { Card } from '@/shared/components/ui/Card/Card'
-import { ALL_TEMPLATES } from '@/features/templates/registry/template.registry'
-import { fadeUp, staggerContainer, viewportOnce, BRAND_GRADIENT } from './motion'
+import { useState, type CSSProperties } from 'react'
+import { Check, FileDown, Layers3, MousePointer2, SlidersHorizontal } from 'lucide-react'
 import styles from './FeatureGrid.module.css'
 
-const SMALL_FEATURES = [
+const COLORS = [
+  { name: 'Violet', value: '#7a45d1' },
+  { name: 'Emerald', value: '#087c58' },
+  { name: 'Cobalt', value: '#2457df' },
+  { name: 'Coral', value: '#c23f35' },
+]
+const FEATURES = [
   {
-    Icon: Palette,
-    title: 'Make it yours',
-    description: 'Pick a color theme, a custom accent color, or a font pairing — your resume, your look.',
+    Icon: MousePointer2,
+    title: 'See every change, live.',
+    description: 'A live preview that keeps up with every change. No guesswork between edits.',
   },
   {
-    Icon: Download,
-    title: 'One-click PDF export',
-    description: 'Export a polished, print-ready PDF whenever you’re ready to apply.',
+    Icon: Layers3,
+    title: 'Make the design yours.',
+    description:
+      'Fine-tune the colors, fonts, and layout. Your experience deserves your own style.',
   },
   {
-    Icon: Upload,
-    title: 'Import an existing resume',
-    description: 'Paste your current resume text and get a head start — review and refine from there.',
-  },
-  {
-    Icon: Moon,
-    title: 'Light & dark mode',
-    description: 'Work comfortably day or night, with autosave and undo/redo built in.',
+    Icon: FileDown,
+    title: 'Download and get going.',
+    description:
+      'Preview your final PDF before downloading. Selectable text, embedded fonts, and no watermark.',
   },
 ]
 
 export function FeatureGrid() {
+  const [color, setColor] = useState(COLORS[0])
+  const [font, setFont] = useState<'Serif' | 'Sans'>('Sans')
+
   return (
-    <section className={styles.section}>
-      <motion.div
-        className={styles.header}
-        initial="hidden"
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={fadeUp}
-        transition={{ duration: 0.4 }}
-      >
-        <span className={styles.eyebrow}>Why Resume Studio</span>
-        <h2 className={styles.heading}>
-          Everything you need. Nothing you don&apos;t.
-        </h2>
-      </motion.div>
-
-      <motion.div
-        className={styles.grid}
-        initial="hidden"
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-      >
-        <motion.div variants={fadeUp} transition={{ duration: 0.4 }} className={styles.bigCardGridItem}>
-          <Card padding="none" className={clsx(styles.card, styles.bigCard)}>
-            <div className={styles.bigIconWrap} style={{ background: BRAND_GRADIENT }}>
-              <LayoutTemplate size={30} className={styles.iconWhite} aria-hidden="true" />
-            </div>
-            <h3 className={styles.bigTitle}>
-              {ALL_TEMPLATES.length} professional templates
-            </h3>
-            <p className={styles.bigDescription}>
-              Clean, ATS-friendly layouts for every stage of your career — switch anytime without losing your content.
+    <section className={styles.section} aria-labelledby="features-heading">
+      <div className={styles.panel}>
+        <div className={styles.top}>
+          <div className={styles.copy}>
+            <p className={styles.eyebrow}>MORE CONTROL. LESS COMPROMISE.</p>
+            <h2 id="features-heading">
+              Small details.
+              <br />
+              <em>A big difference.</em>
+            </h2>
+            <p className={styles.description}>
+              Get the look right without fighting the formatting. Adjust your colors, choose your
+              type, and see every change as you make it.
             </p>
-          </Card>
-        </motion.div>
-
-        {SMALL_FEATURES.map(({ Icon, title, description }) => (
-          <motion.div key={title} variants={fadeUp} transition={{ duration: 0.4 }}>
-            <Card padding="none" className={clsx(styles.card, styles.smallCard)}>
-              <div className={styles.smallIconWrap}>
-                <Icon size={22} className={styles.iconPrimary} aria-hidden="true" />
+            <span className={styles.tryHint}>
+              Try the controls. Find your style. <span aria-hidden="true">↗</span>
+            </span>
+          </div>
+          <div className={styles.designDemo}>
+            <div className={styles.demoHeader}>
+              <SlidersHorizontal size={13} aria-hidden="true" />
+              <span>Your personal style</span>
+              <span className={styles.liveLabel}>LIVE</span>
+            </div>
+            <div
+              className={styles.sample}
+              style={
+                {
+                  '--sample-color': color.value,
+                  fontFamily:
+                    font === 'Serif' ? "'SourceSerifPro', Georgia, serif" : "'Manrope', sans-serif",
+                } as CSSProperties
+              }
+            >
+              <span className={styles.sampleLabel}>HELLO, I’M</span>
+              <span className={styles.sampleName}>
+                Alex Morgan<span>.</span>
+              </span>
+              <span className={styles.sampleRole}>
+                Product designer & thoughtful problem solver
+              </span>
+              <div className={styles.sampleRule} />
+              <span className={styles.sampleSummary}>
+                Good ideas deserve a little attention to detail.
+              </span>
+            </div>
+            <div className={styles.demoControls}>
+              <div className={styles.swatches} role="group" aria-label="Sample accent color">
+                {COLORS.map((option) => (
+                  <button
+                    key={option.name}
+                    type="button"
+                    style={{ background: option.value }}
+                    aria-label={option.name}
+                    aria-pressed={color.name === option.name}
+                    onClick={() => setColor(option)}
+                  >
+                    {color.name === option.name && <Check size={12} aria-hidden="true" />}
+                  </button>
+                ))}
               </div>
-              <h3 className={styles.smallTitle}>{title}</h3>
-              <p className={styles.smallDescription}>{description}</p>
-            </Card>
-          </motion.div>
-        ))}
-      </motion.div>
+              <div className={styles.fonts} role="group" aria-label="Sample typography">
+                {(['Serif', 'Sans'] as const).map((option) => (
+                  <button
+                    type="button"
+                    key={option}
+                    aria-pressed={font === option}
+                    onClick={() => setFont(option)}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <span className={styles.demoNote} aria-live="polite">
+              A little preview of what’s possible · {color.name} / {font}
+            </span>
+          </div>
+        </div>
+        <div className={styles.features}>
+          {FEATURES.map(({ Icon, title, description }) => (
+            <div key={title} className={styles.feature}>
+              <Icon size={21} strokeWidth={1.5} aria-hidden="true" />
+              <h3>{title}</h3>
+              <p>{description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   )
 }

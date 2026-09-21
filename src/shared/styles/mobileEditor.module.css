@@ -1,0 +1,45 @@
+/* Applied only to editor chrome and forms, never the rendered resume canvas. */
+@media (max-width: 1023px), (pointer: coarse) {
+  .controls {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .controls button,
+  .controls a[aria-label] {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+
+  .controls button[data-drag-handle] {
+    touch-action: none;
+  }
+
+  .controls [aria-hidden="true"][inert] button {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .controls input:not([type="checkbox"], [type="radio"], [type="color"], [type="file"], [type="hidden"]),
+  .controls textarea:global(.ant-input),
+  .controls :global(.ant-select),
+  .controls :global(.ant-select input) {
+    font-size: 16px !important;
+  }
+
+  .controls input:not([type="checkbox"], [type="radio"], [type="color"], [type="file"], [type="hidden"]),
+  .controls :global(.ant-select) {
+    min-height: 44px;
+  }
+
+  .controls :global(.ant-checkbox-wrapper) {
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .controls button:has(> svg:only-child) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

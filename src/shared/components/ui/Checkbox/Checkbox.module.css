@@ -1,11 +1,11 @@
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .error {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   color: rgb(var(--color-error));
-  margin-left: 24px;
+  margin-left: var(--space-6);
 }

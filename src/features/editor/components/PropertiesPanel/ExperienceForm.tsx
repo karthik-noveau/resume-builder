@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { StringListField } from '@/shared/components/ui/StringListField/StringListField'
@@ -6,25 +5,28 @@ import { ControlledInput, ControlledCheckbox } from './ControlledFields'
 import { experienceSectionSchema, type ExperienceSectionInput } from '@/shared/schemas/experience.schema'
 import type { ExperienceSection } from '@/shared/types/resume.types'
 import { useResumeStore } from '@/shared/stores/resume.store'
+import { useGuidedForm } from '../../hooks/useGuidedForm'
+import { useResumeFormSync } from '../../hooks/useResumeFormSync'
 import styles from './ExperienceForm.module.css'
 
 export function ExperienceForm({ section }: { section: ExperienceSection }) {
   const updateSection = useResumeStore((s) => s.updateSection)
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<ExperienceSectionInput>({
+  const form = useForm<ExperienceSectionInput>({
     resolver: zodResolver(experienceSectionSchema),
     defaultValues: section,
   })
-
-  useEffect(() => { reset(section) }, [section.id, reset, section])
+  const { control, handleSubmit, formState: { errors } } = form
+  const commit = useResumeFormSync<ExperienceSectionInput>(form, section, (data) => { updateSection('experience', section.id, data) })
+  const guided = useGuidedForm(form, commit)
 
   const current = useWatch({ control, name: 'current' })
-  const save = handleSubmit((data) => { updateSection('experience', section.id, data) })
+  const save = handleSubmit(commit)
   const onSaved = () => { void save() }
 
   return (
     <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
-      <ControlledInput control={control} name="company" label="Company" error={errors.company?.message} onSaved={onSaved} />
-      <ControlledInput control={control} name="role" label="Role / Job title" error={errors.role?.message} onSaved={onSaved} />
+      <ControlledInput control={control} name="company" label="Company" required={!!guided} error={errors.company?.message} onSaved={onSaved} />
+      <ControlledInput control={control} name="role" label="Role / Job title" required={!!guided} error={errors.role?.message} onSaved={onSaved} />
       <ControlledInput control={control} name="location" label="Location" onSaved={onSaved} />
       <div className={styles.grid}>
         <ControlledInput control={control} name="startDate" label="Start date" placeholder="Jan 2020" onSaved={onSaved} />

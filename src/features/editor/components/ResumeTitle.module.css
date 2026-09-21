@@ -1,0 +1,47 @@
+.root {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  max-width: 240px;
+}
+.root button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+  padding: 6px 4px;
+  border-radius: 6px;
+  text-align: left;
+  color: rgb(var(--color-text-primary));
+}
+.root button:hover {
+  background: rgb(var(--color-primary) / 6%);
+}
+.root span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.root svg {
+  flex-shrink: 0;
+  color: rgb(var(--color-text-muted));
+}
+.root input {
+  font: inherit;
+  color: inherit;
+  width: 100%;
+  min-width: 90px;
+  padding: 5px 7px;
+  border: 1px solid rgb(var(--color-primary));
+  border-radius: 6px;
+  background: rgb(var(--color-surface));
+}
+@media (max-width: 640px) {
+  .root {
+    max-width: 160px;
+  }
+  .root input {
+    font-size: 16px;
+  }
+}

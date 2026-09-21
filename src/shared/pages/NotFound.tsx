@@ -1,11 +1,17 @@
 import { Link } from 'react-router'
 import { ArrowRight } from 'lucide-react'
 import { clsx } from 'clsx'
+import { Seo } from '@/shared/components/Seo/Seo'
 import styles from './NotFound.module.css'
 
 export function NotFound() {
   return (
     <div className={styles.root}>
+      <Seo
+        title="Page not found"
+        description="The page you're looking for doesn't exist."
+        noindex
+      />
       <div
         className={styles.blobTop}
         aria-hidden="true"

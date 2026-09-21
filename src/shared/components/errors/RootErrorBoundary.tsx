@@ -39,13 +39,12 @@ export class RootErrorBoundary extends Component<Props, State> {
             <div className={styles.textGroup}>
               <h1 className={styles.title}>Something went wrong</h1>
               <p className={styles.description}>
-                An unexpected error occurred. Your resume data is safe.
+                The workspace couldn’t load. Your previously saved resumes remain in this browser.
+                Reload to try again.
               </p>
             </div>
-            {this.state.error && (
-              <p className={styles.errorMessage}>
-                {this.state.error.message}
-              </p>
+            {import.meta.env.DEV && this.state.error && (
+              <p className={styles.errorMessage}>{this.state.error.message}</p>
             )}
             <button
               onClick={this.handleReload}

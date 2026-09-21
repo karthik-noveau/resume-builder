@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router'
-import { Plus, FileText, Search, Upload, ArrowUpDown } from 'lucide-react'
+import { Link, useNavigate } from 'react-router'
+import { Plus, FileText, Search, Upload, ArrowUpDown, HardDrive, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageLayout } from '@/shared/components/layout/PageLayout'
+import { Seo } from '@/shared/components/Seo/Seo'
 import { Button } from '@/shared/components/ui/Button/Button'
 import { EmptyState } from '@/shared/components/ui/EmptyState/EmptyState'
 import { Skeleton } from '@/shared/components/ui/Skeleton/Skeleton'
@@ -70,6 +71,7 @@ export function Dashboard() {
   const navigate = useNavigate()
   const resumeList = useResumeStore((s) => s.resumeList)
   const isLoading = useResumeStore((s) => s.isLoading)
+  const error = useResumeStore((s) => s.error)
   const loadResumeList = useResumeStore((s) => s.loadResumeList)
   const createResume = useResumeStore((s) => s.createResume)
   const createResumeFromImport = useResumeStore((s) => s.createResumeFromImport)
@@ -86,7 +88,9 @@ export function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<SortBy>('updated')
 
-  useEffect(() => { void loadResumeList() }, [loadResumeList])
+  useEffect(() => {
+    void loadResumeList()
+  }, [loadResumeList])
 
   const displayedList = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
@@ -99,7 +103,9 @@ export function Dashboard() {
   // Choosing a template is the only step "New Resume" ever needed, so it
   // happens here in a modal rather than on a separate route the user then has
   // to navigate back out of.
-  const goToTemplatePicker = () => { setShowTemplatePicker(true) }
+  const goToTemplatePicker = () => {
+    setShowTemplatePicker(true)
+  }
 
   const handleCreateWithTemplate = async (templateId: string) => {
     setCreating(true)
@@ -120,7 +126,7 @@ export function Dashboard() {
       const parsed = parseResumeText(rawText)
       const id = await createResumeFromImport(IMPORT_DEFAULT_TEMPLATE_ID, parsed)
       setShowImport(false)
-      toast.success("Imported — we did our best to structure it, please review each section.")
+      toast.success('Imported — we did our best to structure it, please review each section.')
       void navigate(`/editor/${id}`)
     } catch {
       toast.error('Failed to import resume')
@@ -155,6 +161,8 @@ export function Dashboard() {
 
   return (
     <PageLayout>
+      {/* Private workspace over local resume data — never indexed. */}
+      <Seo title="My Resumes" description="Your saved resumes." noindex />
       <div className={styles.page}>
         {/* Header */}
         <div className={styles.header}>
@@ -162,7 +170,7 @@ export function Dashboard() {
             <h1 className={styles.heading}>My Resumes</h1>
             <p className={styles.subheading}>
               {resumeList.length > 0
-                ? `${resumeList.length} resume${resumeList.length !== 1 ? 's' : ''} · Last edited ${formatRelativeTime(resumeList[0].updatedAt)}`
+                ? `${resumeList.length} resume${resumeList.length !== 1 ? 's' : ''} · Last edited ${formatRelativeTime(sortResumes(resumeList, 'updated')[0].updatedAt)}`
                 : 'Create your first resume'}
             </p>
           </div>
@@ -175,16 +183,42 @@ export function Dashboard() {
               <Upload size={16} aria-hidden="true" />
               Import Resume
             </Button>
-            <Button
-              variant="primary"
-              onClick={goToTemplatePicker}
-              aria-label="Create a new resume"
-            >
+            <Button variant="primary" onClick={goToTemplatePicker} aria-label="Create a new resume">
               <Plus size={16} aria-hidden="true" />
               New Resume
             </Button>
           </div>
         </div>
+
+        <div className={styles.storageBar}>
+          <span>
+            <HardDrive size={16} aria-hidden="true" />
+            <strong>Saved on this device</strong>
+            <span className={styles.storageDetail}>Keep a backup to take your work anywhere.</span>
+          </span>
+          <Link to="/settings#backups">
+            Manage backups <span aria-hidden="true">↗</span>
+          </Link>
+        </div>
+
+        {error && (
+          <div className={styles.errorState} role="alert">
+            <AlertCircle size={20} aria-hidden="true" />
+            <div>
+              <strong>We couldn’t load your workspace.</strong>
+              <p>Check that this browser allows site storage, then try again.</p>
+            </div>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                void loadResumeList()
+              }}
+              loading={isLoading}
+            >
+              Try again
+            </Button>
+          </div>
+        )}
 
         {/* Search + sort */}
         {!isLoading && resumeList.length > 0 && (
@@ -204,6 +238,7 @@ export function Dashboard() {
               <Select
                 label="Sort by"
                 hideLabel
+                className={styles.sortSelect}
                 icon={<ArrowUpDown size={16} aria-hidden="true" />}
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortBy)}
@@ -216,7 +251,7 @@ export function Dashboard() {
         {/* Content */}
         {isLoading ? (
           <DashboardSkeleton />
-        ) : resumeList.length === 0 ? (
+        ) : error && resumeList.length === 0 ? null : resumeList.length === 0 ? (
           <EmptyState
             icon={<FileText size={48} />}
             title="No resumes yet"
@@ -245,9 +280,14 @@ export function Dashboard() {
               <ResumeCard
                 key={resume.id}
                 resume={resume}
-                onDuplicate={(id) => { void handleDuplicate(id) }}
+                onDuplicate={(id) => {
+                  void handleDuplicate(id)
+                }}
                 onDelete={(id) => setDeleteTarget({ id, title: resume.title })}
-                onRename={(id, title) => { void renameResume(id, title) }}
+                onRename={async (id, title) => {
+                  await renameResume(id, title)
+                  toast.success('Resume renamed')
+                }}
               />
             ))}
           </div>
@@ -259,7 +299,9 @@ export function Dashboard() {
       <TemplatePickerModal
         isOpen={showTemplatePicker}
         onClose={() => setShowTemplatePicker(false)}
-        onSelect={(templateId) => { void handleCreateWithTemplate(templateId) }}
+        onSelect={(templateId) => {
+          void handleCreateWithTemplate(templateId)
+        }}
         title="Choose a template"
         intro="Pick a layout to start from — you can change it any time while editing."
         confirmLabel="Create resume"
@@ -270,7 +312,9 @@ export function Dashboard() {
       <ImportResumeModal
         isOpen={showImport}
         onClose={() => setShowImport(false)}
-        onConfirm={(rawText) => { void handleImport(rawText) }}
+        onConfirm={(rawText) => {
+          void handleImport(rawText)
+        }}
         isLoading={importing}
       />
 
@@ -278,7 +322,9 @@ export function Dashboard() {
         isOpen={!!deleteTarget}
         resumeTitle={deleteTarget?.title ?? ''}
         onClose={() => setDeleteTarget(null)}
-        onConfirm={() => { void handleDelete() }}
+        onConfirm={() => {
+          void handleDelete()
+        }}
         isLoading={deleting}
       />
     </PageLayout>

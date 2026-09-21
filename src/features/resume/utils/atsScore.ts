@@ -35,7 +35,7 @@ export interface AtsResult {
 }
 
 /** Structural properties of the layout that affect how reliably a parser reads it. */
-export function scoreTemplate(template: TemplateDefinition): { score: number; factors: AtsFactor[] } {
+export function scoreTemplate(template: TemplateDefinition, resume?: Resume): { score: number; factors: AtsFactor[] } {
   const factors: AtsFactor[] = []
 
   // Reading order is the single biggest parsing factor: a sidebar interleaves
@@ -45,15 +45,15 @@ export function scoreTemplate(template: TemplateDefinition): { score: number; fa
     label: 'Reading order',
     points: singleColumn ? 30 : 12,
     max: 30,
-    hint: singleColumn ? undefined : 'Two-column layouts can be read out of order by parsers',
+    hint: singleColumn ? undefined : 'Choose a single-column template for a simpler reading order.',
   })
 
-  const hasPhotoRegion = template.exportRules.includeProfileImage
+  const hasPhotoRegion = template.exportRules.includeProfileImage && (resume ? resume.settings.showProfileImage : true)
   factors.push({
     label: 'No photo region',
     points: hasPhotoRegion ? 6 : 15,
     max: 15,
-    hint: hasPhotoRegion ? 'Photos are ignored or mis-parsed by most systems' : undefined,
+    hint: hasPhotoRegion ? 'Turn off the profile image for a text-focused resume.' : undefined,
   })
 
   // Every template embeds real fonts and emits selectable text rather than
@@ -68,29 +68,29 @@ export function scoreContent(resume: Resume): { score: number; factors: AtsFacto
   const info = resume.personalInfo
   const factors: AtsFactor[] = []
 
-  const contactComplete = Boolean(info.email && info.phone && info.location)
+  const contactComplete = [info.fullName, info.email, info.phone, info.location].every((value) => value.trim())
   factors.push({
     label: 'Contact details',
     points: contactComplete ? 10 : 0,
     max: 10,
-    hint: contactComplete ? undefined : 'Add email, phone and location',
+    hint: contactComplete ? undefined : 'Add your name, email, phone and location.',
   })
 
-  const hasSummary = resume.summary.visible && resume.summary.content.trim().length > 0
+  const hasSummary = resume.sectionOrder.includes('summary') && resume.summary.visible && resume.summary.content.trim().length > 0
   factors.push({
     label: 'Professional summary',
     points: hasSummary ? 5 : 0,
     max: 5,
-    hint: hasSummary ? undefined : 'A short summary gives parsers a keyword-rich opening',
+    hint: hasSummary ? undefined : 'Add a short professional summary and make it visible.',
   })
 
-  const experience = resume.experience.filter((e) => e.visible)
-  const datedRoles = experience.filter((e) => e.role && e.company && e.startDate)
+  const experience = resume.sectionOrder.includes('experience') ? resume.experience.filter((e) => e.visible) : []
+  const datedRoles = experience.filter((e) => e.role.trim() && e.company.trim() && e.startDate.trim())
   factors.push({
     label: 'Dated work history',
     points: datedRoles.length > 0 ? 10 : 0,
     max: 10,
-    hint: datedRoles.length > 0 ? undefined : 'Give each role a title, employer and start date',
+    hint: datedRoles.length > 0 ? undefined : 'Include a visible role with a title, employer and start date.',
   })
 
   // Quantified achievements are what recruiters filter on, and a digit is a
@@ -100,23 +100,23 @@ export function scoreContent(resume: Resume): { score: number; factors: AtsFacto
     label: 'Quantified achievements',
     points: quantified ? 5 : 0,
     max: 5,
-    hint: quantified ? undefined : 'Include numbers — percentages, revenue, team size',
+    hint: quantified ? undefined : 'Add measurable outcomes to your visible work history, such as percentages or team size.',
   })
 
-  const hasSkills = resume.skills.some((s) => s.visible && s.skills.length > 0)
+  const hasSkills = resume.sectionOrder.includes('skills') && resume.skills.some((s) => s.visible && s.skills.some((skill) => skill.name.trim()))
   factors.push({
     label: 'Skills section',
     points: hasSkills ? 5 : 0,
     max: 5,
-    hint: hasSkills ? undefined : 'List the tools and skills named in the job posting',
+    hint: hasSkills ? undefined : 'Show a skills section with relevant tools and skills.',
   })
 
-  const hasEducation = resume.education.some((e) => e.visible && e.institution.trim())
+  const hasEducation = resume.sectionOrder.includes('education') && resume.education.some((e) => e.visible && e.institution.trim())
   factors.push({
     label: 'Education',
     points: hasEducation ? 5 : 0,
     max: 5,
-    hint: hasEducation ? undefined : 'Add at least one institution',
+    hint: hasEducation ? undefined : 'Add at least one visible education entry with an institution.',
   })
 
   return { score: factors.reduce((n, f) => n + f.points, 0), factors }
@@ -124,11 +124,10 @@ export function scoreContent(resume: Resume): { score: number; factors: AtsFacto
 
 /**
  * Combined score. Pass `null` for the résumé to rate the template alone — the
- * gallery does this before a résumé exists, and reports it as a template
- * rating out of TEMPLATE_MAX rather than a percentage.
+ * template-only ratings are out of TEMPLATE_MAX rather than 100.
  */
 export function calculateAtsScore(template: TemplateDefinition, resume: Resume | null): AtsResult {
-  const t = scoreTemplate(template)
+  const t = scoreTemplate(template, resume ?? undefined)
   if (!resume) {
     return { score: t.score, templateScore: t.score, contentScore: null, factors: t.factors }
   }

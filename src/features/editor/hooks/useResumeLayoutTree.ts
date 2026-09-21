@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useTemplateStore } from '@/shared/stores/template.store'
 import { useThemeStore, resolveResumeTheme } from '@/shared/stores/theme.store'
-import { templateRenderer } from '@/features/templates/registry/template.registry'
+import { getTemplateById, templateRenderer } from '@/features/templates/registry/template.registry'
 import type { Resume } from '@/shared/types/resume.types'
 import type { LayoutTree } from '@/shared/types/layout.types'
 
@@ -16,6 +16,7 @@ export function useResumeLayoutTree(resume: Resume | null): LayoutTree | null {
   return useMemo(() => {
     if (!resume) return null
     const template = availableTemplates.find((t) => t.id === resume.templateId)
+      ?? getTemplateById(resume.templateId)
     if (!template) return null
     const theme = resolveResumeTheme(resume.themeId, resume.customPrimaryColor)
     const fontPreset = getFontPresetById(resume.fontPresetId)

@@ -7,6 +7,7 @@ const mockTemplate: TemplateDefinition = {
   name: 'ATS Clean',
   layout: 'single-column' as const,
   category: 'Experienced',
+  designStyle: 'Simple',
   version: 1,
   description: 'Clean ATS-friendly template',
   thumbnail: '/thumbnails/ats-01-light.svg',

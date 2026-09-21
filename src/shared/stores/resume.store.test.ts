@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useResumeStore } from './resume.store'
 import { useEditorStore } from './editor.store'
-import { createEmptyResume } from '@/features/resume/utils/resume.factory'
+import { createSampleResume } from '@/features/resume/utils/resume.factory'
 
 // Mock the service layer — store tests verify state logic, not storage
 vi.mock('@/shared/services/resume.service', () => ({
@@ -30,7 +30,7 @@ function resetStores() {
 }
 
 function loadResume() {
-  const resume = createEmptyResume('meridian')
+  const resume = createSampleResume('meridian')
   useResumeStore.setState({ activeResume: resume })
   return resume
 }
@@ -41,7 +41,7 @@ describe('resumeStore', () => {
   // ─── Load ───────────────────────────────────────────────────────────────────
   describe('loadResumeList', () => {
     it('fetches and stores resume list', async () => {
-      const list = [createEmptyResume('meridian')]
+      const list = [createSampleResume('meridian')]
       vi.mocked(resumeService.getResumeList).mockResolvedValueOnce(list)
       await useResumeStore.getState().loadResumeList()
       expect(useResumeStore.getState().resumeList).toHaveLength(1)
@@ -56,7 +56,7 @@ describe('resumeStore', () => {
 
   describe('loadResume', () => {
     it('loads a resume and clears undo history', async () => {
-      const resume = createEmptyResume('meridian')
+      const resume = createSampleResume('meridian')
       vi.mocked(resumeService.getResume).mockResolvedValueOnce(resume)
       useEditorStore.getState().pushUndoSnapshot(resume)
 
@@ -76,7 +76,7 @@ describe('resumeStore', () => {
   // ─── Create / Delete ────────────────────────────────────────────────────────
   describe('createResume', () => {
     it('adds new resume to list', async () => {
-      const resume = createEmptyResume('meridian')
+      const resume = createSampleResume('meridian')
       vi.mocked(resumeService.createResume).mockResolvedValueOnce(resume)
       const id = await useResumeStore.getState().createResume('meridian')
       expect(id).toBe(resume.id)
@@ -87,7 +87,7 @@ describe('resumeStore', () => {
   describe('deleteResume', () => {
     it('removes resume from list', async () => {
       loadResume()
-      useResumeStore.setState({ resumeList: [{ ...createEmptyResume('meridian'), id: 'r1' }] })
+      useResumeStore.setState({ resumeList: [{ ...createSampleResume('meridian'), id: 'r1' }] })
       await useResumeStore.getState().deleteResume('r1')
       expect(useResumeStore.getState().resumeList).toHaveLength(0)
     })
@@ -206,6 +206,47 @@ describe('resumeStore', () => {
 
   // ─── Save ───────────────────────────────────────────────────────────────────
   describe('saveActiveResume', () => {
+    it('keeps newer edits dirty when an older autosave finishes', async () => {
+      loadResume()
+      useResumeStore.setState({ isDirty: true })
+      let finishWrite!: () => void
+      vi.mocked(resumeService.updateResume).mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishWrite = () => resolve(useResumeStore.getState().activeResume!)
+          })
+      )
+      const save = useResumeStore.getState().saveActiveResume()
+      useResumeStore.getState().updateSummary('Newer summary')
+      finishWrite()
+      await save
+      expect(useResumeStore.getState().isDirty).toBe(true)
+    })
+
+    it('waits for an older autosave before flushing the latest draft', async () => {
+      loadResume()
+      useResumeStore.setState({ isDirty: true })
+      vi.mocked(resumeService.updateResume).mockClear()
+      let finishWrite!: () => void
+      vi.mocked(resumeService.updateResume).mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishWrite = () => resolve(useResumeStore.getState().activeResume!)
+          })
+      )
+      const first = useResumeStore.getState().saveActiveResume()
+      useResumeStore.getState().updateSummary('Final summary before Finish')
+      const flush = useResumeStore.getState().saveActiveResume()
+      expect(resumeService.updateResume).toHaveBeenCalledTimes(1)
+      finishWrite()
+      await Promise.all([first, flush])
+      expect(resumeService.updateResume).toHaveBeenCalledTimes(2)
+      expect(vi.mocked(resumeService.updateResume).mock.calls[1][1].summary?.content).toBe(
+        'Final summary before Finish'
+      )
+      expect(useResumeStore.getState().isDirty).toBe(false)
+    })
+
     it('calls updateResume service and clears isDirty', async () => {
       loadResume()
       useResumeStore.setState({ isDirty: true })
@@ -236,5 +277,50 @@ describe('resumeStore', () => {
       expect(useResumeStore.getState().error).toBe('Failed to save resume')
       expect(useResumeStore.getState().isDirty).toBe(true)
     })
+  })
+})
+
+describe('navigation and persistence races', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    resetStores()
+  })
+  it('ignores an older load that resolves after the current route', async () => {
+    const first = createSampleResume('meridian')
+    const second = createSampleResume('atlas')
+    let resolveFirst!: (resume: typeof first) => void
+    vi.mocked(resumeService.getResume).mockImplementation((id) =>
+      id === first.id
+        ? new Promise((resolve) => {
+            resolveFirst = resolve
+          })
+        : Promise.resolve(second)
+    )
+    const loadFirst = useResumeStore.getState().loadResume(first.id)
+    await Promise.resolve()
+    const loadSecond = useResumeStore.getState().loadResume(second.id)
+    await loadSecond
+    resolveFirst(first)
+    await loadFirst
+    expect(useResumeStore.getState().activeResume?.id).toBe(second.id)
+  })
+  it('saves a dirty draft before loading another resume', async () => {
+    const first = loadResume()
+    useResumeStore.getState().updateSummary('Keep this newest text')
+    vi.mocked(resumeService.getResume).mockResolvedValueOnce(createSampleResume('atlas'))
+    await useResumeStore.getState().loadResume('next')
+    const saved = vi.mocked(resumeService.updateResume).mock.calls[0]
+    expect(saved[0]).toBe(first.id)
+    expect(saved[1].summary?.content).toBe('Keep this newest text')
+    expect(resumeService.updateResume).toHaveBeenCalledBefore(vi.mocked(resumeService.getResume))
+  })
+  it('keeps unsaved content when a route switch cannot save', async () => {
+    const first = loadResume()
+    useResumeStore.getState().updateSummary('Unsaved work')
+    vi.mocked(resumeService.updateResume).mockRejectedValueOnce(new Error('Quota exceeded'))
+    await useResumeStore.getState().loadResume('next')
+    expect(useResumeStore.getState().activeResume?.id).toBe(first.id)
+    expect(useResumeStore.getState().isDirty).toBe(true)
+    expect(resumeService.getResume).not.toHaveBeenCalled()
   })
 })

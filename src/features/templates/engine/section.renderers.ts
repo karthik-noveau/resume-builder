@@ -15,8 +15,8 @@ import type { LayoutNode, LayoutNodeType, LayoutStyles, EditRef, EntrySectionTyp
 import type { LayoutBuilder } from './layout.builder'
 import {
   estimateTextHeight,
-  estimateBulletHeight,
-  displayUrl,
+  estimateStyledTextHeight,
+  estimateWrappedTextHeight,
   nameStyle,
   sectionTitleStyle,
   entryTitleStyle,
@@ -25,6 +25,7 @@ import {
   captionStyle,
   metadataStyle,
 } from './layout.utils'
+import { buildContactLineNodes, contactItems } from './contact.layout'
 
 // ─── Typed helper ─────────────────────────────────────────────────────────────
 
@@ -92,14 +93,14 @@ export function renderHeader(c: RenderCtx, info: PersonalInfo): void {
     b.advanceY(hH + 12)
   }
 
-  const contactText = [info.location, info.phone, info.email, displayUrl(info.website)].filter(Boolean).join('   •   ')
-  if (contactText) {
-    const cH = fp.scale.small * 1.5
-    b.currentPage.nodes.push(tn(b, 'text', x, b.y, w, cH, { 
+  const contacts = contactItems(info, ['location', 'phone', 'email', 'website'])
+  if (contacts.length) {
+    const line = buildContactLineNodes(b, contacts, x, b.y, w, {
       ...captionStyle(colors, fp), 
       textAlign: 'center'
-    }, contactText))
-    b.advanceY(cH)
+    }, '   •   ')
+    b.currentPage.nodes.push(...line.nodes)
+    b.advanceY(line.height)
   }
   b.advanceY(35)
 }
@@ -108,6 +109,34 @@ export function renderHeader(c: RenderCtx, info: PersonalInfo): void {
 
 export type EntryResult = { nodes: LayoutNode[]; height: number; entryId?: string }
 
+/** Dates use a separate row in a sidebar, and a real gutter at full width. */
+function entryHeading(
+  b: LayoutBuilder,
+  title: string,
+  date: string,
+  w: number,
+  colors: Theme['colors'],
+  fp: FontPreset,
+  forceBlack: boolean,
+  editRef?: EditRef,
+): EntryResult {
+  const stacked = w < 250
+  const dateW = date && !stacked ? Math.min(126, w * 0.3) : 0
+  const titleW = dateW ? w - dateW - 14 : w
+  const titleH = estimateStyledTextHeight(title, titleW, fp.scale.entryTitle, fp.lineHeight.heading, 0, fp.headingFamily, 600)
+  const dateH = date ? estimateTextHeight(date, stacked ? w : dateW, fp.scale.small, fp.lineHeight.body, fp.bodyFamily) : 0
+  const dateY = stacked ? titleH + 4 : Math.max(0, (fp.scale.entryTitle * fp.lineHeight.heading - fp.scale.small * fp.lineHeight.body) * 0.75)
+  const nodes = [tn(b, 'text', 0, 0, titleW, titleH, {
+    ...entryTitleStyle(colors, fp, forceBlack), fontWeight: 600,
+  }, title, editRef)]
+  if (date) nodes.push(tn(b, 'text', stacked ? 0 : w - dateW, dateY,
+    stacked ? w : dateW, dateH, {
+      ...smallStyle(colors, fp), color: forceBlack ? '#000000' : colors.textMuted,
+      textAlign: stacked ? 'left' : 'right', fontWeight: 400,
+    }, date))
+  return { nodes, height: date ? Math.max(titleH, dateY + dateH) : titleH }
+}
+
 export function buildExperienceEntry(b: LayoutBuilder, entry: ExperienceSection, w: number, colors: Theme['colors'], fp: FontPreset, forceBlack: boolean): EntryResult {
   const nodes: LayoutNode[] = []
   let iy = 0
@@ -115,62 +144,51 @@ export function buildExperienceEntry(b: LayoutBuilder, entry: ExperienceSection,
   const endLabel = entry.current ? 'Present' : entry.endDate
   const dateLine = [entry.startDate, endLabel].filter(Boolean).join(' – ')
 
-  // 2x2 Grid Layout
-  // Row 1: Role (Left), Date (Right) — height accounts for wrapping on either side,
-  // since narrow (e.g. sidebar/two-column) widths can wrap both columns.
-  const roleH = Math.max(
-    estimateTextHeight(entry.role || 'Role', w * 0.7, fp.scale.entryTitle, fp.lineHeight.heading),
-    estimateTextHeight(dateLine, w * 0.3, fp.scale.small, fp.lineHeight.body)
-  )
-  nodes.push(tn(b, 'text', 0, iy, w * 0.7, roleH, {
-    ...entryTitleStyle(colors, fp, forceBlack),
-    color: colors.primary,
-    fontWeight: 700
-  }, entry.role || 'Role', { kind: 'entry-field', sectionType: 'experience', entryId: entry.id, field: 'role' }))
+  const heading = entryHeading(b, entry.role || 'Role', dateLine, w, colors, fp, forceBlack,
+    { kind: 'entry-field', sectionType: 'experience', entryId: entry.id, field: 'role' })
+  nodes.push(...heading.nodes)
+  iy += heading.height + 3
 
-  nodes.push(tn(b, 'text', w * 0.7, iy, w * 0.3, roleH, {
-    ...smallStyle(colors, fp),
-    textAlign: 'right',
-    fontWeight: 700,
-    color: colors.textPrimary
-  }, dateLine))
-  iy += roleH + 2
-
-  // Row 2: Company (Left), Location (Right)
-  const companyH = Math.max(
-    estimateTextHeight(entry.company || 'Company', w * 0.7, fp.scale.body, fp.lineHeight.body),
-    entry.location ? estimateTextHeight(entry.location, w * 0.3, fp.scale.small, 1.4) : 0
-  )
-  nodes.push(tn(b, 'text', 0, iy, w * 0.7, companyH, {
+  // Narrow columns use stacked metadata; wider columns keep a real gutter.
+  const stackLocation = w < 250
+  const locationW = entry.location && !stackLocation ? Math.min(108, w * 0.3) : 0
+  const companyW = locationW ? w - locationW - 14 : w
+  const companyH = estimateTextHeight(entry.company || 'Company', companyW, fp.scale.body, fp.lineHeight.body, fp.bodyFamily, 600)
+  nodes.push(tn(b, 'text', 0, iy, companyW, companyH, {
     ...bodyStyle(colors, fp, forceBlack),
     fontWeight: 600,
     color: colors.textSecondary
   }, entry.company || 'Company', { kind: 'entry-field', sectionType: 'experience', entryId: entry.id, field: 'company' }))
 
-  nodes.push(tn(b, 'text', w * 0.7, iy, w * 0.3, companyH, {
-    ...metadataStyle(colors, fp),
-    textAlign: 'right'
-  }, entry.location, { kind: 'entry-field', sectionType: 'experience', entryId: entry.id, field: 'location' }))
-  iy += companyH + 10
+  let metadataH = companyH
+  if (entry.location) {
+    const locationStyle = { ...metadataStyle(colors, fp), fontStyle: 'normal' as const, textAlign: stackLocation ? 'left' as const : 'right' as const }
+    const locationH = estimateTextHeight(entry.location, stackLocation ? w : locationW, locationStyle.fontSize, locationStyle.lineHeight, fp.bodyFamily)
+    const locationY = stackLocation ? companyH + 3 : Math.max(0, (fp.scale.body * fp.lineHeight.body - locationStyle.fontSize * locationStyle.lineHeight) * 0.75)
+    nodes.push(tn(b, 'text', stackLocation ? 0 : w - locationW, iy + locationY, stackLocation ? w : locationW, locationH, locationStyle,
+      entry.location, { kind: 'entry-field', sectionType: 'experience', entryId: entry.id, field: 'location' }))
+    metadataH = Math.max(companyH, locationY + locationH)
+  }
+  iy += metadataH
 
-  // Bullets with primary color symbols
-  for (const [index, bullet] of entry.description.entries()) {
-    if (!bullet) continue
-    const bH = estimateBulletHeight(bullet, w, fp.scale.body, fp.lineHeight.body)
+  const bullets = entry.description.map((text, index) => ({ text, index })).filter(bullet => bullet.text)
+  if (bullets.length) iy += 8
+  for (const [position, { text: bullet, index }] of bullets.entries()) {
+    const bH = estimateTextHeight(bullet, w - 12, fp.scale.body, fp.lineHeight.body, fp.bodyFamily)
 
     // Accent Bullet
-    nodes.push(tn(b, 'text', 0, iy, 12, bH, {
+    nodes.push(tn(b, 'text', 0, iy, 8, bH, {
         ...bodyStyle(colors, fp, forceBlack),
         color: colors.primary,
-        fontWeight: 800
+        fontWeight: 400
     }, '•'))
 
-    nodes.push(tn(b, 'text', 14, iy, w - 14, bH, {
+    nodes.push(tn(b, 'text', 12, iy, w - 12, bH, {
         ...bodyStyle(colors, fp, forceBlack),
-        lineHeight: 1.45,
+        lineHeight: fp.lineHeight.body,
         color: colors.textSecondary
     }, bullet, { kind: 'entry-list-item', sectionType: 'experience', entryId: entry.id, field: 'description', index }))
-    iy += bH + 5
+    iy += bH + (position < bullets.length - 1 ? 4 : 0)
   }
 
   return { nodes, height: iy, entryId: entry.id }
@@ -183,30 +201,23 @@ export function buildEducationEntry(b: LayoutBuilder, entry: EducationSection, w
   const degreeText = [entry.degree, entry.fieldOfStudy ? `in ${entry.fieldOfStudy}` : ''].filter(Boolean).join(' ')
   const dateLine = [entry.startDate, entry.endDate].filter(Boolean).join(' – ')
 
-  const degH = Math.max(
-    estimateTextHeight(degreeText, w * 0.7, fp.scale.entryTitle, fp.lineHeight.heading),
-    estimateTextHeight(dateLine, w * 0.3, fp.scale.small, fp.lineHeight.body)
-  )
-  nodes.push(tn(b, 'text', 0, iy, w * 0.7, degH, {
-    ...entryTitleStyle(colors, fp, forceBlack),
-    fontWeight: 700,
-    color: colors.primary
-  }, degreeText))
-  nodes.push(tn(b, 'text', w * 0.7, iy, w * 0.3, degH, {
-    ...smallStyle(colors, fp),
-    textAlign: 'right',
-    fontWeight: 700
-  }, dateLine))
-  iy += degH + 2
+  const heading = entryHeading(b, degreeText, dateLine, w, colors, fp, forceBlack)
+  nodes.push(...heading.nodes)
+  iy += heading.height + 4
 
   const gradeText = entry.grade ? `GPA: ${entry.grade}` : ''
-  const instH = Math.max(
-    estimateTextHeight(entry.institution, w * 0.7, fp.scale.body, fp.lineHeight.body),
-    gradeText ? estimateTextHeight(gradeText, w * 0.3, fp.scale.caption, 1.3) : 0
-  )
-  nodes.push(tn(b, 'text', 0, iy, w * 0.7, instH, { ...bodyStyle(colors, fp, forceBlack), fontWeight: 600 }, entry.institution, { kind: 'entry-field', sectionType: 'education', entryId: entry.id, field: 'institution' }))
-  if (gradeText) nodes.push(tn(b, 'text', w * 0.7, iy, w * 0.3, instH, { ...captionStyle(colors, fp), textAlign: 'right', color: colors.accent, fontWeight: 700 }, gradeText))
+  const inlineGrade = !!gradeText && w >= 250
+  const institutionW = inlineGrade ? w - 88 : w
+  const instH = estimateTextHeight(entry.institution, institutionW, fp.scale.body, fp.lineHeight.body, fp.bodyFamily)
+  nodes.push(tn(b, 'text', 0, iy, institutionW, instH, { ...bodyStyle(colors, fp, forceBlack), color: colors.textSecondary }, entry.institution, { kind: 'entry-field', sectionType: 'education', entryId: entry.id, field: 'institution' }))
+  if (inlineGrade) nodes.push(tn(b, 'text', w - 74, iy + (fp.scale.body - fp.scale.small) * fp.lineHeight.body * 0.75, 74, fp.scale.small * fp.lineHeight.body,
+    { ...smallStyle(colors, fp), textAlign: 'right' }, gradeText))
   iy += instH
+  if (gradeText && !inlineGrade) {
+    const gradeH = fp.scale.small * fp.lineHeight.body
+    nodes.push(tn(b, 'text', 0, iy + 3, w, gradeH, smallStyle(colors, fp), gradeText))
+    iy += gradeH + 3
+  }
 
   return { nodes, height: iy, entryId: entry.id }
 }
@@ -214,25 +225,39 @@ export function buildEducationEntry(b: LayoutBuilder, entry: EducationSection, w
 export function buildSkillPills(b: LayoutBuilder, section: SkillSection, w: number, colors: Theme['colors'], fp: FontPreset, forceBlack: boolean): EntryResult {
   const nodes: LayoutNode[] = []
   let iy = 0
+
+  const skillsText = section.skills.map(s => s.name).join(' · ')
+  if (w >= 300) {
+    const labelW = Math.min(110, w * 0.24)
+    const textW = w - labelW - 14
+    const labelH = estimateStyledTextHeight(section.category, labelW, fp.scale.body, fp.lineHeight.body, 0, fp.bodyFamily, 600)
+    const textH = estimateTextHeight(skillsText, textW, fp.scale.body, fp.lineHeight.body, fp.bodyFamily)
+    return {
+      nodes: [
+        tn(b, 'text', 0, 0, labelW, labelH, { ...bodyStyle(colors, fp, forceBlack), fontWeight: 600 }, section.category),
+        tn(b, 'text', labelW + 14, 0, textW, textH, { ...bodyStyle(colors, fp, forceBlack), color: colors.textSecondary }, skillsText),
+      ],
+      height: Math.max(labelH, textH),
+    }
+  }
   
-  const catH = fp.scale.body * fp.lineHeight.body
+  const catH = estimateStyledTextHeight(section.category, w, fp.scale.body, fp.lineHeight.body, 0, fp.bodyFamily, 600)
   nodes.push(tn(b, 'text', 0, iy, w, catH, { 
     ...bodyStyle(colors, fp, forceBlack), 
-    fontWeight: 700, 
+    fontWeight: 600,
     color: colors.textPrimary,
-    letterSpacing: 0.02
-  }, section.category.toUpperCase()))
-  iy += catH + 6
+    letterSpacing: 0,
+  }, section.category))
+  iy += catH + 3
   
-  const skillsText = section.skills.map(s => s.name).join('   •   ')
-  const skillsH = estimateTextHeight(skillsText, w, fp.scale.body, 1.4)
+  const skillsH = estimateTextHeight(skillsText, w, fp.scale.body, fp.lineHeight.body, fp.bodyFamily)
   nodes.push(tn(b, 'text', 0, iy, w, skillsH, {
       ...bodyStyle(colors, fp, forceBlack),
       color: colors.textSecondary,
-      lineHeight: 1.4
+      lineHeight: fp.lineHeight.body
   }, skillsText))
   
-  return { nodes, height: iy + skillsH + 8 }
+  return { nodes, height: iy + skillsH }
 }
 
 /** Skill name with a horizontal 1-5 rating bar underneath — for sidebar/creative templates. */
@@ -248,7 +273,7 @@ export function buildSkillBar(
   const nodes: LayoutNode[] = []
   let iy = 0
 
-  const nameH = fp.scale.body * fp.lineHeight.body
+  const nameH = estimateTextHeight(skill.name, w, fp.scale.body, fp.lineHeight.body, fp.bodyFamily, 600)
   nodes.push(tn(b, 'text', 0, iy, w, nameH, {
     fontFamily: fp.bodyFamily,
     fontSize: fp.scale.body,
@@ -268,46 +293,73 @@ export function buildSkillBar(
   return { nodes, height: iy }
 }
 
+/** Honest graphical ratings: unranked skills stay text-only, never default to
+ * an invented proficiency. Compact rows work inside the portrait sidebars. */
+export function buildRatedSkillGroup(
+  b: LayoutBuilder, group: SkillSection, w: number, colors: Theme['colors'], fp: FontPreset, presentation: 'bars' | 'dots',
+): EntryResult {
+  const nodes: LayoutNode[] = []
+  const labelH = estimateTextHeight(group.category, w, fp.scale.body, fp.lineHeight.body, fp.bodyFamily, 600)
+  nodes.push(tn(b, 'text', 0, 0, w, labelH, {
+    ...bodyStyle(colors, fp, false), fontWeight: 600,
+  }, group.category))
+  let y = labelH + 6
+  for (const skill of group.skills) {
+    const rated = typeof skill.level === 'number' && Number.isFinite(skill.level)
+    const labelW = rated ? w * 0.57 : w
+    const h = Math.max(estimateTextHeight(skill.name, labelW, fp.scale.small, 1.45, fp.bodyFamily),
+      estimateWrappedTextHeight(skill.name, labelW, fp.scale.small, 1.45, fp.bodyFamily))
+    nodes.push(tn(b, 'text', 0, y, labelW, h, {
+      ...smallStyle(colors, fp), color: colors.textPrimary, lineHeight: 1.45,
+    }, skill.name))
+    if (rated) {
+      const rx = w * 0.64
+      const rw = w - rx
+      const level = Math.min(5, Math.max(0, skill.level!))
+      const centerY = y + fp.scale.small * 1.45 / 2
+      if (presentation === 'dots') {
+        const d = Math.min(5, rw / 8)
+        for (let index = 0; index < 5; index++) nodes.push(b.node('rect', rx + index * (rw - d) / 4, centerY - d / 2, d, d,
+          { backgroundColor: index < level ? colors.primary : colors.divider }, { clipShape: 'circle' }))
+      } else {
+        nodes.push(b.node('rect', rx, centerY - 2, rw, 4, { backgroundColor: colors.divider }, { clipShape: 'rounded' }))
+        if (level > 0) nodes.push(b.node('rect', rx, centerY - 2, rw * level / 5, 4, { backgroundColor: colors.primary }, { clipShape: 'rounded' }))
+      }
+    }
+    y += h + 5
+  }
+  return { nodes, height: group.skills.length ? y - 5 : labelH }
+}
+
 export function buildProjectEntry(b: LayoutBuilder, entry: ProjectSection, w: number, colors: Theme['colors'], fp: FontPreset, forceBlack: boolean): EntryResult {
   const nodes: LayoutNode[] = []
   let iy = 0
 
   const dateLine = [entry.startDate, entry.endDate].filter(Boolean).join(' – ')
-  const titleH = Math.max(
-    estimateTextHeight(entry.title, w * 0.7, fp.scale.entryTitle, fp.lineHeight.heading),
-    dateLine ? estimateTextHeight(dateLine, w * 0.3, fp.scale.caption, 1.3) : 0
-  )
-
-  nodes.push(tn(b, 'text', 0, iy, w * 0.7, titleH, {
-    ...entryTitleStyle(colors, fp, forceBlack),
-    fontWeight: 700,
-    color: colors.primary
-  }, entry.title, { kind: 'entry-field', sectionType: 'projects', entryId: entry.id, field: 'title' }))
-  if (dateLine) nodes.push(tn(b, 'text', w * 0.7, iy, w * 0.3, titleH, { ...captionStyle(colors, fp), textAlign: 'right', fontWeight: 700 }, dateLine))
-  iy += titleH + 4
+  const heading = entryHeading(b, entry.title, dateLine, w, colors, fp, forceBlack,
+    { kind: 'entry-field', sectionType: 'projects', entryId: entry.id, field: 'title' })
+  nodes.push(...heading.nodes)
+  iy += heading.height + 4
 
   if (entry.technologies && entry.technologies.length > 0) {
-    const tagsText = entry.technologies.join('   •   ')
-    const tagH = estimateTextHeight(tagsText, w, fp.scale.small, 1.5)
+    const tagsText = entry.technologies.join(' · ')
+    const tagH = estimateTextHeight(tagsText, w, fp.scale.small, fp.lineHeight.body, fp.bodyFamily)
     nodes.push(tn(b, 'text', 0, iy, w, tagH, {
-      ...captionStyle(colors, fp),
-      color: colors.accent,
-      fontWeight: 800,
-      backgroundColor: colors.accent + '10',
-      paddingLeftPt: 6,
-      paddingRightPt: 6
+      ...smallStyle(colors, fp),
+      color: colors.textMuted,
+      fontWeight: 400,
     }, tagsText))
-    iy += tagH + 8
+    iy += tagH + 6
   }
   
   if (entry.description) {
-    const descH = estimateTextHeight(entry.description, w, fp.scale.body, 1.4)
+    const descH = estimateTextHeight(entry.description, w, fp.scale.body, fp.lineHeight.body, fp.bodyFamily)
     nodes.push(tn(b, 'text', 0, iy, w, descH, {
         ...bodyStyle(colors, fp, forceBlack),
         color: colors.textSecondary,
-        lineHeight: 1.4
+        lineHeight: fp.lineHeight.body
     }, entry.description, { kind: 'entry-field', sectionType: 'projects', entryId: entry.id, field: 'description' }))
-    iy += descH + 4
+    iy += descH
   }
 
   return { nodes, height: iy, entryId: entry.id }
@@ -316,19 +368,27 @@ export function buildProjectEntry(b: LayoutBuilder, entry: ProjectSection, w: nu
 export function buildCertEntry(b: LayoutBuilder, entry: CertificationSection, w: number, colors: Theme['colors'], fp: FontPreset, forceBlack: boolean): EntryResult {
   const nodes: LayoutNode[] = []
   let iy = 0
-  const titleH = Math.max(
-    estimateTextHeight(entry.title, w * 0.75, fp.scale.body, fp.lineHeight.body),
-    entry.issueDate ? estimateTextHeight(entry.issueDate, w * 0.25, fp.scale.caption, 1.3) : 0
-  )
-  nodes.push(tn(b, 'text', 0, iy, w * 0.75, titleH, { ...bodyStyle(colors, fp, forceBlack), fontWeight: 700 }, entry.title, { kind: 'entry-field', sectionType: 'certifications', entryId: entry.id, field: 'title' }))
-  nodes.push(tn(b, 'text', w * 0.75, iy, w * 0.25, titleH, { ...captionStyle(colors, fp), textAlign: 'right', fontWeight: 600 }, entry.issueDate, { kind: 'entry-field', sectionType: 'certifications', entryId: entry.id, field: 'issueDate' }))
-  iy += titleH + 2
+  const stacked = w < 250
+  const dateW = entry.issueDate && !stacked ? Math.min(88, w * 0.25) : 0
+  const titleW = dateW ? w - dateW - 14 : w
+  const titleH = estimateTextHeight(entry.title, titleW, fp.scale.body, fp.lineHeight.body, fp.bodyFamily, 600)
+  nodes.push(tn(b, 'text', 0, iy, titleW, titleH, { ...bodyStyle(colors, fp, forceBlack), fontWeight: 600 }, entry.title, { kind: 'entry-field', sectionType: 'certifications', entryId: entry.id, field: 'title' }))
+  let headingH = titleH
+  if (entry.issueDate) {
+    const dateH = estimateTextHeight(entry.issueDate, stacked ? w : dateW, fp.scale.small, fp.lineHeight.body, fp.bodyFamily)
+    const dateY = stacked ? titleH + 3 : (fp.scale.body - fp.scale.small) * fp.lineHeight.body * 0.75
+    nodes.push(tn(b, 'text', stacked ? 0 : w - dateW, dateY, stacked ? w : dateW, dateH,
+      { ...smallStyle(colors, fp), textAlign: stacked ? 'left' : 'right' }, entry.issueDate,
+      { kind: 'entry-field', sectionType: 'certifications', entryId: entry.id, field: 'issueDate' }))
+    headingH = Math.max(titleH, dateY + dateH)
+  }
+  iy += headingH + 3
   const issuerText = `${entry.issuer}${entry.credentialId ? `   |   ${entry.credentialId}` : ''}`
   // Measured with the same line height smallStyle renders at — measuring at a
   // tighter one made the box shorter than the text, so a wrapped issuer ran
   // into whatever followed it.
-  const issuerH = estimateTextHeight(issuerText, w, fp.scale.small, fp.lineHeight.body)
-  nodes.push(tn(b, 'text', 0, iy, w, issuerH, { ...smallStyle(colors, fp), color: colors.textSecondary, fontWeight: 600 }, issuerText))
+  const issuerH = estimateTextHeight(issuerText, w, fp.scale.small, fp.lineHeight.body, fp.bodyFamily)
+  nodes.push(tn(b, 'text', 0, iy, w, issuerH, { ...smallStyle(colors, fp), color: colors.textSecondary, fontWeight: 400 }, issuerText))
   iy += issuerH
   return { nodes, height: iy, entryId: entry.id }
 }
@@ -352,12 +412,13 @@ export function placeEntryBlock(
   entries: EntryResult[],
   entryGap: number,
   buildHeader: (continued: boolean) => SectionHeaderResult,
-  bodyStyleFor: Partial<LayoutStyles>
+  bodyStyleFor: Partial<LayoutStyles>,
+  entryInsetPt = 0
 ): void {
   if (!entries.length) return
 
   let header = buildHeader(false)
-  b.ensureSpace(header.height + 60)
+  b.ensureSpace(header.height + entries[0].height)
 
   let sectionY = b.y
   let children: LayoutNode[] = [...header.nodes]
@@ -369,15 +430,19 @@ export function placeEntryBlock(
 
   for (let i = 0; i < entries.length; i++) {
     const { nodes, height, entryId } = entries[i]
+    let gap = i === 0 ? 0 : entryGap
 
-    if (b.willOverflow(innerY + height)) {
+    if (b.willOverflow(innerY + gap + height)) {
       flush()
-      b.ensureSpace(height + 40)
       header = buildHeader(true)
+      b.ensureSpace(header.height + height)
       sectionY = b.y
       children = [...header.nodes]
       innerY = header.height
+      gap = 0
     }
+
+    innerY += gap
 
     // Entries with a known Resume id get wrapped in an 'entry' node (local
     // coordinates preserved for its children) so the canvas can select and
@@ -387,17 +452,16 @@ export function placeEntryBlock(
       // Only the four entry-bearing builders (buildExperienceEntry, buildEducationEntry,
       // buildProjectEntry, buildCertEntry) set `entryId`, so `sectionType` here is always
       // one of EntrySectionType — summary/skills/custom entries never populate it.
-      children.push(b.node('entry', 0, innerY, w, height, {}, {
+      children.push(b.node('entry', entryInsetPt, innerY, w - entryInsetPt, height, {}, {
         children: nodes,
         editRef: { kind: 'entry', sectionType: sectionType as EntrySectionType, entryId },
       }))
     } else {
       for (const node of nodes) {
-        children.push({ ...node, yPt: node.yPt + innerY })
+        children.push({ ...node, xPt: node.xPt + entryInsetPt, yPt: node.yPt + innerY })
       }
     }
     innerY += height
-    if (i < entries.length - 1) innerY += entryGap
   }
 
   flush()
@@ -411,7 +475,8 @@ function placeSection(
   w: number,
   entries: EntryResult[],
   entryGap: number,
-  c: RenderCtx
+  c: RenderCtx,
+  customSectionId?: string
 ): void {
   const { theme, fp, forceBlack, uppercase } = c
   const colors = theme.colors
@@ -424,7 +489,13 @@ function placeSection(
         ...sectionTitleStyle(colors, fp, forceBlack, uppercase),
         color: colors.textPrimary,
         fontWeight: 700
-    }, uppercase || continued ? label.toUpperCase() : label))
+    }, uppercase || continued ? label.toUpperCase() : label, continued
+      ? undefined
+      : customSectionId
+        ? { kind: 'custom-section-title', sectionId: customSectionId, defaultValue: title }
+        : sectionType === 'custom'
+          ? undefined
+          : { kind: 'section-title', sectionType, defaultValue: title }))
     nodes.push(tn(b, 'divider', 0, titleH + 6, w, 1, { color: colors.divider }))
     return { nodes, height: titleH + 24 }
   }
@@ -447,7 +518,10 @@ export function renderSectionSingleColumn(c: RenderCtx, sectionType: SectionType
   const { builder: b, theme, fp, forceBlack } = c
   const colors = theme.colors
   const { x, w } = getXW(c)
-  const title = TITLES[sectionType]
+  const defaultTitle = TITLES[sectionType]
+  const title = sectionType === 'custom'
+    ? defaultTitle
+    : resume.sectionTitles?.[sectionType] ?? defaultTitle
 
   switch (sectionType) {
     case 'summary': {
@@ -496,7 +570,7 @@ export function renderSectionSingleColumn(c: RenderCtx, sectionType: SectionType
         placeSection(b, 'custom', cs.title, x, w, [{ 
             nodes: [tn(b, 'text', 0, 0, w, h, { ...bodyStyle(colors, fp, forceBlack), lineHeight: 1.5 }, text)], 
             height: h 
-        }], 0, c)
+        }], 0, c, cs.id)
       }
       break
     }

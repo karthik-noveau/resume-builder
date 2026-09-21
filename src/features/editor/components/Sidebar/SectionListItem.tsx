@@ -59,6 +59,7 @@ export function SectionListItem({
         {...listeners}
         {...attributes}
         aria-label={`Drag to reorder ${label}`}
+        data-drag-handle
         className={clsx(styles.dragHandle, styles.revealable)}
       >
         <GripVertical size={14} aria-hidden="true" />

@@ -1,0 +1,197 @@
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  /* Fade into the next section without changing the page's existing palette. */
+  mask-image: linear-gradient(#000 0%, #000 76%, transparent 100%);
+}
+
+.arrival {
+  position: absolute;
+  inset: 0;
+  transform-origin: 70% 50%;
+}
+
+.waves {
+  position: absolute;
+  top: -2%;
+  left: 0;
+  width: 108%;
+  max-width: none;
+  height: 104%;
+}
+
+.violetStop {
+  stop-color: rgb(var(--color-primary));
+}
+.blueStop {
+  stop-color: rgb(var(--color-accent));
+}
+.backWave {
+  fill-opacity: 0.09;
+}
+.frontWave {
+  fill: rgb(var(--color-accent));
+  fill-opacity: 0.055;
+}
+.depth {
+  transform-box: view-box;
+  transform-origin: center;
+}
+
+.edge,
+.trace {
+  fill: none;
+  stroke: rgb(var(--color-primary));
+  vector-effect: non-scaling-stroke;
+}
+.edge {
+  stroke-width: 1;
+  stroke-opacity: 0.14;
+}
+.trace {
+  stroke-width: 1.5;
+  stroke-opacity: 0.38;
+  stroke-linecap: round;
+  stroke-dasharray: 0.12 1;
+  stroke-dashoffset: 0.12;
+  opacity: 0;
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgb(var(--color-primary) / 7%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--color-primary) / 7%) 1px, transparent 1px);
+  background-size: 64px 64px;
+  /* The grid is most visible around the edges, keeping the headline clear. */
+  mask-image: radial-gradient(ellipse at 50% 20%, transparent 15%, #000 72%);
+}
+
+.motionToggle {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgb(var(--color-primary) / 14%);
+  border-radius: 50%;
+  color: var(--home-muted);
+  background: rgb(var(--color-surface) / 75%);
+  cursor: pointer;
+}
+.motionToggle:hover {
+  color: var(--home-accent);
+  background: var(--home-surface);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .arrival {
+    animation: arrive 2200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .waves {
+    animation: drift 24s ease-in-out 2200ms infinite;
+  }
+  .depth {
+    animation: depth 30s ease-in-out 2200ms infinite;
+  }
+  .trace {
+    animation: glint 12s ease-in-out 400ms infinite;
+  }
+  .grid {
+    animation: breathe 16s ease-in-out infinite;
+  }
+  .arrival,
+  .waves,
+  .depth,
+  .trace,
+  .grid {
+    animation-play-state: var(--backdrop-motion, running);
+  }
+}
+
+.backdrop[data-paused='true'] {
+  --backdrop-motion: paused;
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translate3d(5%, 0, 0) scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
+  50% {
+    transform: translate3d(-3%, 1.5%, 0) rotate(-1deg);
+  }
+}
+@keyframes depth {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(2.5%, -2%, 0);
+  }
+}
+@keyframes glint {
+  0% {
+    stroke-dashoffset: 0.12;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  40% {
+    stroke-dashoffset: -1;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: -1;
+    opacity: 0;
+  }
+}
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 620px) {
+  .waves {
+    left: -35%;
+    width: 155%;
+  }
+  .grid {
+    background-size: 48px 48px;
+  }
+  .motionToggle {
+    top: 8px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .motionToggle {
+    display: none;
+  }
+}

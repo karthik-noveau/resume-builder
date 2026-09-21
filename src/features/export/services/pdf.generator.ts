@@ -1,10 +1,18 @@
 import type { PDFPage } from 'pdf-lib';
-import { PDFDocument, rgb, degrees, LineCapStyle } from 'pdf-lib'
+import {
+  PDFDocument, rgb, degrees, LineCapStyle, setCharacterSpacing,
+  pushGraphicsState, popGraphicsState, beginText, endText,
+  setFontAndSize, setTextMatrix, setFillingRgbColor, showText,
+  clip, endPath,
+} from 'pdf-lib'
+import type { PDFFont } from 'pdf-lib'
 import type { LayoutTree, LayoutNode, LayoutPage } from '@/shared/types/layout.types'
 import { FontEmbedder } from './font.embedder'
 import { ImageEmbedder } from './image.embedder'
 import { LinkHandler } from './link.handler'
 import { ICON_PATHS, ICON_VIEWBOX_PX } from '../../templates/engine/icons'
+import { shapePath } from './pdf.shapes'
+import { wrapTextLines } from '@/shared/utils/textMeasurement'
 
 export class PdfGenerator {
   private fontEmbedder!: FontEmbedder
@@ -44,6 +52,46 @@ export class PdfGenerator {
     }
   }
 
+  /**
+   * Draws a line slanted, for families that ship no italic cut.
+   *
+   * None of the four bundled families has an italic file, so `fontStyle:
+   * 'italic'` — which the templates set on every date and location — rendered
+   * upright in the PDF while the preview showed it slanted. Rather than ship
+   * four more font files, the glyphs are sheared by the text matrix: the same
+   * synthesised oblique a word processor falls back to. The text itself is
+   * unchanged, so the PDF stays selectable and parseable by an ATS.
+   */
+  private drawObliqueText(
+    page: PDFPage,
+    text: string,
+    x: number,
+    y: number,
+    size: number,
+    font: PDFFont,
+    color: { r: number; g: number; b: number },
+  ): void {
+    // tan(12°) — the conventional slant, matching how browsers synthesise it.
+    const SHEAR = 0.2126
+    // Registers the font in this page's resource dictionary and returns the
+    // name to reference it by — the same public call pdf-lib's own drawText
+    // makes. Inventing a name, or reaching for the private getFont(), would
+    // leave an unregistered reference that opens as a blank page, and this is
+    // the product's actual output.
+    const fontKey = page.node.newFontDictionary(font.name, font.ref)
+    page.pushOperators(
+      pushGraphicsState(),
+      beginText(),
+      setFillingRgbColor(color.r, color.g, color.b),
+      setFontAndSize(fontKey, size),
+      // [a b c d e f] — c is the horizontal shear applied per unit of height.
+      setTextMatrix(1, 0, SHEAR, 1, x, y),
+      showText(font.encodeText(text)),
+      endText(),
+      popGraphicsState(),
+    )
+  }
+
   private async drawNode(
     page: PDFPage,
     node: LayoutNode,
@@ -70,6 +118,9 @@ export class PdfGenerator {
       })
     } else if (bgColor && widthPt > 0 && heightPt > 0) {
       const { r, g, b, a } = this.parseColor(bgColor)
+      if (type === 'rect' && clipShape) {
+        page.pushOperators(pushGraphicsState(), ...shapePath(absX, yPdf, widthPt, heightPt, clipShape), clip(), endPath())
+      }
       // pdf-lib rotates a rectangle around its (x, y) corner, not its center.
       // Positive degrees is clockwise in screen/CSS space (y-down); PDF space
       // is y-up, so negate to keep rotationDeg visually consistent between
@@ -92,6 +143,7 @@ export class PdfGenerator {
         opacity: a,
         rotate: rotationDeg ? degrees(-rotationDeg) : undefined,
       })
+      if (type === 'rect' && clipShape) page.pushOperators(popGraphicsState())
     }
 
     // 'tag' belongs in this group: CanvasLeaf draws its label on screen, so
@@ -108,26 +160,35 @@ export class PdfGenerator {
           const font = await this.fontEmbedder.getFont(styles.fontFamily, styles.fontWeight)
           const fontSize = styles.fontSize
           const lineHeight = styles.lineHeight * fontSize
-          
-          const words = content.split(' ')
-          const lines: string[] = []
-          let currentLine = ''
+          // LayoutStyles carries letterSpacing in em, as CSS does; PDF character
+          // spacing is an absolute advance, so it scales with the font size.
+          // Rounded because the product of two floats goes into the file
+          // verbatim: 0.1em at 12pt is 1.2000000000000002, which is seventeen
+          // characters of noise per tracked run for no visible difference.
+          const tracking = Math.round((styles.letterSpacing ?? 0) * fontSize * 1000) / 1000
+          /** Width as it will actually be drawn — pdf-lib measures the glyphs
+           * only, so a tracked run measures short by one advance per character.
+           * Every template letterspaces its section titles, so without this the
+           * export wrapped at different words than the preview did. */
+          const widthOf = (text: string) =>
+            font.widthOfTextAtSize(text, fontSize) + Math.max(0, text.length - 1) * tracking
 
-          for (const word of words) {
-            const testLine = currentLine ? `${currentLine} ${word}` : word
-            const testWidth = font.widthOfTextAtSize(testLine, fontSize)
-            if (testWidth > widthPt && currentLine) {
-              lines.push(currentLine)
-              currentLine = word
-            } else {
-              currentLine = testLine
-            }
-          }
-          lines.push(currentLine)
+          // Explicit breaks are part of the layout (notably stacked names).
+          // Never pass them through to drawText: pdf-lib would apply its own
+          // default line spacing inside a single call instead of this node's.
+          const lines = wrapTextLines(content, widthPt, widthOf)
+
+          // Applied once around the whole run and reset after, so it cannot
+          // leak into the next node drawn on this page.
+          if (tracking !== 0) page.pushOperators(setCharacterSpacing(tracking))
 
           let lineY = yPdf + heightPt - lineHeight 
           for (const line of lines) {
-            const lineWidth = font.widthOfTextAtSize(line, fontSize)
+            if (!line) {
+              lineY -= lineHeight
+              continue
+            }
+            const lineWidth = widthOf(line)
             let drawX = absX
             if (styles.textAlign === 'center') {
               drawX = absX + (widthPt - lineWidth) / 2
@@ -136,16 +197,36 @@ export class PdfGenerator {
             }
 
             const { r, g, b, a } = this.parseColor(styles.color)
-            page.drawText(line, {
-              x: drawX,
-              y: lineY + (lineHeight * 0.25), 
-              size: fontSize,
-              font,
-              color: rgb(r, g, b),
-              opacity: a
-            })
+            const baselineY = lineY + (lineHeight * 0.25)
+            if (styles.fontStyle === 'italic') {
+              this.drawObliqueText(page, line, drawX, baselineY, fontSize, font, { r, g, b })
+            } else {
+              page.drawText(line, {
+                x: drawX,
+                y: baselineY,
+                size: fontSize,
+                font,
+                color: rgb(r, g, b),
+                opacity: a
+              })
+            }
+            if (styles.textDecoration === 'underline' && line) {
+              // pdf-lib has no text-decoration, so the rule is drawn by hand.
+              // Offsets are fractions of the font size so the line tracks the
+              // text at any size the style inspector allows.
+              page.drawRectangle({
+                x: drawX,
+                y: baselineY - fontSize * 0.12,
+                width: lineWidth,
+                height: Math.max(0.4, fontSize * 0.05),
+                color: rgb(r, g, b),
+                opacity: a,
+              })
+            }
             lineY -= lineHeight
           }
+
+          if (tracking !== 0) page.pushOperators(setCharacterSpacing(0))
         }
         break
 
@@ -166,31 +247,19 @@ export class PdfGenerator {
         if (imageId) {
           const image = await this.imageEmbedder.getImage(imageId)
           if (image) {
+            // Match object-fit: cover, with real clipping instead of painting
+            // corner masks that can obscure an adjacent panel or photo ring.
+            const scale = Math.max(widthPt / image.width, heightPt / image.height)
+            const imageW = image.width * scale
+            const imageH = image.height * scale
+            page.pushOperators(pushGraphicsState(), ...shapePath(absX, yPdf, widthPt, heightPt, clipShape), clip(), endPath())
             page.drawImage(image, {
-              x: absX,
-              y: yPdf,
-              width: widthPt,
-              height: heightPt,
+              x: absX + (widthPt - imageW) / 2,
+              y: yPdf + (heightPt - imageH) / 2,
+              width: imageW,
+              height: imageH,
             })
-
-            if (clipShape === 'circle') {
-              // Fake a circular crop: cover the four corners outside the
-              // inscribed circle with the surrounding background color.
-              // The rect and circle subpaths wind in opposite directions,
-              // so pdf-lib's nonzero-winding fill leaves the circle unpainted.
-              const { r: mr, g: mg, b: mb } = this.parseColor(styles.backgroundColor || '#ffffff')
-              const cx = widthPt / 2
-              const cy = heightPt / 2
-              const radius = Math.min(widthPt, heightPt) / 2
-              const maskPath =
-                `M0,0 L${widthPt},0 L${widthPt},${heightPt} L0,${heightPt} Z ` +
-                `M${cx - radius},${cy} A${radius},${radius} 0 1 0 ${cx + radius},${cy} A${radius},${radius} 0 1 0 ${cx - radius},${cy} Z`
-              page.drawSvgPath(maskPath, {
-                x: absX,
-                y: yPdf + heightPt,
-                color: rgb(mr, mg, mb),
-              })
-            }
+            page.pushOperators(popGraphicsState())
           }
         }
         break

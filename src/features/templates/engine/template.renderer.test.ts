@@ -5,7 +5,7 @@ import type { TemplateDefinition } from '@/shared/types/template.types'
 import type { Theme } from '@/shared/types/theme.types'
 import type { FontPreset } from '@/shared/types/font.types'
 import type { LayoutNode } from '@/shared/types/layout.types'
-import { createEmptyResume } from '@/features/resume/utils/resume.factory'
+import { createSampleResume } from '@/features/resume/utils/resume.factory'
 
 describe('TemplateRenderer', () => {
   const renderer = new TemplateRenderer()
@@ -104,7 +104,7 @@ describe('TemplateRenderer', () => {
     }
 
     it('tags the personal-info, summary, and entry fields it supports inline editing for', () => {
-      const resume = createEmptyResume('unregistered-template-for-fallback')
+      const resume = createSampleResume('unregistered-template-for-fallback')
       const layoutTree = renderer.render(resume, mockTemplate, mockTheme, mockFontPreset)
       const allNodes = flattenNodes(layoutTree.pages.flatMap((p) => p.nodes))
 
@@ -126,7 +126,7 @@ describe('TemplateRenderer', () => {
     })
 
     it('does not tag decorative or joined/derived text with an editRef', () => {
-      const resume = createEmptyResume('unregistered-template-for-fallback')
+      const resume = createSampleResume('unregistered-template-for-fallback')
       const layoutTree = renderer.render(resume, mockTemplate, mockTheme, mockFontPreset)
       const allNodes = flattenNodes(layoutTree.pages.flatMap((p) => p.nodes))
 

@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  gap: 16px;
+  gap: var(--space-4);
   overflow-x: auto;
 }
 
@@ -14,7 +14,7 @@
 .leftGroup {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   min-width: 0;
   flex-shrink: 1;
 }
@@ -45,7 +45,7 @@
 }
 
 .backLink {
-  padding: 6px;
+  padding: var(--space-1-5);
   border-radius: var(--radius-small);
   color: rgb(var(--color-text-muted));
   transition: color var(--duration-fast), background-color var(--duration-fast);
@@ -62,7 +62,7 @@
 }
 
 .title {
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   font-weight: 600;
   color: rgb(var(--color-text-primary));
   white-space: nowrap;
@@ -95,14 +95,14 @@
 .centerGroup {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   flex-shrink: 0;
 }
 
 .zoomWrap {
   display: none;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 @media (min-width: 768px) {
@@ -114,8 +114,46 @@
 .rightGroup {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   flex-shrink: 0;
+}
+
+.tourButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-large);
+  background: transparent;
+  color: rgb(var(--color-text-secondary));
+  font-size: var(--text-base);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tourButton:hover {
+  background: rgb(var(--color-primary) / 7%);
+  color: rgb(var(--color-primary));
+}
+
+.tourButton:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 2px;
+}
+
+.tourLabel {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .tourLabel {
+    display: inline;
+  }
 }
 
 /* Mirrors the guided editor's "Full Editor" button, so the two modes link to
@@ -123,10 +161,10 @@
 .guidedLink {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px;
+  gap: var(--space-2);
+  padding: var(--space-1-5);
   border-radius: var(--radius-large);
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   font-weight: 600;
   border: 1px solid rgb(var(--color-divider));
   color: rgb(var(--color-text-secondary));
@@ -152,9 +190,62 @@
   display: none;
 }
 
+@media (max-width: 1023px) {
+  .root {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 8px;
+    padding: 6px 12px;
+    overflow: visible;
+  }
+
+  .rightGroup {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+
+  .title {
+    max-width: none;
+  }
+
+  .leftGroup {
+    gap: 6px;
+  }
+
+  .backLink,
+  .brandLink {
+    display: grid;
+    place-items: center;
+  }
+
+  .brandLink,
+  .leftGroup .dividerDesktop,
+  .autosaveWrap {
+    display: none;
+  }
+
+  .centerGroup {
+    gap: 4px;
+  }
+
+  .centerGroup > :global([role="separator"]) {
+    display: none;
+  }
+
+  .rightGroup {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 767px) {
+  .centerGroup > :global([role="separator"]) {
+    display: none;
+  }
+}
+
 @media (min-width: 1024px) {
   .guidedLink {
-    padding: 6px 14px;
+    padding: var(--space-1-5) var(--space-3);
   }
 
   .guidedLinkLabel {

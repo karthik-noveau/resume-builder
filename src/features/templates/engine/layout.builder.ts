@@ -1,5 +1,5 @@
-import type { LayoutTree, LayoutPage, LayoutNode, LayoutNodeType, LayoutStyles, IconName, EditRef } from '@/shared/types/layout.types'
-import type { SectionType } from '@/shared/types/resume.types'
+import type { LayoutTree, LayoutPage, LayoutNode, LayoutNodeType, LayoutStyles, IconName, EditRef, ClipShape } from '@/shared/types/layout.types'
+import type { MarginSettings, SectionType } from '@/shared/types/resume.types'
 import { PAGE_DIMENSIONS_PT, MM_TO_PT } from '@/shared/types/layout.types'
 
 const FALLBACK_STYLE: LayoutStyles = {
@@ -26,11 +26,18 @@ export class LayoutBuilder {
       themeId: string
       fontPresetId: string
       pageSize: 'A4' | 'LETTER'
-      marginMm: number
+      marginMm: number | MarginSettings
     }
   ) {
-    const marginPt = meta.marginMm * MM_TO_PT
-    this.margins = { top: marginPt, right: marginPt, bottom: marginPt, left: marginPt }
+    const marginMm = typeof meta.marginMm === 'number'
+      ? { top: meta.marginMm, right: meta.marginMm, bottom: meta.marginMm, left: meta.marginMm }
+      : meta.marginMm
+    this.margins = {
+      top: marginMm.top * MM_TO_PT,
+      right: marginMm.right * MM_TO_PT,
+      bottom: marginMm.bottom * MM_TO_PT,
+      left: marginMm.left * MM_TO_PT,
+    }
     const dims = PAGE_DIMENSIONS_PT[meta.pageSize]
     this._pageW = dims.width
     this._pageH = dims.height
@@ -102,6 +109,27 @@ export class LayoutBuilder {
     this._y = pt
   }
 
+  /** Independent column cursor, starting beside the current content. */
+  forkColumn(): LayoutBuilder {
+    const column = new LayoutBuilder(this.meta)
+    while (column.pages.length < this.pages.length) column.newPage()
+    column.seekY(this.y)
+    return column
+  }
+
+  /** Merge independently paginated columns without sharing node identifiers. */
+  mergeColumn(column: LayoutBuilder): void {
+    const endY = column.pages.length > this.pages.length
+      ? column.y
+      : column.pages.length === this.pages.length ? Math.max(this.y, column.y) : this.y
+    while (this.pages.length < column.pages.length) this.newPage()
+    const copy = (node: LayoutNode): LayoutNode => ({
+      ...node, id: this.id(), children: node.children.map(copy),
+    })
+    column.pages.forEach((page, index) => this.pages[index].nodes.push(...page.nodes.map(copy)))
+    this._y = endY
+  }
+
   /** Place a finished section node on the current page and advance Y. */
   placeSection(node: LayoutNode): void {
     this.currentPage.nodes.push(node)
@@ -121,11 +149,12 @@ export class LayoutBuilder {
       imageId?: string
       sectionType?: SectionType
       children?: LayoutNode[]
-      clipShape?: 'circle'
+      clipShape?: ClipShape
       iconName?: IconName
       iconEditable?: boolean
       rotationDeg?: number
       editRef?: EditRef
+      panelTarget?: 'personal-info'
     } = {}
   ): LayoutNode {
     return {
@@ -146,6 +175,7 @@ export class LayoutBuilder {
       iconEditable: opts.iconEditable,
       rotationDeg: opts.rotationDeg,
       editRef: opts.editRef,
+      panelTarget: opts.panelTarget,
     }
   }
 

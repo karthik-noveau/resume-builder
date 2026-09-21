@@ -24,8 +24,8 @@ describe('AutosaveIndicator', () => {
     expect(screen.getByText('Saved')).toBeInTheDocument()
   })
 
-  it('renders nothing when dirty but not yet saving and no error', () => {
-    const { container } = render(<AutosaveIndicator isSaving={false} isDirty={true} error={null} />)
-    expect(container).toBeEmptyDOMElement()
+  it('shows pending changes before autosave starts', () => {
+    render(<AutosaveIndicator isSaving={false} isDirty={true} error={null} />)
+    expect(screen.getByRole('status')).toHaveTextContent('Unsaved changes')
   })
 })

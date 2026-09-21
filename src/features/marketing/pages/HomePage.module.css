@@ -1,0 +1,40 @@
+.home {
+  --home-bg: rgb(var(--color-background));
+  --home-surface: rgb(var(--color-surface));
+  --home-ink: rgb(var(--color-text-primary));
+  --home-muted: rgb(var(--color-text-secondary));
+  --home-line: rgb(var(--color-divider));
+  --home-accent: rgb(var(--color-primary));
+  --home-soft: rgb(var(--color-surface-elevated));
+  --home-hero: rgb(var(--color-background));
+  --home-panel: rgb(var(--color-surface-elevated));
+  --home-preview: rgb(var(--color-canvas));
+  --home-emphasis: rgb(var(--color-primary));
+  --home-button-bg: var(--gradient-brand);
+  --home-button-ink: #ffffff;
+  --home-button-hover: var(--gradient-brand-hover);
+  --home-shadow: rgb(var(--color-primary) / 14%);
+  --home-violet: rgb(var(--color-primary));
+  --home-display: 'Inter', sans-serif;
+  background: var(--home-bg);
+  color: var(--home-ink);
+  font-size: 16px;
+}
+.home section[id] {
+  scroll-margin-top: 92px;
+}
+.home a:focus-visible,
+.home button:focus-visible,
+.home summary:focus-visible {
+  outline: 3px solid var(--home-accent);
+  outline-offset: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .home *,
+  .home *::before,
+  .home *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

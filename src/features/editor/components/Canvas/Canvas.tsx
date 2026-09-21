@@ -157,6 +157,7 @@ export function Canvas({
     <div className={styles.viewport}>
       <div
         ref={containerRef}
+        data-editor-tour="canvas"
         className={styles.scrollArea}
         onClick={onCanvasClick}
         aria-label="Resume canvas"

@@ -1,0 +1,36 @@
+.trigger:global(.ant-btn) {
+  height: 38px;
+  flex-shrink: 0;
+  gap: var(--space-2);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  border: 1px solid rgb(var(--color-primary) / 18%);
+  background: color-mix(in srgb, rgb(var(--color-primary)) 7%, rgb(var(--color-surface)));
+  color: color-mix(in srgb, rgb(var(--color-primary)) 72%, rgb(var(--color-text-primary)));
+  font-size: var(--text-base);
+  font-weight: 600;
+  box-shadow: none;
+  transition: background-color var(--duration-fast), border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.trigger:global(.ant-btn):not(:disabled):hover {
+  background: color-mix(in srgb, rgb(var(--color-primary)) 12%, rgb(var(--color-surface)));
+  border-color: rgb(var(--color-primary) / 32%);
+  color: color-mix(in srgb, rgb(var(--color-primary)) 72%, rgb(var(--color-text-primary)));
+}
+
+.trigger:global(.ant-btn):not(:disabled):active {
+  background: color-mix(in srgb, rgb(var(--color-primary)) 17%, rgb(var(--color-surface)));
+}
+
+.trigger:global(.ant-btn):focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 3px;
+}
+
+.trigger:global(.ant-btn):disabled {
+  color: rgb(var(--color-text-muted));
+  background: rgb(var(--color-background));
+  border-color: rgb(var(--color-divider));
+  cursor: not-allowed;
+}

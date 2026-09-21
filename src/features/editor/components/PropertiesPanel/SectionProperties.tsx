@@ -15,7 +15,7 @@ import {
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import type { BaseSectionContract, Resume, SectionType } from '@/shared/types/resume.types'
 import { IconPicker } from '@/shared/components/IconPicker/IconPicker'
-import { ALL_TEMPLATES } from '@/features/templates/registry/template.registry'
+import { getTemplateById } from '@/features/templates/registry/template.registry'
 import { resolveSectionIcon, sectionIconKey } from '@/features/templates/engine/icons'
 import { ExperienceForm } from './ExperienceForm'
 import { EducationForm } from './EducationForm'
@@ -24,6 +24,7 @@ import { ProjectsForm } from './ProjectsForm'
 import { CertificationsForm } from './CertificationsForm'
 import { CustomSectionForm } from './CustomSectionForm'
 import { SummaryForm } from './SummaryForm'
+import { SectionTitleField, type SectionTitleEditRef } from './SectionTitleField'
 import { EntryCard } from './EntryCard'
 import { Button } from '@/shared/components/ui/Button/Button'
 import { Inbox, Plus } from 'lucide-react'
@@ -33,6 +34,7 @@ import styles from './SectionProperties.module.css'
 interface SectionPropertiesProps {
   resume: Resume
   sectionType: SectionType
+  titleEditRef?: SectionTitleEditRef
 }
 
 interface EntryListProps<T extends BaseSectionContract> {
@@ -58,7 +60,7 @@ function EntryList<T extends BaseSectionContract>({
   const updateSection = useResumeStore((s) => s.updateSection)
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
@@ -124,7 +126,7 @@ function EntryList<T extends BaseSectionContract>({
  */
 function SectionIconField({ resume, sectionType }: SectionPropertiesProps) {
   const setSectionIcon = useResumeStore((s) => s.setSectionIcon)
-  const template = ALL_TEMPLATES.find((t) => t.id === resume.templateId)
+  const template = getTemplateById(resume.templateId)
   const templateDefault = template?.sectionIcons?.[sectionType]
   if (!templateDefault) return null
 
@@ -150,6 +152,9 @@ function SectionIconField({ resume, sectionType }: SectionPropertiesProps) {
 export function SectionProperties(props: SectionPropertiesProps) {
   return (
     <>
+      {props.sectionType !== 'custom' && props.titleEditRef && (
+        <SectionTitleField resume={props.resume} editRef={props.titleEditRef} />
+      )}
       <SectionIconField {...props} />
       <SectionBody {...props} />
     </>

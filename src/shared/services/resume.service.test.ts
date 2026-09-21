@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { resumeService } from './resume.service'
 import { storageService } from './storage.service'
-import { createEmptyResume } from '@/features/resume/utils/resume.factory'
+import { createEmptyResume, createResumeFromParsed } from '@/features/resume/utils/resume.factory'
 import type { Resume } from '@/shared/types/resume.types'
 
 vi.mock('./storage.service', () => ({
@@ -17,7 +17,8 @@ vi.mock('./storage.service', () => ({
 }))
 
 vi.mock('@/features/resume/utils/resume.factory', () => ({
-  createEmptyResume: vi.fn().mockReturnValue({ id: 'new-id', title: 'New Resume' })
+  createEmptyResume: vi.fn().mockReturnValue({ id: 'new-id', title: 'New Resume' }),
+  createResumeFromParsed: vi.fn().mockReturnValue({ id: 'import-id', title: 'Imported Resume' }),
 }))
 
 vi.mock('./logger', () => ({
@@ -42,6 +43,27 @@ describe('ResumeService', () => {
     })
     expect(storageService.saveResume).toHaveBeenCalledWith(resume)
     expect(resume.id).toBe('new-id')
+  })
+
+  it('carries the default accent into new and imported resumes', async () => {
+    const settings = {
+      ...await storageService.getSettings(),
+      themeId: 'custom', customPrimaryColor: '#7a45d1', fontPresetId: 'minimal', pageSize: 'LETTER' as const,
+    }
+    vi.mocked(storageService.getSettings).mockResolvedValueOnce(settings).mockResolvedValueOnce(settings)
+    await resumeService.createResume('template-1')
+    await resumeService.createResumeFromImport('template-1', { fullName: 'Taylor Smith' })
+    const appearance = { themeId: 'custom', customPrimaryColor: '#7a45d1', fontPresetId: 'minimal', pageSize: 'LETTER' }
+    expect(createEmptyResume).toHaveBeenLastCalledWith('template-1', appearance)
+    expect(createResumeFromParsed).toHaveBeenLastCalledWith('template-1', { fullName: 'Taylor Smith' }, appearance)
+  })
+
+  it('honors an explicit theme choice over the saved default accent', async () => {
+    vi.mocked(storageService.getSettings).mockResolvedValueOnce({
+      ...await storageService.getSettings(), themeId: 'custom', customPrimaryColor: '#7a45d1',
+    })
+    await resumeService.createResume('template-1', { themeId: 'light' })
+    expect(createEmptyResume).toHaveBeenLastCalledWith('template-1', expect.objectContaining({ themeId: 'light', customPrimaryColor: undefined }))
   })
 
   it('duplicates an existing resume', async () => {

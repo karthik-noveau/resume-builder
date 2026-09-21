@@ -3,7 +3,8 @@ import type { TemplateDefinition } from '@/shared/types/template.types'
 import type { Theme, ThemeColors } from '@/shared/types/theme.types'
 import type { FontPreset } from '@/shared/types/font.types'
 import type { LayoutTree, LayoutNode, LayoutNodeType, LayoutStyles, EditRef } from '@/shared/types/layout.types'
-import { tintColor } from '@/shared/stores/theme.store'
+import { tintColor, CUSTOM_THEME_ID } from '@/shared/stores/theme.store'
+import { getTemplateColorConfiguration, resolveTemplateColors, type TemplateColorValues } from '@/shared/utils/templateColors'
 import { LayoutBuilder } from '../../engine/layout.builder'
 import {
   buildExperienceEntry,
@@ -13,7 +14,8 @@ import {
   type EntryResult,
   type SectionHeaderResult,
 } from '../../engine/section.renderers'
-import { estimateTextHeight, estimateStyledTextHeight, displayUrl} from '../../engine/layout.utils'
+import { applyResumeTypography, estimateTextHeight, estimateStyledTextHeight, resolveTemplateTypography, resumeSpacingMultiplier } from '../../engine/layout.utils'
+import { buildContactLineNodes, contactItems, measureContactHeight } from '../../engine/contact.layout'
 import { registerRenderer } from '../../engine/template.renderer'
 
 function t(
@@ -31,38 +33,60 @@ function t(
 }
 
 const COLORS: ThemeColors = {
-  primary: '#1d4ed8',
-  primaryHover: '#1e40af',
-  primaryActive: '#1e3a8a',
+  primary: '#0061c4',
+  primaryHover: '#0054aa',
+  primaryActive: '#00478f',
   background: '#ffffff',
   surface: '#ffffff',
   surfaceElevated: '#eff6ff',
-  textPrimary: '#0f172a',
+  textPrimary: '#111827',
   textSecondary: '#334155',
-  textMuted: '#64748b',
+  textMuted: '#475569',
   success: '#16a34a',
   warning: '#d97706',
   error: '#dc2626',
-  info: '#2563eb',
-  accent: '#1d4ed8',
-  divider: '#dbeafe',
+  info: '#0061c4',
+  accent: '#0061c4',
+  divider: '#cbd5e1',
 }
 
 /** Keeps this template's own text/background/divider identity, but lets the
  * selected app theme drive the accent color so theme switching is visible. */
-function resolveColors(theme: Theme): ThemeColors {
-  return {
-    ...COLORS,
-    primary: theme.colors.primary,
-    primaryHover: theme.colors.primaryHover,
-    primaryActive: theme.colors.primaryActive,
-    accent: theme.colors.accent,
-    divider: tintColor(theme.colors.primary, 0.85),
-  }
+type ResolvedColors = ThemeColors & Pick<TemplateColorValues,
+  'sectionTitle' | 'sectionDescription' | 'sectionBorder' | 'sectionIcon' | 'sectionBackground'
+> & {
+  panelBackground: string
+  panelText: string
+  panelSecondaryText: string
 }
 
-const SIDEBAR_TEXT = '#eff6ff'
-const SIDEBAR_TEXT_MUTED = '#bfdbfe'
+function resolveColors(theme: Theme, resume: Resume): ResolvedColors {
+  const defaults = getTemplateColorConfiguration('experienced-sidebar-logo').defaults
+  const selected = resolveTemplateColors(resume, {
+    ...defaults,
+    accent: theme.id === CUSTOM_THEME_ID ? theme.colors.primary : defaults.accent,
+  })
+  return {
+    ...COLORS,
+    primary: selected.accent,
+    primaryHover: tintColor(selected.accent, -0.15),
+    primaryActive: tintColor(selected.accent, -0.3),
+    accent: selected.accent,
+    divider: selected.divider,
+    surfaceElevated: selected.softBackground,
+    textPrimary: selected.primaryText,
+    textSecondary: selected.sectionDescription,
+    textMuted: selected.mutedText,
+    panelBackground: selected.panelBackground,
+    panelText: selected.panelText,
+    panelSecondaryText: selected.panelSecondaryText,
+    sectionTitle: selected.sectionTitle,
+    sectionDescription: selected.sectionDescription,
+    sectionBorder: selected.sectionBorder,
+    sectionIcon: selected.sectionIcon,
+    sectionBackground: selected.sectionBackground,
+  }
+}
 
 const SIDEBAR_TYPES = new Set<SectionType>(['skills', 'certifications', 'custom'])
 
@@ -85,19 +109,25 @@ function getInitials(fullName: string): string {
 }
 
 function render(resume: Resume, template: TemplateDefinition, theme: Theme, fp: FontPreset): LayoutTree {
-  const colors = resolveColors(theme)
+  const colors = resolveColors(theme, resume)
+  const fpx = applyResumeTypography(resolveTemplateTypography(fp, {
+    headingFamily: 'SourceSerifPro',
+    bodyFamily: 'Inter',
+    scale: { name: 32, headline: 11.5, sectionTitle: 10, entryTitle: 11, body: 9.5, small: 8.5, caption: 8 },
+    lineHeight: { heading: 1.2, body: 1.5 },
+  }), resume.settings)
   const builder = new LayoutBuilder({
     resumeId: resume.id,
     templateId: template.id,
     themeId: theme.id,
     fontPresetId: fp.id,
     pageSize: resume.settings.pageSize,
-    marginMm: 16,
+    marginMm: resume.settings.margins ?? 16,
   })
 
-  const sidebarW = builder.pageW * 0.32
-  const pad = 20
-  const gutter = 26
+  const sidebarW = builder.pageW * 0.29
+  const pad = 24
+  const gutter = 28
   const mainX = sidebarW + gutter
   const mainW = builder.pageW - mainX - builder.margins.right
   const sidebarContentX = pad
@@ -112,18 +142,18 @@ function render(resume: Resume, template: TemplateDefinition, theme: Theme, fp: 
   // entirely on the final page once the first one paginates. The sidebar is
   // the shorter column, so the main column is the one allowed to overflow.
   builder.seekY(afterMonogramY)
-  const sidebarOrder = resume.sectionOrder.filter((s) => SIDEBAR_TYPES.has(s))
+  const sidebarOrder = resume.sectionOrder.filter((s) => s !== 'custom' && SIDEBAR_TYPES.has(s))
   for (const sectionType of sidebarOrder) {
-    renderSidebarSection(builder, sectionType, resume, sidebarContentX, sidebarContentW, fp)
+    renderSidebarSection(builder, sectionType, resume, sidebarContentX, sidebarContentW, fpx, colors)
   }
   const sidebarEndY = builder.y
 
   builder.seekY(startY)
-  const afterHeaderY = renderMainHeader(builder, resume, mainX, mainW, fp, startY, colors)
+  const afterHeaderY = renderMainHeader(builder, resume, mainX, mainW, fpx, startY, colors)
   builder.seekY(afterHeaderY)
-  const mainOrder = resume.sectionOrder.filter((s) => !SIDEBAR_TYPES.has(s))
+  const mainOrder = resume.sectionOrder.filter((s) => s !== 'custom' && !SIDEBAR_TYPES.has(s))
   for (const sectionType of mainOrder) {
-    renderMainSection(builder, sectionType, resume, mainX, mainW, fp, colors)
+    renderMainSection(builder, sectionType, resume, mainX, mainW, fpx, colors)
   }
   const mainEndY = builder.y
 
@@ -131,30 +161,30 @@ function render(resume: Resume, template: TemplateDefinition, theme: Theme, fp: 
   // the content. Drawing it only on page 1 left the sidebar's near-white text
   // on bare white paper wherever the resume ran past one page.
   for (const page of builder.allPages) {
-    page.nodes.unshift(t(builder, 'rect', 0, 0, sidebarW, builder.pageH, { color: colors.primary }))
+    page.nodes.unshift(t(builder, 'rect', 0, 0, sidebarW, builder.pageH, { color: colors.panelBackground }))
   }
 
   builder.seekY(Math.max(mainEndY, sidebarEndY))
   return builder.build()
 }
 
-function renderMonogram(b: LayoutBuilder, resume: Resume, x: number, w: number, y: number, colors: ThemeColors): number {
-  const size = Math.min(w, 72)
-  b.currentPage.nodes.push(t(b, 'rect', x, y, size, size, { color: '#ffffff' }))
-  b.currentPage.nodes.push(t(b, 'text', x, y + size / 2 - 16, size, 32, {
-    fontFamily: 'Manrope',
+function renderMonogram(b: LayoutBuilder, resume: Resume, x: number, w: number, y: number, colors: ResolvedColors): number {
+  const size = Math.min(w, 64)
+  b.currentPage.nodes.push(t(b, 'rect', x, y, size, size, { color: colors.panelText }))
+  b.currentPage.nodes.push(t(b, 'text', x, y + (size - 30) / 2, size, 30, {
+    fontFamily: 'SourceSerifPro',
     fontSize: 24,
-    fontWeight: 800,
-    color: colors.primary,
-    lineHeight: 1,
+    fontWeight: 600,
+    color: colors.panelBackground,
+    lineHeight: 1.25,
     textAlign: 'center',
   }, getInitials(resume.personalInfo.fullName)))
-  return y + size + 24
+  return y + size + 30
 }
 
 function renderMainHeader(b: LayoutBuilder, resume: Resume, x: number, w: number, fp: FontPreset, y: number, colors: ThemeColors): number {
   const info = resume.personalInfo
-  const nameH = fp.scale.name * fp.lineHeight.heading
+  const nameH = estimateStyledTextHeight(info.fullName || 'Your Name', w, fp.scale.name, fp.lineHeight.heading, 0, fp.headingFamily, 700)
   b.currentPage.nodes.push(t(b, 'text', x, y, w, nameH, {
     fontFamily: fp.headingFamily,
     fontSize: fp.scale.name,
@@ -166,7 +196,7 @@ function renderMainHeader(b: LayoutBuilder, resume: Resume, x: number, w: number
 
   let cy = y + nameH + 4
   if (info.headline) {
-    const hH = fp.scale.headline * fp.lineHeight.body
+    const hH = estimateTextHeight(info.headline, w, fp.scale.headline, fp.lineHeight.body, fp.bodyFamily, 500)
     b.currentPage.nodes.push(t(b, 'text', x, cy, w, hH, {
       fontFamily: fp.bodyFamily,
       fontSize: fp.scale.headline,
@@ -180,50 +210,65 @@ function renderMainHeader(b: LayoutBuilder, resume: Resume, x: number, w: number
 
   // Contact line. Without it the sheet cannot actually be sent to an employer,
   // which is what contact.coverage.test.ts checks for every template.
-  const contactText = [info.location, info.phone, info.email, displayUrl(info.website || info.linkedin)]
-    .filter(Boolean)
-    .join('   ·   ')
-  if (contactText) {
+  const primaryUrl = info.website ? 'website' : 'linkedin'
+  const contacts = contactItems(info, ['location', 'phone', 'email', primaryUrl])
+  if (contacts.length) {
     // Measured, not assumed to be one line: the full contact string wraps in
     // the main column's width at most font sizes.
-    const cH = estimateTextHeight(contactText, w, fp.scale.small, 1.5)
-    b.currentPage.nodes.push(t(b, 'text', x, cy, w, cH, {
+    const cH = measureContactHeight(contacts, w, fp.scale.small, 1.5)
+    const line = buildContactLineNodes(b, contacts, x, cy, w, {
       fontFamily: fp.bodyFamily,
       fontSize: fp.scale.small,
       fontWeight: 400,
       color: colors.textSecondary,
       lineHeight: 1.5,
       textAlign: 'left',
-    }, contactText))
+    })
+    b.currentPage.nodes.push(...line.nodes)
     cy += cH + 8
   }
 
-  b.currentPage.nodes.push(t(b, 'divider', x, cy, w, 2, { color: colors.primary }))
-  return cy + 26
+  b.currentPage.nodes.push(t(b, 'divider', x, cy, w, 0.7, { color: colors.divider }))
+  return cy + 24
 }
 
-function sectionHeader(b: LayoutBuilder, title: string, w: number, fp: FontPreset, continued: boolean, color: string): SectionHeaderResult {
+function sectionHeader(
+  b: LayoutBuilder,
+  title: string,
+  w: number,
+  fp: FontPreset,
+  continued: boolean,
+  color: string,
+  editRef?: EditRef,
+): SectionHeaderResult {
   // Uppercased and letterspaced, so measured with the caps-aware metric — the
   // prose figure reports one line for a title that renders as two, and the
   // first entry then draws on top of it.
   const titleH = Math.max(
     fp.scale.sectionTitle * fp.lineHeight.heading,
-    estimateStyledTextHeight((continued ? `${title} (continued)` : title).toUpperCase(), w - 12, fp.scale.sectionTitle, fp.lineHeight.heading, 0.02)
+    estimateStyledTextHeight((continued ? `${title} (continued)` : title).toUpperCase(), w, fp.scale.sectionTitle, fp.lineHeight.heading, 0.04, fp.headingFamily, 700)
   )
   return {
     nodes: [
       t(b, 'text', 0, 0, w, titleH, {
         fontFamily: fp.headingFamily, fontSize: fp.scale.sectionTitle, fontWeight: 700,
         color, lineHeight: fp.lineHeight.heading, textAlign: 'left', letterSpacing: 0.04,
-      }, (continued ? `${title} (continued)` : title).toUpperCase()),
+      }, (continued ? `${title} (continued)` : title).toUpperCase(), continued ? undefined : editRef),
     ],
-    height: titleH + 14,
+    height: titleH + 12,
   }
 }
 
-function renderMainSection(b: LayoutBuilder, sectionType: SectionType, resume: Resume, x: number, w: number, fp: FontPreset, colors: ThemeColors): void {
-  const title = TITLES[sectionType]
-  const header = (continued: boolean) => sectionHeader(b, title, w, fp, continued, colors.primary)
+function renderMainSection(b: LayoutBuilder, sectionType: SectionType, resume: Resume, x: number, w: number, fp: FontPreset, colors: ResolvedColors): void {
+  const spacing = resumeSpacingMultiplier(resume.settings)
+  const defaultTitle = TITLES[sectionType]
+  const title = sectionType === 'custom'
+    ? defaultTitle
+    : resume.sectionTitles?.[sectionType] ?? defaultTitle
+  const header = (continued: boolean) => sectionHeader(
+    b, title, w, fp, continued, colors.sectionTitle,
+    sectionType === 'custom' ? undefined : { kind: 'section-title', sectionType, defaultValue: defaultTitle },
+  )
   const bodyStyleFor: Partial<LayoutStyles> = {
     fontFamily: fp.bodyFamily, fontSize: fp.scale.body, fontWeight: 400,
     color: colors.textPrimary, lineHeight: fp.lineHeight.body, textAlign: 'left',
@@ -238,28 +283,28 @@ function renderMainSection(b: LayoutBuilder, sectionType: SectionType, resume: R
         height: h,
       }]
       placeEntryBlock(b, 'summary', x, w, entries, 0, header, bodyStyleFor)
-      b.advanceY(26)
+      b.advanceY(20 * spacing)
       break
     }
     case 'experience': {
       const visible = resume.experience.filter((e) => e.visible)
       if (!visible.length) return
-      placeEntryBlock(b, 'experience', x, w, visible.map((e) => buildExperienceEntry(b, e, w, colors, fp, false)), 20, header, bodyStyleFor)
-      b.advanceY(26)
+      placeEntryBlock(b, 'experience', x, w, visible.map((e) => buildExperienceEntry(b, e, w, colors, fp, false)), 20 * spacing, header, bodyStyleFor)
+      b.advanceY(20 * spacing)
       break
     }
     case 'education': {
       const visible = resume.education.filter((e) => e.visible)
       if (!visible.length) return
-      placeEntryBlock(b, 'education', x, w, visible.map((e) => buildEducationEntry(b, e, w, colors, fp, false)), 16, header, bodyStyleFor)
-      b.advanceY(26)
+      placeEntryBlock(b, 'education', x, w, visible.map((e) => buildEducationEntry(b, e, w, colors, fp, false)), 16 * spacing, header, bodyStyleFor)
+      b.advanceY(20 * spacing)
       break
     }
     case 'projects': {
       const visible = resume.projects.filter((p) => p.visible)
       if (!visible.length) return
-      placeEntryBlock(b, 'projects', x, w, visible.map((p) => buildProjectEntry(b, p, w, colors, fp, false)), 20, header, bodyStyleFor)
-      b.advanceY(26)
+      placeEntryBlock(b, 'projects', x, w, visible.map((p) => buildProjectEntry(b, p, w, colors, fp, false)), 20 * spacing, header, bodyStyleFor)
+      b.advanceY(20 * spacing)
       break
     }
     case 'skills':
@@ -269,67 +314,73 @@ function renderMainSection(b: LayoutBuilder, sectionType: SectionType, resume: R
   }
 }
 
-function buildSidebarSkillLine(b: LayoutBuilder, section: SkillSection, w: number): EntryResult {
+function buildSidebarSkillLine(b: LayoutBuilder, section: SkillSection, w: number, colors: ResolvedColors): EntryResult {
   const text = section.skills.map((s) => s.name).join(', ')
   const h = estimateTextHeight(text, w, 9, 1.4)
   return {
     nodes: [t(b, 'text', 0, 0, w, h, {
-      fontFamily: 'Inter', fontSize: 9, fontWeight: 400, color: SIDEBAR_TEXT, lineHeight: 1.4, textAlign: 'left',
+      fontFamily: 'Inter', fontSize: 9, fontWeight: 400, color: colors.panelText, lineHeight: 1.4, textAlign: 'left',
     }, text)],
     height: h,
   }
 }
 
-function buildSidebarCert(b: LayoutBuilder, cert: CertificationSection, w: number): EntryResult {
-  const titleH = estimateTextHeight(cert.title, w, 9.5, 1.3)
+function buildSidebarCert(b: LayoutBuilder, cert: CertificationSection, w: number, colors: ResolvedColors): EntryResult {
+  const titleH = estimateTextHeight(cert.title, w, 9.5, 1.3, 'Inter', 700)
   const nodes: LayoutNode[] = [
-    t(b, 'text', 0, 0, w, titleH, { fontFamily: 'Inter', fontSize: 9.5, fontWeight: 700, color: SIDEBAR_TEXT, lineHeight: 1.3, textAlign: 'left' }, cert.title),
+    t(b, 'text', 0, 0, w, titleH, { fontFamily: 'Inter', fontSize: 9.5, fontWeight: 700, color: colors.panelText, lineHeight: 1.3, textAlign: 'left' }, cert.title),
   ]
   let iy = titleH + 2
   if (cert.issuer) {
-    const issuerH = 11
-    nodes.push(t(b, 'text', 0, iy, w, issuerH, { fontFamily: 'Inter', fontSize: 8.5, fontWeight: 400, color: SIDEBAR_TEXT_MUTED, lineHeight: 1.2, textAlign: 'left' }, cert.issuer))
+    const issuerH = estimateTextHeight(cert.issuer, w, 8.5, 1.4)
+    nodes.push(t(b, 'text', 0, iy, w, issuerH, { fontFamily: 'Inter', fontSize: 8.5, fontWeight: 400, color: colors.panelSecondaryText, lineHeight: 1.4, textAlign: 'left' }, cert.issuer))
     iy += issuerH
   }
   return { nodes, height: iy + 6 }
 }
 
-function buildSidebarCustomItem(b: LayoutBuilder, title: string, subtitle: string, w: number): EntryResult {
+function buildSidebarCustomItem(b: LayoutBuilder, title: string, subtitle: string, w: number, colors: ResolvedColors): EntryResult {
   const label = subtitle ? `${title}: ${subtitle}` : title
   const h = estimateTextHeight(label, w, 9.5, 1.3)
   return {
-    nodes: [t(b, 'text', 0, 0, w, h, { fontFamily: 'Inter', fontSize: 9.5, fontWeight: 400, color: SIDEBAR_TEXT, lineHeight: 1.3, textAlign: 'left' }, label)],
+    nodes: [t(b, 'text', 0, 0, w, h, { fontFamily: 'Inter', fontSize: 9.5, fontWeight: 400, color: colors.panelText, lineHeight: 1.3, textAlign: 'left' }, label)],
     height: h + 4,
   }
 }
 
-function renderSidebarSection(b: LayoutBuilder, sectionType: SectionType, resume: Resume, x: number, w: number, fp: FontPreset): void {
+function renderSidebarSection(b: LayoutBuilder, sectionType: SectionType, resume: Resume, x: number, w: number, fp: FontPreset, colors: ResolvedColors): void {
+  const spacing = resumeSpacingMultiplier(resume.settings)
   const bodyStyleFor: Partial<LayoutStyles> = {
-    fontFamily: 'Inter', fontSize: 9.5, fontWeight: 400, color: SIDEBAR_TEXT, lineHeight: 1.4, textAlign: 'left',
+    fontFamily: 'Inter', fontSize: 9.5, fontWeight: 400, color: colors.panelText, lineHeight: 1.4, textAlign: 'left',
   }
 
   switch (sectionType) {
     case 'skills': {
       const visible = resume.skills.filter((s) => s.visible)
       if (!visible.length) return
-      const header = (continued: boolean) => sectionHeader(b, TITLES.skills, w, fp, continued, '#ffffff')
-      placeEntryBlock(b, 'skills', x, w, visible.map((s) => buildSidebarSkillLine(b, s, w)), 10, header, bodyStyleFor)
-      b.advanceY(22)
+      const title = resume.sectionTitles?.skills ?? TITLES.skills
+      const header = (continued: boolean) => sectionHeader(b, title, w, fp, continued, colors.panelText,
+        { kind: 'section-title', sectionType: 'skills', defaultValue: TITLES.skills })
+      placeEntryBlock(b, 'skills', x, w, visible.map((s) => buildSidebarSkillLine(b, s, w, colors)), 10 * spacing, header, bodyStyleFor)
+      b.advanceY(22 * spacing)
       break
     }
     case 'certifications': {
       const visible = resume.certifications.filter((c) => c.visible)
       if (!visible.length) return
-      const header = (continued: boolean) => sectionHeader(b, TITLES.certifications, w, fp, continued, '#ffffff')
-      placeEntryBlock(b, 'certifications', x, w, visible.map((c) => buildSidebarCert(b, c, w)), 8, header, bodyStyleFor)
-      b.advanceY(22)
+      const title = resume.sectionTitles?.certifications ?? TITLES.certifications
+      const header = (continued: boolean) => sectionHeader(b, title, w, fp, continued, colors.panelText,
+        { kind: 'section-title', sectionType: 'certifications', defaultValue: TITLES.certifications })
+      placeEntryBlock(b, 'certifications', x, w, visible.map((c) => buildSidebarCert(b, c, w, colors)), 8 * spacing, header, bodyStyleFor)
+      b.advanceY(22 * spacing)
       break
     }
     case 'custom': {
       for (const cs of resume.customSections.filter((s) => s.visible && s.items.length > 0)) {
-        const header = (continued: boolean) => sectionHeader(b, cs.title, w, fp, continued, '#ffffff')
-        placeEntryBlock(b, 'custom', x, w, cs.items.map((i) => buildSidebarCustomItem(b, i.title, i.subtitle, w)), 4, header, bodyStyleFor)
-        b.advanceY(22)
+        const header = (continued: boolean) => sectionHeader(b, cs.title, w, fp, continued, colors.panelText,
+          { kind: 'custom-section-title', sectionId: cs.id, defaultValue: cs.title })
+        placeEntryBlock(b, 'custom', x, w, cs.items.map((i) => buildSidebarCustomItem(b, i.title, i.subtitle, w, colors)), 4 * spacing, header, bodyStyleFor)
+        b.advanceY(22 * spacing)
       }
       break
     }

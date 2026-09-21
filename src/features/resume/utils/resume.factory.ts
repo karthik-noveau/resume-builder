@@ -3,23 +3,93 @@ import type { ParsedResumeData } from './resumeParser'
 
 type ResumeDefaults = { themeId?: string; fontPresetId?: string; pageSize?: 'A4' | 'LETTER'; customPrimaryColor?: string }
 
-const DEFAULT_SECTION_ORDER: SectionType[] = [
+export const DEFAULT_SECTION_ORDER: SectionType[] = [
   'summary',
   'experience',
   'education',
   'skills',
   'projects',
   'certifications',
-  'custom',
 ]
 
 /**
- * Builds a new resume pre-filled with realistic sample content (instead of
- * blank fields) so every section renders across all templates immediately —
- * the user edits/replaces the sample rather than starting from an empty page.
+ * Everything that decides how a resume *looks*, as a fresh resume would have it.
+ *
+ * Single-sourced because three places need to agree on it: the two factories
+ * below and the editor's "reset appearance". Inlined in each, the reset would
+ * quietly drift from what creating a new resume actually gives you.
+ *
+ * `templateId` is deliberately absent — the product has no default template.
+ * It is picked per resume and every entry point asks for one, so a reset
+ * leaves whichever template is in use rather than substituting an arbitrary
+ * member of the catalog.
+ */
+export function defaultAppearance(defaults?: ResumeDefaults) {
+  return {
+    themeId: defaults?.themeId ?? 'light',
+    fontPresetId: defaults?.fontPresetId ?? 'professional',
+    customPrimaryColor: defaults?.customPrimaryColor,
+    sectionOrder: DEFAULT_SECTION_ORDER,
+    settings: {
+      pageSize: defaults?.pageSize ?? ('A4' as const),
+      margins: { top: 15, right: 15, bottom: 15, left: 15 },
+      showProfileImage: true,
+      showSectionIcons: false,
+      typographyScale: 'standard' as const,
+      lineHeightDensity: 'balanced' as const,
+      spacingDensity: 'balanced' as const,
+    },
+  }
+}
+
+/**
+ * The blank content a new resume begins with, as a content-only slice.
+ *
+ * The counterpart to defaultAppearance(): between them they partition a resume
+ * into the two halves the reset dialog offers, so neither can quietly grow a
+ * field the other also claims. Section titles live here rather than with the
+ * appearance — a renamed heading is wording, not styling.
+ *
+ * Built by running the factory and taking only what it wrote, so the reset and
+ * a brand-new resume cannot drift apart. Entries come back with fresh ids,
+ * because they are new records rather than the old ones edited.
+ */
+export function defaultContent() {
+  // templateId only decides how the resume is drawn, never what it says.
+  return contentFromResume(createEmptyResume(''))
+}
+
+/** Opt-in example content, without changing the current resume's design or identity. */
+export function sampleContent() {
+  return contentFromResume(createSampleResume(''))
+}
+
+function contentFromResume(sample: Resume) {
+  return {
+    personalInfo: sample.personalInfo,
+    summary: sample.summary,
+    experience: sample.experience,
+    education: sample.education,
+    skills: sample.skills,
+    projects: sample.projects,
+    certifications: sample.certifications,
+    customSections: sample.customSections,
+    sectionTitles: undefined,
+  }
+}
+
+/**
+ * New resumes start blank. Examples belong in previews or behind an explicit
+ * "Use mock data" action, never in a user's newly created document.
  */
 export function createEmptyResume(templateId: string, defaults?: ResumeDefaults): Resume {
+  return createResumeFromParsed(templateId, {}, defaults)
+}
+
+/** Realistic example content for template previews and the opt-in mock-data action. */
+export function createSampleResume(templateId: string, defaults?: ResumeDefaults): Resume {
   const ts = new Date().toISOString()
+  const appearance = defaultAppearance(defaults)
   return {
     id: crypto.randomUUID(),
     schemaVersion: 1,
@@ -27,9 +97,9 @@ export function createEmptyResume(templateId: string, defaults?: ResumeDefaults)
     createdAt: ts,
     updatedAt: ts,
     templateId,
-    themeId: defaults?.themeId ?? 'light',
-    fontPresetId: defaults?.fontPresetId ?? 'professional',
-    customPrimaryColor: defaults?.customPrimaryColor,
+    themeId: appearance.themeId,
+    fontPresetId: appearance.fontPresetId,
+    customPrimaryColor: appearance.customPrimaryColor,
     personalInfo: {
       fullName: 'Alex Morgan',
       headline: 'Senior Product Manager',
@@ -172,28 +242,11 @@ export function createEmptyResume(templateId: string, defaults?: ResumeDefaults)
         credentialUrl: '',
       },
     ],
-    customSections: [
-      {
-        id: crypto.randomUUID(),
-        type: 'custom',
-        visible: true,
-        order: 0,
-        createdAt: ts,
-        updatedAt: ts,
-        title: 'Languages',
-        items: [
-          { id: crypto.randomUUID(), title: 'English', subtitle: 'Native', description: '' },
-          { id: crypto.randomUUID(), title: 'Spanish', subtitle: 'Professional working proficiency', description: '' },
-        ],
-      },
-    ],
-    sectionOrder: DEFAULT_SECTION_ORDER,
-    settings: {
-      pageSize: defaults?.pageSize ?? 'A4',
-      margins: { top: 15, right: 15, bottom: 15, left: 15 },
-      showProfileImage: false,
-      showSectionIcons: false,
-    },
+    // Retained in the data model for backward compatibility with saved files,
+    // but custom sections are no longer offered or rendered by the product.
+    customSections: [],
+    sectionOrder: appearance.sectionOrder,
+    settings: appearance.settings,
     metadata: {
       wordCount: 0,
       pageCount: 1,
@@ -203,7 +256,7 @@ export function createEmptyResume(templateId: string, defaults?: ResumeDefaults)
 
 /**
  * Builds a new resume from best-effort parsed text (see resumeParser.ts).
- * Unlike createEmptyResume, unmatched fields are left blank rather than
+ * Like createEmptyResume, unmatched fields are left blank rather than
  * filled with sample content — an imported resume shouldn't end up with
  * leftover fake data mixed in with whatever the user actually pasted.
  */
@@ -213,6 +266,7 @@ export function createResumeFromParsed(
   defaults?: ResumeDefaults
 ): Resume {
   const ts = new Date().toISOString()
+  const appearance = defaultAppearance(defaults)
   return {
     id: crypto.randomUUID(),
     schemaVersion: 1,
@@ -220,9 +274,9 @@ export function createResumeFromParsed(
     createdAt: ts,
     updatedAt: ts,
     templateId,
-    themeId: defaults?.themeId ?? 'light',
-    fontPresetId: defaults?.fontPresetId ?? 'professional',
-    customPrimaryColor: defaults?.customPrimaryColor,
+    themeId: appearance.themeId,
+    fontPresetId: appearance.fontPresetId,
+    customPrimaryColor: appearance.customPrimaryColor,
     personalInfo: {
       fullName: parsed.fullName ?? '',
       headline: '',
@@ -316,13 +370,8 @@ export function createResumeFromParsed(
       credentialUrl: '',
     })),
     customSections: [],
-    sectionOrder: DEFAULT_SECTION_ORDER,
-    settings: {
-      pageSize: defaults?.pageSize ?? 'A4',
-      margins: { top: 15, right: 15, bottom: 15, left: 15 },
-      showProfileImage: false,
-      showSectionIcons: false,
-    },
+    sectionOrder: appearance.sectionOrder,
+    settings: appearance.settings,
     metadata: {
       wordCount: 0,
       pageCount: 1,

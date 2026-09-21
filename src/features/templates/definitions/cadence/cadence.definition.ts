@@ -2,6 +2,7 @@ import type { TemplateDefinition } from '@/shared/types/template.types'
 
 export const cadenceDefinition: TemplateDefinition = {
   id: 'cadence',
+  designStyle: 'Simple',
   name: 'Cadence',
   category: 'Experienced',
   version: 1,

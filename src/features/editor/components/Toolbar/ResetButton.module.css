@@ -1,0 +1,93 @@
+/* Matches the zoom and undo controls it sits beside — same size, same quiet
+   resting state — so the row reads as one group of icon buttons. */
+.trigger {
+  display: grid;
+  place-items: center;
+  width: var(--control-md);
+  height: var(--control-md);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-small);
+  background: none;
+  color: rgb(var(--color-text-secondary));
+  cursor: pointer;
+  transition: color var(--duration-fast), background-color var(--duration-fast);
+}
+
+.trigger:hover {
+  color: rgb(var(--color-primary));
+  background-color: rgb(var(--color-primary) / 10%);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 1px;
+}
+
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.confirmIntro {
+  margin: 0;
+  color: rgb(var(--color-text-secondary));
+  font-size: var(--text-base);
+  line-height: 1.5;
+}
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: var(--radius-medium);
+}
+
+.choice {
+  display: block;
+}
+
+/* Sits under the checkbox's own label, indented to its text so the hint reads
+   as belonging to that option rather than to the group. */
+.choiceHint {
+  display: block;
+  margin-left: 24px;
+  color: rgb(var(--color-text-muted));
+  font-size: var(--text-xs);
+  line-height: 1.45;
+}
+
+.confirmNote {
+  margin: 0;
+  color: rgb(var(--color-text-muted));
+  font-size: var(--text-xs);
+  line-height: 1.45;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trigger {
+    transition: none;
+  }
+}

@@ -9,4 +9,5 @@ export interface DrawerProps {
   title?: string
   children: ReactNode
   width?: string
+  flush?: boolean
 }

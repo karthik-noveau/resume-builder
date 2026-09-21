@@ -1,10 +1,20 @@
 import { create } from 'zustand'
 import type { SectionType, ResumeSnapshot } from '@/shared/types/resume.types'
+import type { StyleRole } from '@/shared/types/style.types'
 
 const MAX_UNDO_STACK = 100
 const ZOOM_MIN = 0.5
 const ZOOM_MAX = 2.0
 const ZOOM_STEP = 0.1
+
+/** The element the style inspector is pointed at. */
+export interface StyleTarget {
+  /** Stable style key from the layout tree — see engine/style.roles.ts. */
+  key: string
+  /** The text style it inherits from, when it is a text element. */
+  role: StyleRole | null
+  label: string
+}
 
 interface EditorState {
   selectedSectionId: string | null
@@ -13,14 +23,25 @@ interface EditorState {
   selectedEntryId: string | null
   zoomLevel: number
   activePage: number
+  /** Independent of section/entry selection: styling an element should not
+   * disturb which section's content form is open, and vice versa. */
+  styleTarget: StyleTarget | null
+  /** styleKey of the element open for inline editing, if any. The canvas reads
+   * it to stand down its own ring while the editor draws one. */
+  editingKey: string | null
   undoStack: ResumeSnapshot[]
   redoStack: ResumeSnapshot[]
+  personalInfoOpenRequest: number
 }
 
 interface EditorActions {
   selectSection(id: string, type: SectionType): void
   selectEntry(entryId: string, type: SectionType): void
   clearSelection(): void
+  selectStyleTarget(target: StyleTarget): void
+  clearStyleTarget(): void
+  setEditingKey(key: string | null): void
+  openPersonalInfo(): void
   setZoom(level: number): void
   zoomIn(): void
   zoomOut(): void
@@ -44,8 +65,11 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   selectedEntryId: null,
   zoomLevel: 1.0,
   activePage: 0,
+  styleTarget: null,
+  editingKey: null,
   undoStack: [],
   redoStack: [],
+  personalInfoOpenRequest: 0,
 
   // ─── Selection ──────────────────────────────────────────────────────────────
   selectSection(id, type) {
@@ -57,7 +81,28 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   },
 
   clearSelection() {
-    set({ selectedSectionId: null, selectedSectionType: null, selectedEntryId: null })
+    set({ selectedSectionId: null, selectedSectionType: null, selectedEntryId: null, styleTarget: null, editingKey: null })
+  },
+
+  selectStyleTarget(target) {
+    set({ styleTarget: target })
+  },
+
+  clearStyleTarget() {
+    set({ styleTarget: null })
+  },
+
+  setEditingKey(key) {
+    set({ editingKey: key })
+  },
+
+  openPersonalInfo() {
+    set((state) => ({
+      selectedSectionId: null,
+      selectedSectionType: null,
+      selectedEntryId: null,
+      personalInfoOpenRequest: state.personalInfoOpenRequest + 1,
+    }))
   },
 
   // ─── Zoom ───────────────────────────────────────────────────────────────────

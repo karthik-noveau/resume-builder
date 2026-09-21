@@ -34,7 +34,6 @@ function renderDashboard() {
 describe('Dashboard', () => {
   beforeEach(() => {
     vi.mocked(useResumeStore).mockImplementation((selector) =>
-       
       selector(mockStore as unknown as Parameters<typeof selector>[0])
     )
   })
@@ -51,7 +50,6 @@ describe('Dashboard', () => {
 
   it('shows skeleton when loading', () => {
     vi.mocked(useResumeStore).mockImplementation((selector) =>
-       
       selector({ ...mockStore, isLoading: true } as unknown as Parameters<typeof selector>[0])
     )
     renderDashboard()
@@ -63,7 +61,6 @@ describe('Dashboard', () => {
   it('shows resume cards when resumes exist', () => {
     const list = [{ ...createEmptyResume('meridian'), id: 'r1', title: 'My CV' }]
     vi.mocked(useResumeStore).mockImplementation((selector) =>
-       
       selector({ ...mockStore, resumeList: list } as unknown as Parameters<typeof selector>[0])
     )
     renderDashboard()
@@ -91,13 +88,24 @@ describe('Dashboard', () => {
     expect(mockStore.createResume).not.toHaveBeenCalled()
 
     await userEvent.click(confirm)
-    await waitFor(() =>
-      expect(mockStore.createResume).toHaveBeenCalledWith('meridian')
-    )
+    await waitFor(() => expect(mockStore.createResume).toHaveBeenCalledWith('meridian'))
   })
 
   it('calls loadResumeList on mount', () => {
     renderDashboard()
     expect(mockStore.loadResumeList).toHaveBeenCalled()
   })
+})
+
+it('shows a retryable load error instead of a misleading empty workspace', async () => {
+  vi.mocked(useResumeStore).mockImplementation((selector) =>
+    selector({ ...mockStore, error: 'Failed to load resumes' } as unknown as Parameters<
+      typeof selector
+    >[0])
+  )
+  renderDashboard()
+  expect(screen.getByRole('alert')).toHaveTextContent('couldn’t load your workspace')
+  expect(screen.queryByText('No resumes yet')).not.toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'Try again' }))
+  expect(mockStore.loadResumeList).toHaveBeenCalled()
 })

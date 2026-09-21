@@ -35,14 +35,14 @@ describe('ResumeCard', () => {
 
   it('shows actions menu when menu button clicked', async () => {
     renderCard()
-    await userEvent.click(screen.getByRole('button', { name: 'Resume actions' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Actions for My Developer Resume' }))
     expect(screen.getByRole('menu')).toBeInTheDocument()
   })
 
   it('calls onDuplicate with resume id when duplicate clicked', async () => {
     const onDuplicate = vi.fn()
     renderCard({ onDuplicate })
-    await userEvent.click(screen.getByRole('button', { name: 'Resume actions' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Actions for My Developer Resume' }))
     await userEvent.click(screen.getByRole('menuitem', { name: /duplicate/i }))
     expect(onDuplicate).toHaveBeenCalledWith('r1')
   })
@@ -50,13 +50,32 @@ describe('ResumeCard', () => {
   it('calls onDelete with resume id when delete clicked', async () => {
     const onDelete = vi.fn()
     renderCard({ onDelete })
-    await userEvent.click(screen.getByRole('button', { name: 'Resume actions' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Actions for My Developer Resume' }))
     await userEvent.click(screen.getByRole('menuitem', { name: /delete/i }))
     expect(onDelete).toHaveBeenCalledWith('r1')
   })
 
-  it('has accessible article label', () => {
+  it('provides a real keyboard-accessible link', () => {
     renderCard()
-    expect(screen.getByRole('article', { name: /open resume: my developer resume/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /open resume: my developer resume/i })).toHaveAttribute(
+      'href',
+      '/editor/r1'
+    )
   })
+})
+
+it('keeps a failed rename editable and supports Escape without committing', async () => {
+  const onRename = vi.fn().mockRejectedValue(new Error('Storage unavailable'))
+  renderCard({ onRename })
+  await userEvent.click(screen.getByRole('button', { name: 'Actions for My Developer Resume' }))
+  await userEvent.click(screen.getByRole('menuitem', { name: /rename/i }))
+  const input = screen.getByRole('textbox', { name: 'Resume title' })
+  await userEvent.clear(input)
+  await userEvent.type(input, 'New title{Enter}')
+  expect(await screen.findByRole('alert')).toHaveTextContent('Couldn’t rename')
+  expect(screen.getByRole('textbox')).toHaveValue('New title')
+  await userEvent.click(input)
+  await userEvent.keyboard('{Escape}')
+  expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+  expect(onRename).toHaveBeenCalledTimes(1)
 })

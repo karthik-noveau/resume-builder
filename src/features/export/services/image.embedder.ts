@@ -2,6 +2,7 @@ import type { PDFDocument, PDFImage } from 'pdf-lib'
 
 import { storageService } from '@/shared/services/storage.service'
 import { logger } from '@/shared/services/logger'
+import { getBuiltinImageUrl } from '@/shared/utils/profileAvatar'
 
 export class ImageEmbedder {
   private embeddedImages = new Map<string, PDFImage>()
@@ -14,6 +15,14 @@ export class ImageEmbedder {
     }
 
     try {
+      const builtinUrl = getBuiltinImageUrl(imageId)
+      if (builtinUrl) {
+        const response = await fetch(builtinUrl)
+        if (!response.ok) return null
+        const image = await this.pdfDoc.embedPng(await response.arrayBuffer())
+        this.embeddedImages.set(imageId, image)
+        return image
+      }
       const asset = await storageService.getImage(imageId)
       if (!asset) return null
 

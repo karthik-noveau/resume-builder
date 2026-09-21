@@ -3,3 +3,24 @@
   display: flex;
   flex-direction: column;
 }
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  /* The viewer owns its own frame and toolbar, so this only has to give it a
+     height to fill. The border and background that used to live here belonged
+     to the <iframe> the browser's viewer was painted into. */
+  /* Everything the dialog spends before the page gets any room: the 16px top
+     offset .fullModal sets, its header, and its own padding. Measured rather
+     than guessed — the previous value ignored the offset entirely and ran the
+     dialog past the bottom of the window. */
+  height: calc(100vh - 116px);
+  min-height: 320px;
+}
+
+.previewLoading {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  min-height: 320px;
+}

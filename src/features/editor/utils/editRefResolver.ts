@@ -25,6 +25,11 @@ export function getEditRefValue(editRef: EditRef, resume: Resume): string {
       return resume.personalInfo[editRef.field] ?? ''
     case 'summary':
       return resume.summary.content ?? ''
+    case 'section-title':
+      return resume.sectionTitles?.[editRef.sectionType] ?? editRef.defaultValue
+    case 'custom-section-title':
+      return resume.customSections.find((section) => section.id === editRef.sectionId)?.title
+        ?? editRef.defaultValue
     case 'entry':
       // Whole-entry selection target, not a text leaf — no value to seed an edit with.
       return ''
@@ -57,6 +62,20 @@ export function applyEditRefValue(editRef: EditRef, newValue: string, resume: Re
     case 'summary':
       store.updateSummary(newValue)
       break
+    case 'section-title': {
+      const title = newValue.trim()
+      if (!title) break
+      store.updateResume({
+        sectionTitles: { ...resume.sectionTitles, [editRef.sectionType]: title },
+      })
+      break
+    }
+    case 'custom-section-title': {
+      const title = newValue.trim()
+      if (!title) break
+      store.updateSection('custom', editRef.sectionId, { title })
+      break
+    }
     case 'entry':
       // Whole-entry selection target, not a text leaf — nothing to commit.
       break

@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useResumeStore } from '@/shared/stores/resume.store'
-import { createEmptyResume } from '@/features/resume/utils/resume.factory'
+import { createSampleResume } from '@/features/resume/utils/resume.factory'
 import { getEditRefValue, applyEditRefValue } from './editRefResolver'
 
 function loadResume() {
-  const resume = createEmptyResume('meridian')
+  const resume = createSampleResume('meridian')
   useResumeStore.setState({ activeResume: resume })
   return resume
 }

@@ -1,0 +1,281 @@
+.preview {
+  flex-shrink: 0;
+  --ink: #64748b;
+  --accent: #7950df;
+  --rule: #dbe1ea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  height: 108px;
+  margin-top: 14px;
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: 10px;
+  background: rgb(var(--color-primary) / 3%);
+  pointer-events: none;
+}
+
+.page {
+  position: relative;
+  width: 52px;
+  height: 74px;
+  flex-shrink: 0;
+  padding: 9px 7px;
+  border: 1px solid #dbe1ea;
+  border-radius: 3px;
+  background: #fff;
+  box-shadow: 0 3px 8px rgb(15 23 42 / 5%);
+}
+
+.pageInner {
+  position: relative;
+  height: 100%;
+}
+
+.name,
+.subtitle,
+.block i {
+  display: block;
+  border-radius: 1px;
+  height: 2px;
+  background: var(--rule);
+}
+
+.name {
+  width: 70%;
+  height: 4px;
+  background: var(--ink);
+}
+
+.subtitle {
+  width: 55%;
+  margin-top: 3px;
+}
+
+.block {
+  position: relative;
+  display: grid;
+  gap: 3px;
+  margin-top: 9px;
+}
+
+.block i:first-child {
+  width: 65%;
+  background: var(--ink);
+}
+
+.block i:last-child {
+  width: 80%;
+}
+
+.templates {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.page[data-variant="sidebar"] {
+  padding-left: 20px;
+  background: linear-gradient(90deg, #334155 14px, #fff 14px);
+}
+
+.chosen {
+  position: relative;
+  outline: 1.5px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+.page[data-variant="banner"] .name {
+  width: 100%;
+  height: 10px;
+  background: var(--accent);
+}
+
+.check {
+  position: absolute;
+  right: -8px;
+  bottom: -6px;
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+}
+
+.page[data-variant="margins"] .pageInner {
+  outline: 1px dashed #b4a3e6;
+  outline-offset: 3px;
+}
+
+.page[data-variant="global"] {
+  --ink: var(--accent);
+  --rule: #d3c6f2;
+}
+
+.page[data-variant="selected"] .block:first-of-type {
+  padding: 3px;
+  margin-inline: -3px;
+  outline: 1px solid var(--accent);
+  background: #f3effc;
+}
+
+.page[data-variant="selected"] .block:first-of-type i:first-child {
+  background: var(--accent);
+}
+
+.pointer {
+  position: absolute;
+  color: var(--accent);
+  fill: #fff;
+  right: -1px;
+  top: 33px;
+}
+
+.page[data-variant="content"] .name {
+  background: var(--accent);
+}
+
+.arrow {
+  color: rgb(var(--color-text-muted));
+  flex-shrink: 0;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 112px;
+}
+
+.label {
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 500;
+  color: rgb(var(--color-text-secondary));
+}
+
+.sizes,
+.typeRow,
+.swatches {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.sizes span,
+.typeRow span,
+.typeRow em {
+  display: grid;
+  place-items: center;
+  height: 24px;
+  padding-inline: 9px;
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: 5px;
+  background: rgb(var(--color-surface));
+  font-size: 10px;
+  color: rgb(var(--color-text-secondary));
+}
+
+.sizes span:first-child {
+  border-color: #c5b3ef;
+  color: rgb(var(--color-primary));
+}
+
+.slider {
+  position: relative;
+  height: 3px;
+  border-radius: 3px;
+  background: #d7cbee;
+  margin-block: 3px;
+}
+
+.slider i {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  top: -3px;
+  left: 38%;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  height: 23px;
+  padding-inline: 7px;
+  background: rgb(var(--color-surface));
+  border: 1px solid #c5b3ef;
+  border-radius: 4px;
+  color: rgb(var(--color-text-secondary));
+  font-size: 10px;
+}
+
+.field:last-child {
+  height: 17px;
+  border-color: rgb(var(--color-divider));
+}
+
+.caret {
+  height: 11px;
+  width: 1px;
+  margin-left: 3px;
+  background: var(--accent);
+}
+
+.fieldLine {
+  width: 60%;
+  height: 2px;
+  background: var(--rule);
+}
+
+.typeRow {
+  gap: 4px;
+}
+
+.typeRow span:first-child {
+  font-family: Georgia, serif;
+  font-size: 15px;
+}
+
+.typeRow span:nth-child(2) {
+  font-weight: 700;
+}
+
+.swatches {
+  position: relative;
+  gap: 6px;
+}
+
+.swatches i {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.swatches i:nth-child(2) {
+  background: #334155;
+}
+
+.swatches i:nth-child(3) {
+  background: #2a8276;
+}
+
+.swatches svg {
+  position: absolute;
+  top: 1.5px;
+  left: 1.5px;
+  color: white;
+}
+
+@media (max-height: 599px) {
+  .preview {
+    height: 90px;
+    margin-top: 8px;
+  }
+}

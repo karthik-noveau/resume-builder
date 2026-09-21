@@ -12,7 +12,10 @@ export function useActiveResume(resumeId: string | undefined) {
   const loadResume = useResumeStore((s) => s.loadResume)
 
   useEffect(() => {
-    if (!resumeId) { void navigate('/app'); return }
+    if (!resumeId) {
+      void navigate('/app')
+      return
+    }
     void loadResume(resumeId)
   }, [resumeId, loadResume, navigate])
 
@@ -23,5 +26,10 @@ export function useActiveResume(resumeId: string | undefined) {
     }
   }, [error, navigate])
 
-  return { activeResume, isLoading }
+  return {
+    activeResume,
+    isLoading,
+    loadError: error,
+    retry: () => resumeId && void loadResume(resumeId),
+  }
 }

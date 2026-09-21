@@ -1,4 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { PDFDocument } from 'pdf-lib'
 import { PdfGenerator } from './pdf.generator'
 import type { LayoutTree } from '@/shared/types/layout.types'
 
@@ -67,6 +68,7 @@ vi.mock('./link.handler', () => {
 
 describe('PdfGenerator', () => {
   const generator = new PdfGenerator()
+  beforeEach(() => vi.clearAllMocks())
 
   const mockLayoutTree: LayoutTree = {
     resumeId: '1',
@@ -108,5 +110,39 @@ describe('PdfGenerator', () => {
     const bytes = await generator.generate(mockLayoutTree)
     expect(bytes).toBeDefined()
     expect(bytes).toBeInstanceOf(Uint8Array)
+  })
+
+  it('draws stacked display names at the specified line height', async () => {
+    const tree = structuredClone(mockLayoutTree)
+    const node = tree.pages[0].nodes[0]
+    node.content = 'ALEX\nMORGAN'
+    node.widthPt = 300
+    node.heightPt = 140
+    node.styles.fontSize = 61
+    node.styles.lineHeight = 1.08
+
+    await generator.generate(tree)
+    const page = (await PDFDocument.create()).addPage()
+    const calls = vi.mocked(page.drawText).mock.calls
+    expect(calls.map(([text]) => text)).toEqual(['ALEX', 'MORGAN'])
+    expect(calls[0][1]!.y! - calls[1][1]!.y!).toBeCloseTo(61 * 1.08)
+  })
+
+  it('wraps each paragraph independently and preserves empty lines', async () => {
+    const tree = structuredClone(mockLayoutTree)
+    const node = tree.pages[0].nodes[0]
+    node.content = 'First paragraph wraps\r\n\r\nSecond\nThird\rFourth'
+    node.heightPt = 120
+
+    await generator.generate(tree)
+    const page = (await PDFDocument.create()).addPage()
+    const calls = vi.mocked(page.drawText).mock.calls
+    expect(calls.map(([text]) => text)).toEqual([
+      'First paragraph', 'wraps', 'Second', 'Third', 'Fourth',
+    ])
+    const lineHeight = node.styles.fontSize * node.styles.lineHeight
+    expect(calls[0][1]!.y! - calls[1][1]!.y!).toBeCloseTo(lineHeight)
+    expect(calls[1][1]!.y! - calls[2][1]!.y!).toBeCloseTo(lineHeight * 2)
+    expect(calls[2][1]!.y! - calls[3][1]!.y!).toBeCloseTo(lineHeight)
   })
 })

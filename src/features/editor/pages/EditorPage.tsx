@@ -1,4 +1,6 @@
-import { useParams } from 'react-router'
+import { useEffect, useRef, useState } from 'react'
+import { Navigate, useNavigate, useParams } from 'react-router'
+import { FilePenLine } from 'lucide-react'
 import { EditorLayout } from '@/shared/components/layout/EditorLayout'
 import { Toolbar } from '../components/Toolbar/Toolbar'
 import { Sidebar } from '../components/Sidebar/Sidebar'
@@ -17,26 +19,60 @@ import { useExport } from '@/features/export/hooks/useExport'
 import { ExportModal } from '@/features/export/components/ExportModal/ExportModal'
 import type { SectionType } from '@/shared/types/resume.types'
 import { Spinner } from '@/shared/components/ui/Spinner/Spinner'
+import { Seo } from '@/shared/components/Seo/Seo'
+import { Button } from '@/shared/components/ui/Button/Button'
+import { EmptyState } from '@/shared/components/ui/EmptyState/EmptyState'
+import { hasResumeContent } from '@/features/resume/utils/resumeContent'
+import { useEditorTour } from '../hooks/useEditorTour'
+import { EditorTour } from '../components/EditorTour/EditorTour'
 import styles from './EditorPage.module.css'
+import { ResumeLoadError } from '../components/ResumeLoadError'
+import { prepareExport } from '../utils/prepareExport'
 
 export function EditorPage() {
   const { resumeId } = useParams<{ resumeId: string }>()
+  const navigate = useNavigate()
+  const openedResumeId = useRef<string | null>(null)
+  const [inspectorRequest, setInspectorRequest] = useState(0)
+  const personalInfoRequest = useEditorStore((s) => s.personalInfoOpenRequest)
 
-  const { activeResume, isLoading } = useActiveResume(resumeId)
+  const { activeResume, isLoading, loadError, retry } = useActiveResume(resumeId)
+  const hasContent = activeResume !== null && hasResumeContent(activeResume)
+  useEffect(() => {
+    if (!isLoading && activeResume?.id === resumeId && hasContent) {
+      openedResumeId.current = resumeId ?? null
+    }
+  }, [activeResume?.id, resumeId, isLoading, hasContent])
   const isSaving = useResumeStore((s) => s.isSaving)
   const isDirty = useResumeStore((s) => s.isDirty)
   const saveError = useResumeStore((s) => s.error)
-  const addSection = useResumeStore((s) => s.addSection)
-  const reorderSectionBlocks = useResumeStore((s) => s.reorderSectionBlocks)
   const toggleSectionTypeVisibility = useResumeStore((s) => s.toggleSectionTypeVisibility)
   const saveActiveResume = useResumeStore((s) => s.saveActiveResume)
   const deleteSection = useResumeStore((s) => s.deleteSection)
+  const reorderSectionBlocks = useResumeStore((s) => s.reorderSectionBlocks)
+  const resetResume = useResumeStore((s) => s.resetResume)
 
   const selectSection = useEditorStore((s) => s.selectSection)
 
-  const { status: exportStatus, error: exportError, exportToPdf, isExporting } = useExport()
+  const {
+    status: exportStatus,
+    error: exportError,
+    mode: exportMode,
+    previewUrl,
+    exportToPdf,
+    previewPdf,
+    closeExport,
+    isExporting,
+  } = useExport()
 
   const layoutTree = useResumeLayoutTree(activeResume)
+  const tour = useEditorTour(
+    !isLoading &&
+      activeResume?.id === resumeId &&
+      hasContent &&
+      layoutTree !== null &&
+      exportStatus === 'idle'
+  )
 
   useAutosave()
   const { handleUndo, handleRedo, canUndo, canRedo } = useUndoRedo()
@@ -51,23 +87,34 @@ export function EditorPage() {
     clearSelection,
   } = useCanvasSelection()
 
+  // Arrow keys move whatever is selected on the canvas.
+
   useKeyboardShortcuts({
+    enabled: !tour.isOpen,
     onUndo: handleUndo,
     onRedo: handleRedo,
-    onSave: () => { void saveActiveResume() },
-    onEscape: () => { clearSelection() },
-    onDelete: selectedEntryId && selectedSectionType
-      ? () => {
-          deleteSection(selectedSectionType, selectedEntryId)
-          clearSelection()
-        }
-      : undefined,
+    onSave: () => {
+      void saveActiveResume()
+    },
+    onEscape: () => {
+      clearSelection()
+    },
+    onDelete:
+      selectedEntryId && selectedSectionType
+        ? () => {
+            deleteSection(selectedSectionType, selectedEntryId)
+            clearSelection()
+          }
+        : undefined,
     onZoomIn: zoomIn,
     onZoomOut: zoomOut,
     onResetZoom: resetZoom,
   })
 
-  if (isLoading || !activeResume) {
+  if (!isLoading && loadError && (!activeResume || activeResume.id !== resumeId)) {
+    return <ResumeLoadError onRetry={retry} />
+  }
+  if (isLoading || !activeResume || activeResume.id !== resumeId) {
     return (
       <div className={styles.loading}>
         <Spinner size={32} label="Loading resume…" />
@@ -75,8 +122,20 @@ export function EditorPage() {
     )
   }
 
+  // New/reopened blank drafts belong in setup. If content was cleared while
+  // editing, keep the toolbar and undo history instead of showing a blank page.
+  if (!hasContent && openedResumeId.current !== activeResume.id) {
+    return <Navigate to={`/editor/${activeResume.id}/guided`} replace />
+  }
+
+  const continueSetup = async () => {
+    await saveActiveResume()
+    if (!useResumeStore.getState().error) void navigate(`/editor/${activeResume.id}/guided`)
+  }
+
   const handleSelectSection = (type: SectionType) => {
     selectSection(type, type)
+    setInspectorRequest((value) => value + 1)
   }
 
   const handleToggleVisibility = (type: SectionType) => {
@@ -84,14 +143,24 @@ export function EditorPage() {
   }
 
   const handleExport = () => {
-    if (activeResume) {
-      void exportToPdf(activeResume)
-    }
+    void prepareExport().then((latest) => {
+      if (latest?.id === resumeId && hasResumeContent(latest)) void exportToPdf(latest)
+    })
+  }
+
+  const handlePreview = () => {
+    void prepareExport().then((latest) => {
+      if (latest?.id === resumeId && hasResumeContent(latest)) void previewPdf(latest)
+    })
   }
 
   return (
     <>
+      {/* Titled with the resume so browser tabs and history stay distinguishable. */}
+      <Seo title={`Editing ${activeResume.title}`} description="Resume editor." noindex />
       <EditorLayout
+        propertiesRequest={`${inspectorRequest}:${personalInfoRequest}`}
+        tourOpen={tour.isOpen}
         toolbar={
           <Toolbar
             resumeId={activeResume.id}
@@ -108,50 +177,86 @@ export function EditorPage() {
             onZoomOut={zoomOut}
             onResetZoom={resetZoom}
             onExport={handleExport}
-            exportDisabled={isExporting}
+            onPreview={handlePreview}
+            previewLoading={isExporting && exportMode === 'preview'}
+            exportDisabled={isExporting || !hasContent}
+            onReset={resetResume}
+            onStartTour={tour.start}
           />
         }
         sidebar={
           <Sidebar
+            tourStep={tour.step}
             resume={activeResume}
+            layoutTree={layoutTree}
             selectedSectionType={selectedSectionType}
             onSelectSection={handleSelectSection}
-            onAddSection={addSection}
             onReorderBlocks={reorderSectionBlocks}
             onToggleVisibility={handleToggleVisibility}
           />
         }
         canvas={
-          <Canvas
-            layoutTree={layoutTree}
-            zoomLevel={zoomLevel}
-            pageSize={activeResume.settings.pageSize}
-            selectedSectionId={selectedSectionId}
-            selectedEntryId={selectedEntryId}
-            onSectionClick={handleSectionClick}
-            onEntryClick={handleEntryClick}
-            onCanvasClick={handleCanvasClick}
-          />
+          hasContent ? (
+            <Canvas
+              layoutTree={layoutTree}
+              zoomLevel={zoomLevel}
+              pageSize={activeResume.settings.pageSize}
+              selectedSectionId={selectedSectionId}
+              selectedEntryId={selectedEntryId}
+              onSectionClick={(id, type) => {
+                handleSectionClick(id, type)
+                setInspectorRequest((value) => value + 1)
+              }}
+              onEntryClick={(id, type) => {
+                handleEntryClick(id, type)
+                setInspectorRequest((value) => value + 1)
+              }}
+              onCanvasClick={handleCanvasClick}
+            />
+          ) : (
+            <EmptyState
+              icon={<FilePenLine size={28} aria-hidden="true" />}
+              title="Add content to your resume"
+              description="Your resume is empty. Continue guided setup to add your details, or undo your last change."
+              action={
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    void continueSetup()
+                  }}
+                >
+                  Continue guided setup
+                </Button>
+              }
+            />
+          )
         }
         propertiesPanel={
           <PropertiesPanel
+            tourStep={tour.step}
             resume={activeResume}
+            layoutTree={layoutTree}
             selectedSectionType={selectedSectionType}
             onClearSelection={clearSelection}
           />
         }
       />
 
+      {tour.isOpen && (
+        <EditorTour current={tour.current} onChange={tour.goToStep} onClose={tour.close} />
+      )}
+
       <ExportModal
         isOpen={exportStatus !== 'idle'}
-        onClose={() => {}} // Reset state is handled by the hook after completion
+        onClose={closeExport}
         status={exportStatus}
         error={exportError}
-        onRetry={handleExport}
+        onRetry={exportMode === 'preview' ? handlePreview : handleExport}
+        mode={exportMode}
+        previewUrl={previewUrl}
       />
     </>
   )
 }
-
 
 export default EditorPage

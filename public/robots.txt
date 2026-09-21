@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /$
+Allow: /templates
+
+# Private, per-user workspace routes. These render only local IndexedDB data and
+# have no meaningful content for a crawler.
+Disallow: /app
+Disallow: /settings
+Disallow: /editor/
+
+Sitemap: https://resume-studio.netlify.app/sitemap.xml

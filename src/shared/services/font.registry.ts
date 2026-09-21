@@ -29,18 +29,26 @@ class FontRegistryImpl {
   async initialize(): Promise<void> {
     const results = await Promise.allSettled(
       (Object.entries(FONT_FILES) as [FontKey, string][]).map(async ([key, path]) => {
-        const res = await fetch(path)
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const buf = await res.arrayBuffer()
-        this.fonts.set(key, buf)
+        const controller = new AbortController()
+        const timer = setTimeout(() => controller.abort(), 8000)
+        try {
+          const res = await fetch(path, { signal: controller.signal })
+          if (!res.ok) throw new Error(`HTTP ${res.status}`)
+          const buf = await res.arrayBuffer()
+          this.fonts.set(key, buf)
+        } finally {
+          clearTimeout(timer)
+        }
       })
     )
 
-    const loaded = results.filter(r => r.status === 'fulfilled').length
-    const failed = results.filter(r => r.status === 'rejected').length
+    const loaded = results.filter((r) => r.status === 'fulfilled').length
+    const failed = results.filter((r) => r.status === 'rejected').length
 
     if (failed > 0) {
-      logger.warn(`FontRegistry: ${loaded} fonts loaded, ${failed} unavailable — PDF will use standard fonts as fallback`)
+      logger.warn(
+        `FontRegistry: ${loaded} fonts loaded, ${failed} unavailable — PDF will use standard fonts as fallback`
+      )
     } else {
       logger.info('FontRegistry: all fonts loaded', { count: loaded })
     }

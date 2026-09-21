@@ -8,7 +8,7 @@ import {
   sectionIconKey,
   resolveSectionIcon,
 } from './icons'
-import { ALL_TEMPLATES } from '../registry/template.registry'
+import { ALL_TEMPLATES, getTemplateById } from '../registry/template.registry'
 import type { Resume } from '@/shared/types/resume.types'
 
 describe('icon library', () => {
@@ -111,7 +111,11 @@ describe('template section-icon defaults', () => {
     expect(bad).toEqual([])
   })
 
-  it('declares defaults for at least one template', () => {
-    expect(ALL_TEMPLATES.some((t) => t.sectionIcons)).toBe(true)
+  it('keeps icon-enabled legacy templates valid for saved resumes', () => {
+    expect(getTemplateById('cadence')?.sectionIcons).toBeDefined()
+  })
+
+  it('keeps title icons editable in the visible Clarity template', () => {
+    expect(ALL_TEMPLATES.find((template) => template.id === 'experienced-icon-minimal')?.sectionIcons).toBeDefined()
   })
 })

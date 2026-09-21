@@ -11,7 +11,12 @@ interface ImportResumeModalProps {
   isLoading?: boolean
 }
 
-export function ImportResumeModal({ isOpen, onClose, onConfirm, isLoading }: ImportResumeModalProps) {
+export function ImportResumeModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  isLoading,
+}: ImportResumeModalProps) {
   const [rawText, setRawText] = useState('')
 
   const handleClose = () => {
@@ -23,9 +28,9 @@ export function ImportResumeModal({ isOpen, onClose, onConfirm, isLoading }: Imp
     <Modal isOpen={isOpen} onClose={handleClose} title="Import resume" maxWidth="lg">
       <div className={styles.root}>
         <p className={styles.description}>
-          Paste your existing resume text below. We'll do our best to pull out
-          your name, contact details, and sections — it's a rough first pass,
-          so review and adjust everything afterward in the editor.
+          Paste your existing resume text below. We'll do our best to pull out your name, contact
+          details, and sections — it's a rough first pass, so review and adjust everything afterward
+          in the editor.
         </p>
 
         <Textarea
@@ -34,14 +39,17 @@ export function ImportResumeModal({ isOpen, onClose, onConfirm, isLoading }: Imp
           onChange={(e) => setRawText(e.target.value)}
           placeholder="Paste your resume text here…"
           rows={14}
+          maxLength={50000}
           disabled={isLoading}
         />
 
         <div className={styles.footer}>
-          <Button variant="ghost" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+          <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
+            Cancel
+          </Button>
           <Button
             variant="primary"
-            onClick={() => onConfirm(rawText)}
+            onClick={() => onConfirm(rawText.trim())}
             loading={isLoading}
             disabled={!rawText.trim()}
           >

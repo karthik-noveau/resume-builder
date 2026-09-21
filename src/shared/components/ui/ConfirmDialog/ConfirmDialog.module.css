@@ -1,16 +1,16 @@
 .body {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-5);
 }
 
 .description {
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   color: rgb(var(--color-text-secondary));
 }
 
 .actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
+  gap: var(--space-3);
 }

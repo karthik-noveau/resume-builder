@@ -16,7 +16,7 @@ class ResumeServiceImpl {
       themeId: themeOverride?.themeId ?? settings.themeId,
       fontPresetId: settings.fontPresetId,
       pageSize: settings.pageSize,
-      customPrimaryColor: themeOverride?.customPrimaryColor,
+      customPrimaryColor: themeOverride ? themeOverride.customPrimaryColor : settings.customPrimaryColor,
     })
     await storageService.saveResume(resume)
     logger.info('Resume created', { id: resume.id, templateId })
@@ -27,6 +27,7 @@ class ResumeServiceImpl {
     const settings = await storageService.getSettings()
     const resume = createResumeFromParsed(templateId, parsed, {
       themeId: settings.themeId,
+      customPrimaryColor: settings.customPrimaryColor,
       fontPresetId: settings.fontPresetId,
       pageSize: settings.pageSize,
     })

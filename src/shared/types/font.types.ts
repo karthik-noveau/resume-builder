@@ -22,6 +22,21 @@ export interface FontLetterSpacing {
   body: number
 }
 
+/**
+ * Per-resume typography chosen by the user at the text-style level.
+ *
+ * Carried on the preset rather than merged into it up front because a template
+ * is allowed to override a preset's scale (see resolveTemplateTypography), and
+ * an explicit user choice must outrank a template default. `applyResumeTypography`
+ * runs last in every render path and re-applies these on the way out.
+ */
+export interface RoleTypographyOverrides {
+  scale?: Partial<FontScale>
+  headingFamily?: FontFamily
+  bodyFamily?: FontFamily
+  lineHeight?: Partial<FontLineHeight>
+}
+
 export interface FontPreset {
   id: string
   name: string
@@ -30,4 +45,5 @@ export interface FontPreset {
   scale: FontScale
   lineHeight: FontLineHeight
   letterSpacing: FontLetterSpacing
+  roleOverrides?: RoleTypographyOverrides
 }

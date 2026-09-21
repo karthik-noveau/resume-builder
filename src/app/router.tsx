@@ -1,13 +1,19 @@
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { AppLayout } from './AppLayout'
 import { AppShell } from './AppShell'
-import { RootErrorBoundary } from '@/shared/components/errors/RootErrorBoundary'
+import { RouteError } from '@/shared/components/errors/RouteError'
+import { Spinner } from '@/shared/components/ui/Spinner/Spinner'
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <AppLayout />,
-    errorElement: <RootErrorBoundary><div /></RootErrorBoundary>,
+    errorElement: <RouteError />,
+    hydrateFallbackElement: (
+      <div className="app-loading">
+        <Spinner size={28} label="Opening your workspace…" />
+      </div>
+    ),
     children: [
       {
         element: <AppShell />,

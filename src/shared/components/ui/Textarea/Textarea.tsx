@@ -6,6 +6,7 @@ import styles from './Textarea.module.css'
 
 export function Textarea({
   label,
+  required,
   error,
   helperText,
   showCharacterCount,
@@ -27,11 +28,13 @@ export function Textarea({
     <div className={styles.field}>
       <label htmlFor={id} className={styles.label}>
         {label}
+        {required && <span className={styles.required} aria-hidden="true"> *</span>}
       </label>
 
       <AntInput.TextArea
         ref={externalRef as never}
         id={id}
+        required={required}
         value={value}
         maxLength={maxLength}
         autoSize={{ minRows: rows }}

@@ -1,0 +1,90 @@
+.card {
+  padding: 24px;
+  background: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: 20px;
+  box-shadow: var(--shadow-level-1);
+  scroll-margin-top: 88px;
+}
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header h2 {
+  font-size: 16px;
+  font-weight: 700;
+}
+.header p {
+  margin: 5px 0 0;
+  color: rgb(var(--color-text-secondary));
+  font-size: 12px;
+}
+.icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  color: rgb(var(--color-primary));
+  background: rgb(var(--color-primary) / 9%);
+}
+.description {
+  margin: 18px 0;
+  line-height: 1.7;
+  color: rgb(var(--color-text-secondary));
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.note {
+  margin: 12px 0 0;
+  font-size: 11px;
+  color: rgb(var(--color-text-muted));
+}
+.fileInput {
+  display: none;
+}
+.error {
+  margin-top: 14px;
+  color: rgb(var(--color-error));
+}
+.success {
+  margin-top: 14px;
+  color: rgb(var(--color-text-secondary));
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.success a {
+  color: rgb(var(--color-primary));
+  text-decoration: underline;
+}
+.restore {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 8px;
+}
+.restore p {
+  margin: 0;
+  line-height: 1.65;
+}
+.restore ul {
+  background: rgb(var(--color-surface-elevated));
+  border-radius: 12px;
+  padding: 16px 16px 16px 32px;
+  list-style: disc;
+}
+@media (max-width: 480px) {
+  .card {
+    padding: 20px;
+  }
+  .actions button {
+    flex: 1;
+  }
+}

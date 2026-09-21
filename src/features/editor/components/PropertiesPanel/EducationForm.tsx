@@ -1,28 +1,30 @@
-import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ControlledInput } from './ControlledFields'
 import { educationSectionSchema, type EducationSectionInput } from '@/shared/schemas/education.schema'
 import type { EducationSection } from '@/shared/types/resume.types'
 import { useResumeStore } from '@/shared/stores/resume.store'
+import { useGuidedForm } from '../../hooks/useGuidedForm'
+import { useResumeFormSync } from '../../hooks/useResumeFormSync'
 import styles from './EducationForm.module.css'
 
 export function EducationForm({ section }: { section: EducationSection }) {
   const updateSection = useResumeStore((s) => s.updateSection)
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<EducationSectionInput>({
+  const form = useForm<EducationSectionInput>({
     resolver: zodResolver(educationSectionSchema),
     defaultValues: section,
   })
+  const { control, handleSubmit, formState: { errors } } = form
+  const commit = useResumeFormSync<EducationSectionInput>(form, section, (data) => { updateSection('education', section.id, data) })
+  const guided = useGuidedForm(form, commit)
 
-  useEffect(() => { reset(section) }, [section.id, reset, section])
-
-  const save = handleSubmit((data) => { updateSection('education', section.id, data) })
+  const save = handleSubmit(commit)
   const onSaved = () => { void save() }
 
   return (
     <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
-      <ControlledInput control={control} name="institution" label="Institution" error={errors.institution?.message} onSaved={onSaved} />
-      <ControlledInput control={control} name="degree" label="Degree" error={errors.degree?.message} onSaved={onSaved} />
+      <ControlledInput control={control} name="institution" label="Institution" required={!!guided} error={errors.institution?.message} onSaved={onSaved} />
+      <ControlledInput control={control} name="degree" label="Degree" required={!!guided} error={errors.degree?.message} onSaved={onSaved} />
       <ControlledInput control={control} name="fieldOfStudy" label="Field of study" onSaved={onSaved} />
       <ControlledInput control={control} name="location" label="Location" onSaved={onSaved} />
       <div className={styles.grid}>

@@ -1,35 +1,43 @@
 import type { Resume } from '@/shared/types/resume.types'
 import { templateRenderer } from '@/features/templates/engine/template.renderer'
-import { ALL_TEMPLATES } from '@/features/templates/registry/template.registry'
-import { PdfGenerator } from './pdf.generator'
+import { getTemplateById } from '@/features/templates/registry/template.registry'
+import type { PdfGenerator } from './pdf.generator'
 import { logger } from '@/shared/services/logger'
 import { useThemeStore, resolveResumeTheme } from '@/shared/stores/theme.store'
 import { resumeSchema } from '@/shared/schemas/resume.schema'
 
+export interface GeneratedPdf {
+  bytes: Uint8Array
+  fileName: string
+}
+
 export class ExportService {
-  private pdfGenerator = new PdfGenerator()
+  /**
+   * pdf-lib and @pdf-lib/fontkit are ~1 MB of the bundle and are only reachable
+   * from this one method, so the generator is imported on first export rather
+   * than with the editor route. Statically importing it put 565 kB of fontkit
+   * into the EditorPage chunk for a page that may never export anything.
+   * The promise is cached, so a second export reuses the loaded module.
+   */
+  private generatorPromise?: Promise<PdfGenerator>
+
+  private loadGenerator(): Promise<PdfGenerator> {
+    this.generatorPromise ??= import('./pdf.generator')
+      .then((m) => new m.PdfGenerator())
+      .catch((error: unknown) => {
+        this.generatorPromise = undefined
+        throw error
+      })
+    return this.generatorPromise
+  }
 
   async exportToPdf(resume: Resume): Promise<void> {
     logger.info('Starting PDF export', { resumeId: resume.id })
 
     try {
-      // 1. Validate resume
-      this.validateResume(resume)
+      const pdf = await this.generatePdf(resume)
+      this.downloadPdf(pdf)
 
-      // 2. Get active template, theme, fontPreset
-      const { template, theme, fontPreset } = this.getExportContext(resume)
-
-      // 3. Render LayoutTree
-      logger.debug('Rendering LayoutTree for export')
-      const layoutTree = templateRenderer.render(resume, template, theme, fontPreset)
-
-      // 4. Generate PDF
-      logger.debug('Generating PDF bytes')
-      const pdfBytes = await this.pdfGenerator.generate(layoutTree)
-
-      // 5. Trigger download
-      this.downloadPdf(pdfBytes, this.buildFileName(resume))
-      
       logger.info('PDF export completed successfully')
     } catch (error) {
       logger.error('PDF export failed', error)
@@ -37,10 +45,40 @@ export class ExportService {
     }
   }
 
+  async generatePdf(resume: Resume): Promise<GeneratedPdf> {
+    this.validateResume(resume)
+
+    const { template, theme, fontPreset } = this.getExportContext(resume)
+
+    logger.debug('Rendering LayoutTree for export')
+    const layoutTree = templateRenderer.render(resume, template, theme, fontPreset)
+
+    logger.debug('Generating PDF bytes')
+    const generator = await this.loadGenerator()
+    const bytes = await generator.generate(layoutTree)
+
+    return { bytes, fileName: this.buildFileName(resume) }
+  }
+
+  createPreviewUrl(pdf: GeneratedPdf): string {
+    return URL.createObjectURL(this.toBlob(pdf.bytes))
+  }
+
+  downloadPdf(pdf: GeneratedPdf): void {
+    const url = URL.createObjectURL(this.toBlob(pdf.bytes))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = pdf.fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
+
   private validateResume(resume: Resume) {
     const result = resumeSchema.safeParse(resume)
     if (!result.success) {
-      const issues = result.error.issues.map(i => i.message).join(', ')
+      const issues = result.error.issues.map((i) => i.message).join(', ')
       throw new Error(`Resume validation failed: ${issues}`)
     }
 
@@ -53,13 +91,14 @@ export class ExportService {
   }
 
   private getExportContext(resume: Resume) {
-    const template = ALL_TEMPLATES.find(t => t.id === resume.templateId)
+    const template = getTemplateById(resume.templateId)
     if (!template) throw new Error(`Template not found: ${resume.templateId}`)
 
     const theme = resolveResumeTheme(resume.themeId, resume.customPrimaryColor)
 
-    const fontPreset = useThemeStore.getState().availableFontPresets.find(fp => fp.id === resume.fontPresetId)
-      || useThemeStore.getState().availableFontPresets[0]
+    const fontPreset =
+      useThemeStore.getState().availableFontPresets.find((fp) => fp.id === resume.fontPresetId) ||
+      useThemeStore.getState().availableFontPresets[0]
 
     return { template, theme, fontPreset }
   }
@@ -72,16 +111,9 @@ export class ExportService {
     return `${name || 'Resume'}_${new Date().toISOString().split('T')[0]}.pdf`
   }
 
-  private downloadPdf(bytes: Uint8Array, fileName: string) {
+  private toBlob(bytes: Uint8Array): Blob {
     const blob = new Blob([bytes as unknown as BlobPart], { type: 'application/pdf' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = fileName
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+    return blob
   }
 }
 

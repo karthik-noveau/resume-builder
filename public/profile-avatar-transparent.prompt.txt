@@ -1,0 +1,7 @@
+Mode: Built-in image_gen, using the imagegen skill.
+Two independent background-extraction edits with the same prompt:
+1. Edit target: public/profile-avatar-cartoon-v1.png -> public/profile-avatar-male-transparent-v1.png
+2. Edit target: public/profile-avatar-female-v1.png -> public/profile-avatar-female-transparent-v1.png
+
+Final prompt:
+Use case: background-extraction. Asset type: resume-builder cartoon profile avatar PNG. Input Image 1 is the edit target. Remove ONLY the lavender background, producing a genuinely transparent RGBA PNG with clean alpha edges around the character. Preserve the exact character identity, face, hair, purple shirt, colors, pose, centered square crop, subject size and placement, and 3D cartoon rendering. Keep the shoulders extending to the bottom edge. Do not add, recolor, redraw or change the character. No background color, no halo, no shadow outside the cutout, no checkerboard baked into the pixels, no text.

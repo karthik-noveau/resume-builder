@@ -1,20 +1,27 @@
-/* Scrolls as a whole. The Appearance panel below the section list is always
-   expanded and ~400px tall, so on a short viewport the column's natural height
-   exceeds the available space — without this it would silently overflow and
-   clip "Add section" off the bottom. */
+/* Section navigation and the document-wide page settings share this rail: one
+   is what you are editing, the other is how the page itself is set up, and
+   neither belongs in the inspector that tracks the current selection. */
+/* One scrolling column, with the blocks stacked in reading order. The headings
+   stick as you pass them, so you can always tell which block you are inside
+   without any of them being pinned somewhere the content is not. */
 .root {
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
+  min-width: 0;
+  scrollbar-gutter: stable;
 }
 
-/* Every block in this column — Profile strength, Sections, Appearance, Add
-   section — opens and closes with 20px between its divider and its first or
-   last piece of ink. Where a block's edge element carries its own padding, the
-   figure here is reduced by that much so the *visual* gap still lands on 20. */
-.strength {
-  padding: 20px 16px;
+.sectionList {
+  flex-shrink: 0;
+  padding-bottom: var(--space-2);
+}
+
+/* Keep the evaluation aligned with the section controls below it. */
+.evaluation {
+  padding: var(--space-5) var(--space-4);
   border-bottom: 1px solid rgb(var(--color-divider));
   flex-shrink: 0;
 }
@@ -22,57 +29,88 @@
 /* No border under this one: the rule belongs above a heading, not between a
    heading and the list it names. 20px above is the shared block inset; the 12px
    below is the heading-to-content gap, matching the Appearance panel. */
+/* z-index below the block headers on purpose: each sticky heading should be
+   covered by the next one as you scroll into it, so only the block you are
+   actually inside is labelled at the top of the rail. */
 .heading {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   flex-shrink: 0;
-  padding: 20px 16px 12px;
-  font-size: 0.75rem;
+  background: rgb(var(--color-surface));
+  padding: var(--space-5) var(--space-4) var(--space-3);
+  font-size: var(--text-sm);
   font-weight: 600;
   color: rgb(var(--color-text-muted));
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-.completenessRow {
+.footerBlocks {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgb(var(--color-divider));
+}
+
+.footerBlock {
+  flex-shrink: 0;
+}
+
+.footerBlock + .footerBlock {
+  border-top: 1px solid rgb(var(--color-divider));
+}
+
+/* Keeps the block's own name in view while scrolling through its contents, and
+   covers the heading above it on the way past. */
+.footerToggle {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
+  width: 100%;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  background: rgb(var(--color-surface));
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--duration-fast);
 }
 
-.completenessLabel {
-  font-size: 0.6875rem;
-  font-weight: 500;
-  color: rgb(var(--color-text-secondary));
+.footerToggle:hover {
+  background-color: rgb(var(--color-primary) / 4%);
 }
 
-.completenessValue {
-  font-size: 0.6875rem;
+.footerToggle:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: -2px;
+}
+
+.footerIdentity {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  font-size: var(--text-sm);
   font-weight: 600;
-  color: rgb(var(--color-text-primary));
-  font-variant-numeric: tabular-nums;
+  color: rgb(var(--color-text-muted));
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.track {
-  height: 6px;
-  border-radius: 9999px;
-  background-color: rgb(var(--color-surface-elevated));
-  overflow: hidden;
+.footerChevron {
+  flex-shrink: 0;
+  color: rgb(var(--color-text-muted));
+  transition: transform var(--duration-fast);
 }
 
-.fill {
-  height: 100%;
-  border-radius: 9999px;
-  transition: width var(--duration-normal);
+.footerChevronOpen {
+  transform: rotate(180deg);
 }
 
-.fillHigh {
-  background-color: rgb(var(--color-success));
-}
-
-.fillMedium {
-  background-color: rgb(var(--color-primary));
-}
-
-.fillLow {
-  background-color: rgb(var(--color-warning));
+.footerBody {
+  padding: 0 16px 20px;
 }

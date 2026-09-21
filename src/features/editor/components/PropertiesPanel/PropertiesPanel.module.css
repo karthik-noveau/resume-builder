@@ -3,76 +3,268 @@
   flex-direction: column;
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
+  min-width: 0;
+  background:
+    radial-gradient(circle at 100% 0%, rgb(var(--color-primary) / 6%), transparent 240px),
+    rgb(var(--color-background));
+  scrollbar-gutter: stable;
 }
 
-.personalInfoSection {
+.inspectorHeader {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: block;
+  padding: var(--space-2) var(--space-3);
   border-bottom: 1px solid rgb(var(--color-divider));
-  flex-shrink: 0;
+  background: rgb(var(--color-surface) / 88%);
+  backdrop-filter: blur(16px);
+  min-width: 0;
 }
 
-.sectionToggle {
+/* The second and last line of the header. Matches the accordion hints in the
+   Design tab so the two panels describe themselves at the same weight. */
+.selectedSectionDescription {
+  margin: 1px 0 0;
+  color: rgb(var(--color-text-muted));
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+/* The only thing in the header row, so it spans it. */
+/* A segmented control: a recessed track with a raised thumb on the active half.
+   The track was `--color-surface-elevated`, which is the same white as
+   `--color-surface` in the light theme — so the thumb and the groove it sits in
+   were the identical colour and the only thing marking the selection was a 1px
+   shadow. (In dark the two tokens differ but the wrong way round: elevated is
+   lighter than surface, so the thumb sat *below* its track.) `--color-background`
+   is recessed relative to `--color-surface` in both themes, which is the one
+   relationship this control depends on.
+
+   The outer border went with it. A filled track already draws the shape, and an
+   outline around it plus the thumb's own edge read as two nested boxes. */
+.modeTabs {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   width: 100%;
+  min-width: 0;
+  gap: var(--space-0-5);
+  padding: 3px;
+  border-radius: var(--radius-medium);
+  background: rgb(var(--color-background));
+  /* An inset hairline rather than a border: on a recessed fill it reads as the
+     edge of a groove, which is what the thumb sits in. A real border drew a box
+     around the control and, with the thumb's own edge inside it, gave the
+     nested-outline look. */
+  box-shadow: inset 0 0 0 1px rgb(var(--color-divider) / 55%);
+}
+
+/* Exactly one column wide, offset by a column when the second tab is active.
+   Out of flow, so it adds no grid track. */
+.modeThumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  /* Track width less its padding and the inter-tab gap, halved. */
+  width: calc(50% - 4px);
+  border-radius: 7px;
+  background: rgb(var(--color-surface));
+  box-shadow: 0 1px 2px rgb(15 23 42 / 8%), 0 2px 6px rgb(15 23 42 / 5%);
+  pointer-events: none;
+  transition: transform var(--duration-normal) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Its own width plus the gap lands it exactly on the second column. */
+.modeTabs[data-active='design'] .modeThumb {
+  transform: translateX(calc(100% + var(--space-0-5)));
+}
+
+.modeTab {
+  /* --control-md, so the tabs stand at the same height as the selects and
+     inputs in the panel below them rather than at a one-off 28px. */
+  min-height: var(--control-md);
+  min-width: 0;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1-5);
+  border: 0;
+  /* Concentric with the track: 10px outer radius less 3px of padding. */
+  border-radius: 7px;
+  /* Above the thumb, which is painted behind both labels. */
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  color: rgb(var(--color-text-secondary));
+  font-size: var(--text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--duration-fast), background-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+/* Only the inactive half responds — hovering the one you are already on should
+   not promise a change. The thumb carries the surface, so this is text only. */
+.modeTab[aria-selected='false']:hover {
+  color: rgb(var(--color-text-primary));
+}
+
+.modeTab[aria-selected='true'] {
+  color: rgb(var(--color-primary));
+}
+
+.modeTab:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 1px;
+}
+
+.sectionIcon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: var(--radius-control);
+  background: rgb(var(--color-surface-elevated));
+  color: rgb(var(--color-text-secondary));
+}
+
+.selectedSection {
+  margin: var(--space-3) var(--space-3) var(--space-5);
+  padding: var(--space-4);
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: var(--radius-large);
+  background: rgb(var(--color-surface));
+  box-shadow: 0 1px 2px rgb(15 23 42 / 3%), 0 8px 22px rgb(15 23 42 / 3%);
+}
+
+.designBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-5);
+}
+
+.accordion {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: var(--radius-large);
+  background: rgb(var(--color-surface));
+  box-shadow: 0 1px 2px rgb(15 23 42 / 3%), 0 8px 22px rgb(15 23 42 / 3%);
+}
+
+.accordionToggle {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  text-align: left;
-  background: none;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-3);
   border: none;
+  background: none;
   cursor: pointer;
+  text-align: left;
   transition: background-color var(--duration-fast);
 }
 
-.sectionToggle:hover {
-  background-color: rgb(var(--color-surface-elevated));
+.accordionToggle:hover {
+  background-color: rgb(var(--color-primary) / 4%);
 }
 
-.sectionHeading {
-  font-size: 0.75rem;
-  font-weight: 600;
+.accordionToggle:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: -2px;
+}
+
+.accordionIcon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  border: 1px solid rgb(var(--color-primary) / 18%);
+  border-radius: var(--radius-control);
+  background: linear-gradient(145deg, rgb(var(--color-primary) / 13%), rgb(var(--color-primary) / 5%));
+  color: rgb(var(--color-primary));
+}
+
+.accordionCopy {
+  flex: 1;
+  min-width: 0;
+}
+
+.accordionLabel {
+  display: block;
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: rgb(var(--color-text-primary));
+  letter-spacing: -0.005em;
+}
+
+/* A one-line hint under the heading, not a paragraph. The copy is kept short
+   enough to fit the rail so both headers stand the same height; if a longer
+   string ever lands here it truncates rather than reflowing the whole panel. */
+.accordionDescription {
+  display: block;
+  margin-top: 1px;
+  font-size: var(--text-xs);
+  line-height: 1.4;
   color: rgb(var(--color-text-muted));
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.chevron {
+.accordionChevron {
+  flex-shrink: 0;
   color: rgb(var(--color-text-muted));
   transition: transform var(--duration-fast);
 }
 
-.chevronOpen {
+.accordionChevronOpen {
   transform: rotate(180deg);
 }
 
-.personalInfoBody {
-  padding: 0 16px 16px;
-}
-
-.selectedSection {
-  padding: 12px 16px 16px;
+.accordionBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 14px 14px;
+  border-top: 1px solid rgb(var(--color-divider));
+  padding-top: var(--space-3);
 }
 
 .selectedSectionHeader {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 12px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .backButton {
-  padding: 4px;
-  margin-left: -4px;
-  border-radius: var(--radius-small);
-  color: rgb(var(--color-text-muted));
-  background: none;
-  border: none;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: var(--radius-control);
+  color: rgb(var(--color-text-secondary));
+  background: rgb(var(--color-surface-elevated));
   cursor: pointer;
   transition: color var(--duration-fast), background-color var(--duration-fast);
 }
 
 .backButton:hover {
-  color: rgb(var(--color-text-primary));
-  background-color: rgb(var(--color-surface-elevated));
+  color: rgb(var(--color-primary));
+  border-color: rgb(var(--color-primary) / 28%);
+  background-color: rgb(var(--color-primary) / 6%);
 }
 
 .backButton:focus-visible {
@@ -80,22 +272,95 @@
 }
 
 .selectedSectionTitle {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: rgb(var(--color-text-muted));
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: rgb(var(--color-text-primary));
   text-transform: capitalize;
-  letter-spacing: 0.05em;
+  letter-spacing: -0.01em;
 }
 
-.layoutSection {
-  padding: 12px 16px 16px;
+.root :global(.ant-input),
+.root :global(.ant-input-number),
+.root :global(.ant-select-selector),
+.root :global(textarea.ant-input) {
+  border-color: rgb(var(--color-divider)) !important;
+  border-radius: var(--radius-small) !important;
+  background: rgb(var(--color-background)) !important;
+  box-shadow: inset 0 1px 1px rgb(15 23 42 / 2%) !important;
+  transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease, background-color var(--duration-fast) ease !important;
 }
 
-.layoutSectionTitle {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: rgb(var(--color-text-muted));
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 12px;
+/* One height, one radius, one type size for every control in the panel.
+   They previously measured 40px (antd select), 40px (colour picker) and 37px
+   (the number inputs) with radii of 10px and 8px and type at 14px and 13px —
+   three different controls sharing one grid row, none of them agreeing. */
+.root :global(.ant-input),
+.root :global(.ant-input-number),
+.root :global(.ant-select-selector),
+.root :global(.ant-color-picker-trigger) {
+  min-height: var(--control-md) !important;
+  height: var(--control-md) !important;
+  border-radius: var(--radius-control) !important;
+  font-size: var(--text-base) !important;
+}
+
+/* antd centres the selected label with a line-height matched to its own
+   default height; pinning ours leaves the text riding high without this. */
+.root :global(.ant-select-single .ant-select-selector .ant-select-selection-item),
+.root :global(.ant-select-single .ant-select-selector .ant-select-selection-placeholder) {
+  line-height: calc(var(--control-md) - 2px) !important;
+}
+
+/* Square: a colour trigger is a swatch, so it takes the control height in both
+   directions instead of collapsing to its content width. */
+.root :global(.ant-color-picker-trigger) {
+  width: var(--control-md) !important;
+  min-width: var(--control-md) !important;
+  justify-content: center;
+  padding: var(--space-1);
+  flex-shrink: 0;
+}
+
+.root :global(.ant-color-picker-trigger .ant-color-picker-color-block) {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  flex: 1;
+  border-radius: var(--radius-xs);
+}
+
+/* Textareas grow, so they take the radius and type but not the fixed height. */
+.root :global(textarea.ant-input) {
+  height: auto !important;
+  min-height: calc(var(--control-md) * 2) !important;
+}
+
+.root :global(.ant-input:hover),
+.root :global(.ant-input-number:hover),
+.root :global(.ant-select-selector:hover) {
+  border-color: rgb(var(--color-primary) / 38%) !important;
+  background: rgb(var(--color-surface)) !important;
+}
+
+.root :global(.ant-input:focus),
+.root :global(.ant-input-focused),
+.root :global(.ant-input-number-focused),
+.root :global(.ant-select-focused .ant-select-selector),
+.root :global(.ant-color-picker-trigger-active) {
+  border-color: rgb(var(--color-primary) / 65%) !important;
+  background: rgb(var(--color-surface)) !important;
+  box-shadow: 0 0 0 3px rgb(var(--color-primary) / 10%) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root :global(.ant-input),
+  .root :global(.ant-input-number),
+  .root :global(.ant-select-selector),
+  .sectionToggle,
+  .backButton,
+  .modeTab,
+  .modeThumb {
+    transition: none !important;
+  }
 }

@@ -1,58 +1,48 @@
 .root {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 8px 10px 24px;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 600;
+  justify-content: center;
+  gap: 24px;
+  min-height: 56px;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
   text-decoration: none;
-  transition: transform var(--duration-fast);
+  transition:
+    background 160ms,
+    transform 160ms;
 }
-
 .root:hover {
-  transform: scale(1.02);
+  transform: translateY(-2px);
 }
-
 .root:active {
-  transform: scale(0.98);
+  transform: translateY(0);
 }
-
 .brand {
-  color: #fff;
-  box-shadow: var(--shadow-glow-lift);
+  background: var(--home-button-bg);
+  color: var(--home-button-ink);
+  box-shadow: 0 4px 18px var(--home-shadow);
 }
-
+.brand:hover {
+  background: var(--home-button-hover);
+}
 .inverted {
-  background-color: #fff;
-  color: #1a0f2e;
+  background: #ffffff;
+  color: #17141e;
 }
-
+.inverted:hover {
+  background: #eee7ff;
+}
 .inverted:focus-visible {
-  outline-color: #fff;
+  outline-color: var(--home-accent) !important;
 }
-
 .iconCircle {
-  width: 32px;
-  height: 32px;
-  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  transition: transform var(--duration-fast);
 }
-
-.root:hover .iconCircle {
-  transform: translateX(2px);
-}
-
-.iconCircleBrand {
-  background-color: #fff;
-  color: rgb(var(--color-primary));
-}
-
+.iconCircleBrand,
 .iconCircleInverted {
-  background-color: #1a0f2e;
-  color: #fff;
+  color: inherit;
 }

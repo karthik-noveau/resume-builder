@@ -2,7 +2,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   padding-bottom: 4px;
 }
 
@@ -10,11 +10,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .label {
-  font-size: 0.8125rem;
+  font-size: var(--text-base);
   font-weight: 500;
   color: rgb(var(--color-text-primary));
 }
@@ -22,12 +22,12 @@
 .reset {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 6px;
+  gap: var(--space-1);
+  padding: var(--space-0-5) var(--space-1-5);
   border: none;
   background: none;
   border-radius: var(--radius-small);
-  font-size: 0.6875rem;
+  font-size: var(--text-xs);
   color: rgb(var(--color-text-muted));
   cursor: pointer;
   transition: color var(--duration-fast), background-color var(--duration-fast);
@@ -47,9 +47,9 @@
 .trigger {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   width: 100%;
-  padding: 7px 10px;
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-medium);
   border: 1px solid rgb(var(--color-divider));
   background-color: rgb(var(--color-surface));
@@ -82,7 +82,7 @@
 
 .triggerName {
   flex: 1 1 auto;
-  font-size: 0.8125rem;
+  font-size: var(--text-base);
   text-transform: capitalize;
   white-space: nowrap;
   overflow: hidden;
@@ -91,10 +91,10 @@
 
 .defaultTag {
   flex-shrink: 0;
-  padding: 1px 6px;
-  border-radius: 9999px;
+  padding: var(--space-0-5) var(--space-1-5);
+  border-radius: var(--radius-pill);
   background-color: rgb(var(--color-surface-elevated));
-  font-size: 0.625rem;
+  font-size: var(--text-2xs);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -128,12 +128,21 @@
   overflow: hidden;
 }
 
+/* The row carries the focus state for the input inside it, which is borderless
+   by design. Without this the input's `outline: none` left keyboard users with
+   no indication of where they were. */
 .search {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 10px;
+  gap: var(--space-1-5);
+  padding: var(--space-2) var(--space-3);
   border-bottom: 1px solid rgb(var(--color-divider));
+  transition: background-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.search:focus-within {
+  background: rgb(var(--color-primary) / 4%);
+  box-shadow: inset 0 0 0 1px rgb(var(--color-primary) / 45%);
 }
 
 .searchIcon {
@@ -146,7 +155,7 @@
   min-width: 0;
   border: none;
   background: none;
-  font-size: 0.8125rem;
+  font-size: var(--text-base);
   color: rgb(var(--color-text-primary));
 }
 
@@ -154,6 +163,7 @@
   color: rgb(var(--color-text-muted));
 }
 
+/* Borderless inside .search, which shows the focus state for it. */
 .searchInput:focus {
   outline: none;
 }
@@ -163,7 +173,7 @@
 .scroll {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
   max-height: 300px;
   overflow-y: auto;
   padding: 12px 10px;
@@ -176,7 +186,7 @@
 }
 
 .groupLabel {
-  font-size: 0.625rem;
+  font-size: var(--text-2xs);
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -222,6 +232,6 @@
 
 .empty {
   padding: 8px 2px;
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   color: rgb(var(--color-text-muted));
 }

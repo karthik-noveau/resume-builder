@@ -11,6 +11,8 @@ import type {
   CustomSection,
 } from '@/shared/types/resume.types'
 import type { IconName } from '@/shared/types/layout.types'
+import type { ElementStyle, ResumeStyleOverrides, StyleRole } from '@/shared/types/style.types'
+import { isEmptyStyle } from '@/shared/types/style.types'
 import type { DeepPartial } from '@/shared/types/utils.types'
 import type { ParsedResumeData } from '@/features/resume/utils/resumeParser'
 import { resumeService } from '@/shared/services/resume.service'
@@ -24,6 +26,49 @@ import {
   createEmptyCertification,
   createEmptyCustomSection,
 } from '@/features/resume/utils/section.factory'
+import { defaultAppearance, defaultContent } from '@/features/resume/utils/resume.factory'
+
+// ─── Style-override helpers ───────────────────────────────────────────────────
+
+/**
+ * Merges a style patch, treating an explicit `undefined` as "clear this
+ * property" rather than "leave it alone". The inspector needs both: a colour
+ * picker sets a value, and its reset button unsets one, and a plain spread
+ * cannot tell those apart.
+ */
+function mergeStyle(current: ElementStyle | undefined, patch: ElementStyle): ElementStyle {
+  const next: ElementStyle = { ...current }
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === undefined) delete next[key as keyof ElementStyle]
+    else (next as Record<string, unknown>)[key] = value
+  }
+  return next
+}
+
+function omitKey<T extends object>(source: T, key: keyof T): T {
+  const next = { ...source }
+  delete next[key]
+  return next
+}
+
+/** Drops emptied entries so a resume that has been reset stops carrying the
+ * husk of its overrides into storage — and so `hasStyleOverrides` stays true
+ * only while something is actually overridden. */
+function pruneOverrides(overrides: ResumeStyleOverrides): ResumeStyleOverrides | undefined {
+  const roles = Object.fromEntries(
+    Object.entries(overrides.roles ?? {}).filter(([, style]) => !isEmptyStyle(style))
+  ) as ResumeStyleOverrides['roles']
+  const elements = Object.fromEntries(
+    Object.entries(overrides.elements ?? {}).filter(([, style]) => !isEmptyStyle(style))
+  ) as ResumeStyleOverrides['elements']
+  const page = overrides.page?.backgroundColor ? overrides.page : undefined
+
+  const result: ResumeStyleOverrides = {}
+  if (roles && Object.keys(roles).length) result.roles = roles
+  if (elements && Object.keys(elements).length) result.elements = elements
+  if (page) result.page = page
+  return Object.keys(result).length ? result : undefined
+}
 
 // ─── Array helpers ────────────────────────────────────────────────────────────
 
@@ -34,14 +79,8 @@ function arrayMove<T>(arr: T[], from: number, to: number): T[] {
   return result
 }
 
-function updateById<T extends BaseSectionContract>(
-  arr: T[],
-  id: string,
-  patch: Partial<T>
-): T[] {
-  return arr.map((s) =>
-    s.id === id ? { ...s, ...patch, updatedAt: new Date().toISOString() } : s
-  )
+function updateById<T extends BaseSectionContract>(arr: T[], id: string, patch: Partial<T>): T[] {
+  return arr.map((s) => (s.id === id ? { ...s, ...patch, updatedAt: new Date().toISOString() } : s))
 }
 
 function removeById<T extends BaseSectionContract>(arr: T[], id: string): T[] {
@@ -66,7 +105,10 @@ interface ResumeState {
 interface ResumeActions {
   loadResumeList(): Promise<void>
   loadResume(id: string): Promise<void>
-  createResume(templateId: string, themeOverride?: { themeId: string; customPrimaryColor?: string }): Promise<string>
+  createResume(
+    templateId: string,
+    themeOverride?: { themeId: string; customPrimaryColor?: string }
+  ): Promise<string>
   createResumeFromImport(templateId: string, parsed: ParsedResumeData): Promise<string>
   updateResume(patch: DeepPartial<Resume>): void
   updateSection(
@@ -83,13 +125,44 @@ interface ResumeActions {
   toggleSectionTypeVisibility(sectionType: SectionType): void
   /** Sets a section-header icon override; pass null to fall back to the template default. */
   setSectionIcon(key: string, icon: IconName | null): void
+  /** Merges a patch into one text style. Passing `null` for a property clears it. */
+  setRoleStyle(role: StyleRole, patch: ElementStyle): void
+  /** Merges a patch into one element's own style, keyed by its stable style key. */
+  setElementStyle(styleKey: string, patch: ElementStyle): void
+  /** Drops every override on one element, so it falls back to its text style. */
+  resetElementStyle(styleKey: string): void
+  /** Drops every override on one text style. */
+  resetRoleStyle(role: StyleRole): void
+  setPageBackground(color: string | null): void
+  /** Clears the whole style layer, returning the resume to its template. */
+  resetAllStyleOverrides(): void
+  /**
+   * Clears the chosen halves of the resume in a single undoable step.
+   *
+   * `appearance` returns colours, fonts, text styles, spacing, page setup and
+   * section order to what a new resume starts with. It keeps the chosen
+   * template, because the product has no default one to fall back to.
+   *
+   * `content` restores the blank fields a new resume begins with, discarding
+   * anything written over it including renamed headings. The resume keeps its
+   * id, title and creation date, so its link and place in the list survive.
+   */
+  resetResume(options: ResetResumeOptions): void
   reorderSectionBlocks(fromIndex: number, toIndex: number): void
+  /** Reorders the achievement bullets inside one experience entry. */
+  reorderEntryBullets(entryId: string, fromIndex: number, toIndex: number): void
   duplicateResume(id: string): Promise<string>
   renameResume(id: string, title: string): Promise<void>
   deleteResume(id: string): Promise<void>
   saveActiveResume(): Promise<void>
   markClean(): void
   setError(error: string | null): void
+}
+
+/** Which halves of the resume a reset should clear. */
+export interface ResetResumeOptions {
+  content: boolean
+  appearance: boolean
 }
 
 type ResumeStore = ResumeState & ResumeActions
@@ -106,6 +179,9 @@ function withTimestamp<T extends Partial<Resume>>(patch: T): T {
 
 // ─── Store ───────────────────────────────────────────────────────────────────
 
+let pendingSave: Promise<void> | null = null
+let loadVersion = 0
+
 export const useResumeStore = create<ResumeStore>((set, get) => ({
   // ─── State ──────────────────────────────────────────────────────────────────
   activeResume: null,
@@ -119,6 +195,11 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   async loadResumeList() {
     set({ isLoading: true, error: null })
     try {
+      await get().saveActiveResume()
+      if (get().error) {
+        set({ isLoading: false })
+        return
+      }
       const resumeList = await resumeService.getResumeList()
       set({ resumeList, isLoading: false })
     } catch (err) {
@@ -128,17 +209,28 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   },
 
   async loadResume(id) {
+    const version = ++loadVersion
     set({ isLoading: true, error: null })
     try {
+      await get().saveActiveResume()
+      if (version !== loadVersion) return
+      if (get().error) {
+        set({ isLoading: false })
+        return
+      }
       const resume = await resumeService.getResume(id)
+      if (version !== loadVersion) return
       if (!resume) {
         set({ isLoading: false, error: `Resume ${id} not found` })
         return
       }
       useEditorStore.getState().clearHistory()
+      useEditorStore.getState().clearSelection()
+      useEditorStore.getState().clearStyleTarget()
       set({ activeResume: resume, isLoading: false, isDirty: false })
       logger.info('Resume loaded', { id })
     } catch (err) {
+      if (version !== loadVersion) return
       logger.error('Failed to load resume', err, { id })
       set({ isLoading: false, error: 'Failed to load resume' })
     }
@@ -164,7 +256,15 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   },
 
   async renameResume(id, title) {
-    const resume = await resumeService.updateResume(id, { title })
+    const trimmed = title.trim().slice(0, 120)
+    if (!trimmed) throw new Error('Give your resume a name')
+    if (get().activeResume?.id === id) {
+      get().updateResume({ title: trimmed })
+      await get().saveActiveResume()
+      if (get().error) throw new Error(get().error ?? 'Could not rename resume')
+      return
+    }
+    const resume = await resumeService.updateResume(id, { title: trimmed })
     set((s) => ({
       resumeList: s.resumeList.map((r) => (r.id === id ? resume : r)),
       activeResume: s.activeResume?.id === id ? resume : s.activeResume,
@@ -222,6 +322,144 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
     })
   },
 
+  setRoleStyle(role, patch) {
+    const { activeResume } = get()
+    if (!activeResume) return
+
+    useEditorStore.getState().pushUndoSnapshot(snapshot(activeResume))
+    const current = activeResume.styleOverrides ?? {}
+    const merged = mergeStyle(current.roles?.[role], patch)
+
+    set({
+      activeResume: withTimestamp({
+        ...activeResume,
+        styleOverrides: pruneOverrides({
+          ...current,
+          roles: { ...current.roles, [role]: merged },
+        }),
+      }),
+      isDirty: true,
+    })
+  },
+
+  setElementStyle(styleKey, patch) {
+    const { activeResume } = get()
+    if (!activeResume) return
+
+    useEditorStore.getState().pushUndoSnapshot(snapshot(activeResume))
+    const current = activeResume.styleOverrides ?? {}
+    const merged = mergeStyle(current.elements?.[styleKey], patch)
+
+    set({
+      activeResume: withTimestamp({
+        ...activeResume,
+        styleOverrides: pruneOverrides({
+          ...current,
+          elements: { ...current.elements, [styleKey]: merged },
+        }),
+      }),
+      isDirty: true,
+    })
+  },
+
+  resetElementStyle(styleKey) {
+    const { activeResume } = get()
+    if (!activeResume?.styleOverrides?.elements?.[styleKey]) return
+
+    useEditorStore.getState().pushUndoSnapshot(snapshot(activeResume))
+    const rest = omitKey(activeResume.styleOverrides.elements, styleKey)
+
+    set({
+      activeResume: withTimestamp({
+        ...activeResume,
+        styleOverrides: pruneOverrides({ ...activeResume.styleOverrides, elements: rest }),
+      }),
+      isDirty: true,
+    })
+  },
+
+  resetRoleStyle(role) {
+    const { activeResume } = get()
+    if (!activeResume?.styleOverrides?.roles?.[role]) return
+
+    useEditorStore.getState().pushUndoSnapshot(snapshot(activeResume))
+    const rest = omitKey(activeResume.styleOverrides.roles, role)
+
+    set({
+      activeResume: withTimestamp({
+        ...activeResume,
+        styleOverrides: pruneOverrides({ ...activeResume.styleOverrides, roles: rest }),
+      }),
+      isDirty: true,
+    })
+  },
+
+  setPageBackground(color) {
+    const { activeResume } = get()
+    if (!activeResume) return
+
+    useEditorStore.getState().pushUndoSnapshot(snapshot(activeResume))
+
+    set({
+      activeResume: withTimestamp({
+        ...activeResume,
+        styleOverrides: pruneOverrides({
+          ...activeResume.styleOverrides,
+          page: color ? { backgroundColor: color.toLowerCase() } : undefined,
+        }),
+      }),
+      isDirty: true,
+    })
+  },
+
+  resetAllStyleOverrides() {
+    const { activeResume } = get()
+    if (!activeResume?.styleOverrides) return
+
+    useEditorStore.getState().pushUndoSnapshot(snapshot(activeResume))
+    set({
+      activeResume: withTimestamp({ ...activeResume, styleOverrides: undefined }),
+      isDirty: true,
+    })
+  },
+
+  resetResume({ content, appearance }) {
+    const { activeResume } = get()
+    if (!activeResume) return
+    if (!content && !appearance) return
+
+    useEditorStore.getState().pushUndoSnapshot(snapshot(activeResume))
+
+    // Built up in one object so ticking both halves costs one undo entry and
+    // one save, not two of each.
+    let next: Resume = { ...activeResume }
+
+    if (appearance) {
+      const defaults = defaultAppearance()
+      next = {
+        ...next,
+        themeId: defaults.themeId,
+        fontPresetId: defaults.fontPresetId,
+        customPrimaryColor: defaults.customPrimaryColor,
+        templateColors: undefined,
+        sectionOrder: defaults.sectionOrder,
+        settings: defaults.settings,
+        sectionIcons: undefined,
+        styleOverrides: undefined,
+      }
+    }
+
+    if (content) {
+      next = { ...next, ...defaultContent() }
+    }
+
+    set({ activeResume: withTimestamp(next), isDirty: true })
+    // The inspector points at an element that may have just lost its overrides
+    // or stopped existing, and the canvas re-renders underneath it either way.
+    useEditorStore.getState().clearStyleTarget()
+    useEditorStore.getState().clearSelection()
+  },
+
   updateSummary(content) {
     const { activeResume } = get()
     if (!activeResume) return
@@ -247,22 +485,48 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
 
     switch (sectionType) {
       case 'experience':
-        updated = { ...activeResume, experience: updateById(activeResume.experience, id, patch as Partial<ExperienceSection>) }
+        updated = {
+          ...activeResume,
+          experience: updateById(activeResume.experience, id, patch as Partial<ExperienceSection>),
+        }
         break
       case 'education':
-        updated = { ...activeResume, education: updateById(activeResume.education, id, patch as Partial<EducationSection>) }
+        updated = {
+          ...activeResume,
+          education: updateById(activeResume.education, id, patch as Partial<EducationSection>),
+        }
         break
       case 'skills':
-        updated = { ...activeResume, skills: updateById(activeResume.skills, id, patch as Partial<SkillSection>) }
+        updated = {
+          ...activeResume,
+          skills: updateById(activeResume.skills, id, patch as Partial<SkillSection>),
+        }
         break
       case 'projects':
-        updated = { ...activeResume, projects: updateById(activeResume.projects, id, patch as Partial<ProjectSection>) }
+        updated = {
+          ...activeResume,
+          projects: updateById(activeResume.projects, id, patch as Partial<ProjectSection>),
+        }
         break
       case 'certifications':
-        updated = { ...activeResume, certifications: updateById(activeResume.certifications, id, patch as Partial<CertificationSection>) }
+        updated = {
+          ...activeResume,
+          certifications: updateById(
+            activeResume.certifications,
+            id,
+            patch as Partial<CertificationSection>
+          ),
+        }
         break
       case 'custom':
-        updated = { ...activeResume, customSections: updateById(activeResume.customSections, id, patch as Partial<CustomSection>) }
+        updated = {
+          ...activeResume,
+          customSections: updateById(
+            activeResume.customSections,
+            id,
+            patch as Partial<CustomSection>
+          ),
+        }
         break
       default:
         return
@@ -283,32 +547,50 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
     switch (sectionType) {
       case 'experience': {
         const order = activeResume.experience.length
-        updated = { ...activeResume, experience: [...activeResume.experience, createEmptyExperience(order)] }
+        updated = {
+          ...activeResume,
+          experience: [...activeResume.experience, createEmptyExperience(order)],
+        }
         break
       }
       case 'education': {
         const order = activeResume.education.length
-        updated = { ...activeResume, education: [...activeResume.education, createEmptyEducation(order)] }
+        updated = {
+          ...activeResume,
+          education: [...activeResume.education, createEmptyEducation(order)],
+        }
         break
       }
       case 'skills': {
         const order = activeResume.skills.length
-        updated = { ...activeResume, skills: [...activeResume.skills, createEmptySkillSection(order)] }
+        updated = {
+          ...activeResume,
+          skills: [...activeResume.skills, createEmptySkillSection(order)],
+        }
         break
       }
       case 'projects': {
         const order = activeResume.projects.length
-        updated = { ...activeResume, projects: [...activeResume.projects, createEmptyProject(order)] }
+        updated = {
+          ...activeResume,
+          projects: [...activeResume.projects, createEmptyProject(order)],
+        }
         break
       }
       case 'certifications': {
         const order = activeResume.certifications.length
-        updated = { ...activeResume, certifications: [...activeResume.certifications, createEmptyCertification(order)] }
+        updated = {
+          ...activeResume,
+          certifications: [...activeResume.certifications, createEmptyCertification(order)],
+        }
         break
       }
       case 'custom': {
         const order = activeResume.customSections.length
-        updated = { ...activeResume, customSections: [...activeResume.customSections, createEmptyCustomSection(order)] }
+        updated = {
+          ...activeResume,
+          customSections: [...activeResume.customSections, createEmptyCustomSection(order)],
+        }
         break
       }
       default:
@@ -353,6 +635,28 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   },
 
   // ─── Reorder ──────────────────────────────────────────────────────────────
+  reorderEntryBullets(entryId, fromIndex, toIndex) {
+    const { activeResume } = get()
+    if (!activeResume || fromIndex === toIndex) return
+    const entry = activeResume.experience.find((e) => e.id === entryId)
+    if (!entry) return
+    if (fromIndex < 0 || toIndex < 0) return
+    if (fromIndex >= entry.description.length || toIndex >= entry.description.length) return
+
+    useEditorStore.getState().pushUndoSnapshot(snapshot(activeResume))
+
+    set({
+      activeResume: withTimestamp({
+        ...activeResume,
+        experience: updateById(activeResume.experience, entryId, {
+          description: arrayMove(entry.description, fromIndex, toIndex),
+          updatedAt: new Date().toISOString(),
+        }),
+      }),
+      isDirty: true,
+    })
+  },
+
   reorderSections(sectionType, fromIndex, toIndex) {
     const { activeResume } = get()
     if (!activeResume || fromIndex === toIndex) return
@@ -363,22 +667,37 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
 
     switch (sectionType) {
       case 'experience':
-        updated = { ...activeResume, experience: arrayMove(activeResume.experience, fromIndex, toIndex) }
+        updated = {
+          ...activeResume,
+          experience: arrayMove(activeResume.experience, fromIndex, toIndex),
+        }
         break
       case 'education':
-        updated = { ...activeResume, education: arrayMove(activeResume.education, fromIndex, toIndex) }
+        updated = {
+          ...activeResume,
+          education: arrayMove(activeResume.education, fromIndex, toIndex),
+        }
         break
       case 'skills':
         updated = { ...activeResume, skills: arrayMove(activeResume.skills, fromIndex, toIndex) }
         break
       case 'projects':
-        updated = { ...activeResume, projects: arrayMove(activeResume.projects, fromIndex, toIndex) }
+        updated = {
+          ...activeResume,
+          projects: arrayMove(activeResume.projects, fromIndex, toIndex),
+        }
         break
       case 'certifications':
-        updated = { ...activeResume, certifications: arrayMove(activeResume.certifications, fromIndex, toIndex) }
+        updated = {
+          ...activeResume,
+          certifications: arrayMove(activeResume.certifications, fromIndex, toIndex),
+        }
         break
       case 'custom':
-        updated = { ...activeResume, customSections: arrayMove(activeResume.customSections, fromIndex, toIndex) }
+        updated = {
+          ...activeResume,
+          customSections: arrayMove(activeResume.customSections, fromIndex, toIndex),
+        }
         break
       default:
         return
@@ -417,11 +736,21 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
 
     switch (sectionType) {
       case 'summary':
-        updated = { ...activeResume, summary: { ...activeResume.summary, visible: !activeResume.summary.visible, updatedAt: new Date().toISOString() } }
+        updated = {
+          ...activeResume,
+          summary: {
+            ...activeResume.summary,
+            visible: !activeResume.summary.visible,
+            updatedAt: new Date().toISOString(),
+          },
+        }
         break
       case 'experience': {
         const nextVisible = !activeResume.experience.some((e) => e.visible)
-        updated = { ...activeResume, experience: setAllVisible(activeResume.experience, nextVisible) }
+        updated = {
+          ...activeResume,
+          experience: setAllVisible(activeResume.experience, nextVisible),
+        }
         break
       }
       case 'education': {
@@ -441,12 +770,18 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       }
       case 'certifications': {
         const nextVisible = !activeResume.certifications.some((e) => e.visible)
-        updated = { ...activeResume, certifications: setAllVisible(activeResume.certifications, nextVisible) }
+        updated = {
+          ...activeResume,
+          certifications: setAllVisible(activeResume.certifications, nextVisible),
+        }
         break
       }
       case 'custom': {
         const nextVisible = !activeResume.customSections.some((e) => e.visible)
-        updated = { ...activeResume, customSections: setAllVisible(activeResume.customSections, nextVisible) }
+        updated = {
+          ...activeResume,
+          customSections: setAllVisible(activeResume.customSections, nextVisible),
+        }
         break
       }
       default:
@@ -473,18 +808,38 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
 
   // ─── Save ─────────────────────────────────────────────────────────────────
   async saveActiveResume() {
+    // A manual flush (such as Finish) must wait for an in-flight autosave and
+    // then write any newer draft, rather than racing it with another write.
+    if (pendingSave) {
+      await pendingSave
+      if (!get().error) await get().saveActiveResume()
+      return
+    }
     const { activeResume, isDirty } = get()
     if (!activeResume || !isDirty) return
 
     set({ isSaving: true })
-    try {
-      await resumeService.updateResume(activeResume.id, activeResume)
-      set({ isSaving: false, isDirty: false, error: null })
-      logger.debug('Resume autosaved', { id: activeResume.id })
-    } catch (err) {
-      logger.error('Autosave failed', err)
-      set({ isSaving: false, error: 'Failed to save resume' })
-    }
+    pendingSave = (async () => {
+      try {
+        await resumeService.updateResume(activeResume.id, activeResume)
+        set((state) => ({
+          isSaving: false,
+          // Only this snapshot was saved; edits made during the write remain dirty.
+          isDirty: state.activeResume === activeResume ? false : state.isDirty,
+          resumeList: state.resumeList.map((resume) =>
+            resume.id === activeResume.id ? activeResume : resume
+          ),
+          error: null,
+        }))
+        logger.debug('Resume autosaved', { id: activeResume.id })
+      } catch (err) {
+        logger.error('Autosave failed', err)
+        set({ isSaving: false, error: 'Failed to save resume' })
+      }
+    })().finally(() => {
+      pendingSave = null
+    })
+    await pendingSave
   },
 
   markClean() {

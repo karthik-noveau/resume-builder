@@ -1,3 +1,27 @@
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.previewButton {
+  padding-inline: 8px;
+}
+
+.previewLabel {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .previewButton {
+    padding-inline: 14px;
+  }
+
+  .previewLabel {
+    display: inline;
+  }
+}
+
 /* Hidden on phones so the label reads "Export" and the toolbar's right group
    fits without pushing the button off-screen. */
 .pdfSuffix {

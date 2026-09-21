@@ -1,11 +1,10 @@
 import { useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
+import { Dropdown } from 'antd'
 import { MoreHorizontal, FolderOpen, Pencil, Copy, Trash2 } from 'lucide-react'
-import { clsx } from 'clsx'
-import { AnimatePresence, motion } from 'framer-motion'
 import type { Resume } from '@/shared/types/resume.types'
 import { ResumePreview } from '@/shared/components/ResumePreview/ResumePreview'
-import { ALL_TEMPLATES, templateRenderer } from '@/features/templates/registry/template.registry'
+import { getTemplateById, templateRenderer } from '@/features/templates/registry/template.registry'
 import { useThemeStore, resolveResumeTheme } from '@/shared/stores/theme.store'
 import styles from './ResumeCard.module.css'
 
@@ -13,23 +12,30 @@ interface ResumeCardProps {
   resume: Resume
   onDuplicate: (id: string) => void
   onDelete: (id: string) => void
-  onRename: (id: string, title: string) => void
+  onRename: (id: string, title: string) => Promise<void> | void
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+  return new Date(iso).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
 export function ResumeCard({ resume, onDuplicate, onDelete, onRename }: ResumeCardProps) {
   const navigate = useNavigate()
-  const [menuOpen, setMenuOpen] = useState(false)
   const [isRenaming, setIsRenaming] = useState(false)
   const [titleDraft, setTitleDraft] = useState(resume.title)
+  const [renaming, setRenaming] = useState(false)
+  const [renameError, setRenameError] = useState<string | null>(null)
+  const committing = useRef(false)
+  const cancelled = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const getFontPresetById = useThemeStore((s) => s.getFontPresetById)
 
   const layoutTree = useMemo(() => {
-    const template = ALL_TEMPLATES.find((t) => t.id === resume.templateId)
+    const template = getTemplateById(resume.templateId)
     if (!template) return null
     return templateRenderer.render(
       resume,
@@ -39,27 +45,46 @@ export function ResumeCard({ resume, onDuplicate, onDelete, onRename }: ResumeCa
     )
   }, [resume, getFontPresetById])
 
-  const handleOpen = () => { void navigate(`/editor/${resume.id}`) }
+  const handleOpen = () => {
+    void navigate(`/editor/${resume.id}`)
+  }
 
   const startRename = () => {
     setTitleDraft(resume.title)
     setIsRenaming(true)
-    setMenuOpen(false)
+    setRenameError(null)
+    cancelled.current = false
     requestAnimationFrame(() => inputRef.current?.select())
   }
 
-  const commitRename = () => {
+  const commitRename = async () => {
+    if (cancelled.current || committing.current) return
     const trimmed = titleDraft.trim()
-    if (trimmed && trimmed !== resume.title) onRename(resume.id, trimmed)
-    setIsRenaming(false)
+    if (!trimmed) {
+      setRenameError('Give your resume a name.')
+      return
+    }
+    if (trimmed === resume.title) {
+      setIsRenaming(false)
+      return
+    }
+    committing.current = true
+    setRenaming(true)
+    try {
+      await onRename(resume.id, trimmed)
+      setIsRenaming(false)
+    } catch {
+      setRenameError('Couldn’t rename this resume. Try again.')
+    } finally {
+      setRenaming(false)
+      committing.current = false
+    }
   }
 
+  const templateName = getTemplateById(resume.templateId)?.name ?? 'Resume'
+
   return (
-    <article
-      className={styles.card}
-      onClick={isRenaming ? undefined : handleOpen}
-      aria-label={`Open resume: ${resume.title}`}
-    >
+    <article className={styles.card} aria-label={resume.title}>
       {/* Thumbnail */}
       <div className={styles.thumbnail}>
         <ResumePreview layoutTree={layoutTree} widthPx={140} className={styles.previewShadow} />
@@ -73,88 +98,83 @@ export function ResumeCard({ resume, onDuplicate, onDelete, onRename }: ResumeCa
             value={titleDraft}
             onChange={(e) => setTitleDraft(e.target.value)}
             onClick={(e) => e.stopPropagation()}
-            onBlur={commitRename}
+            onBlur={() => {
+              void commitRename()
+            }}
+            maxLength={120}
+            disabled={renaming}
+            aria-invalid={!!renameError}
+            aria-describedby={renameError ? `rename-error-${resume.id}` : undefined}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') { e.currentTarget.blur() }
-              if (e.key === 'Escape') { setIsRenaming(false) }
+              if (e.key === 'Enter') {
+                e.currentTarget.blur()
+              }
+              if (e.key === 'Escape') {
+                cancelled.current = true
+                setIsRenaming(false)
+              }
             }}
             aria-label="Resume title"
             className={styles.titleInput}
           />
         ) : (
-          <p className={styles.title}>{resume.title}</p>
+          <Link
+            className={styles.title}
+            to={`/editor/${resume.id}`}
+            aria-label={`Open resume: ${resume.title}`}
+          >
+            {resume.title}
+          </Link>
         )}
-        <p className={styles.updatedAt}>Updated {formatDate(resume.updatedAt)}</p>
+        {renameError && isRenaming && (
+          <p id={`rename-error-${resume.id}`} className={styles.renameError} role="alert">
+            {renameError}
+          </p>
+        )}
+        <div className={styles.metadata}>
+          <span>{templateName}</span>
+          <time dateTime={resume.updatedAt}>{formatDate(resume.updatedAt)}</time>
+        </div>
       </div>
 
-      {/* Actions menu */}
-      <div
-        className={styles.menuWrap}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          aria-label="Resume actions"
-          aria-expanded={menuOpen}
-          aria-haspopup="menu"
-          onClick={() => setMenuOpen((v) => !v)}
-          className={clsx(styles.menuButton, menuOpen && styles.menuButtonOpen)}
+      <div className={styles.menuWrap}>
+        <Dropdown
+          trigger={['click']}
+          placement="bottomRight"
+          menu={{
+            items: [
+              {
+                key: 'open',
+                label: 'Open resume',
+                icon: <FolderOpen size={14} />,
+                onClick: handleOpen,
+              },
+              { key: 'rename', label: 'Rename', icon: <Pencil size={14} />, onClick: startRename },
+              {
+                key: 'duplicate',
+                label: 'Duplicate',
+                icon: <Copy size={14} />,
+                onClick: () => onDuplicate(resume.id),
+              },
+              { type: 'divider' },
+              {
+                key: 'delete',
+                label: 'Delete',
+                icon: <Trash2 size={14} />,
+                danger: true,
+                onClick: () => onDelete(resume.id),
+              },
+            ],
+          }}
         >
-          <MoreHorizontal size={16} aria-hidden="true" />
-        </button>
-
-        <AnimatePresence>
-          {menuOpen && (
-            <>
-              <div className={styles.menuOverlay} onClick={() => setMenuOpen(false)} aria-hidden="true" />
-              <motion.ul
-                role="menu"
-                aria-label="Resume actions"
-                className={styles.menu}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.1 }}
-              >
-                <li>
-                  <button
-                    role="menuitem"
-                    onClick={handleOpen}
-                    className={styles.menuItem}
-                  >
-                    <FolderOpen size={14} aria-hidden="true" /> Open
-                  </button>
-                </li>
-                <li>
-                  <button
-                    role="menuitem"
-                    onClick={startRename}
-                    className={styles.menuItem}
-                  >
-                    <Pencil size={14} aria-hidden="true" /> Rename
-                  </button>
-                </li>
-                <li>
-                  <button
-                    role="menuitem"
-                    onClick={() => { onDuplicate(resume.id); setMenuOpen(false) }}
-                    className={styles.menuItem}
-                  >
-                    <Copy size={14} aria-hidden="true" /> Duplicate
-                  </button>
-                </li>
-                <li>
-                  <button
-                    role="menuitem"
-                    onClick={() => { onDelete(resume.id); setMenuOpen(false) }}
-                    className={clsx(styles.menuItem, styles.menuItemDanger)}
-                  >
-                    <Trash2 size={14} aria-hidden="true" /> Delete
-                  </button>
-                </li>
-              </motion.ul>
-            </>
-          )}
-        </AnimatePresence>
+          <button
+            type="button"
+            aria-label={`Actions for ${resume.title}`}
+            className={styles.menuButton}
+          >
+            <MoreHorizontal size={18} aria-hidden="true" />
+          </button>
+        </Dropdown>
       </div>
     </article>
   )
