@@ -1,7 +1,8 @@
 import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { Dropdown } from 'antd'
-import { MoreHorizontal, FolderOpen, Pencil, Copy, Trash2 } from 'lucide-react'
+import { MoreHorizontal, FolderOpen, Pencil, Copy, Trash2, Share2 } from 'lucide-react'
+import { ShareDialog } from '@/features/share/ShareDialog'
 import type { Resume } from '@/shared/types/resume.types'
 import { ResumePreview } from '@/shared/components/ResumePreview/ResumePreview'
 import { getTemplateById, templateRenderer } from '@/features/templates/registry/template.registry'
@@ -26,6 +27,7 @@ function formatDate(iso: string): string {
 export function ResumeCard({ resume, onDuplicate, onDelete, onRename }: ResumeCardProps) {
   const navigate = useNavigate()
   const [isRenaming, setIsRenaming] = useState(false)
+  const [isSharing, setIsSharing] = useState(false)
   const [titleDraft, setTitleDraft] = useState(resume.title)
   const [renaming, setRenaming] = useState(false)
   const [renameError, setRenameError] = useState<string | null>(null)
@@ -149,6 +151,12 @@ export function ResumeCard({ resume, onDuplicate, onDelete, onRename }: ResumeCa
                 icon: <FolderOpen size={14} />,
                 onClick: handleOpen,
               },
+              {
+                key: 'share',
+                label: 'Share',
+                icon: <Share2 size={14} />,
+                onClick: () => setIsSharing(true),
+              },
               { key: 'rename', label: 'Rename', icon: <Pencil size={14} />, onClick: startRename },
               {
                 key: 'duplicate',
@@ -176,6 +184,9 @@ export function ResumeCard({ resume, onDuplicate, onDelete, onRename }: ResumeCa
           </button>
         </Dropdown>
       </div>
+      {isSharing && (
+        <ShareDialog resumeId={resume.id} resume={resume} onClose={() => setIsSharing(false)} />
+      )}
     </article>
   )
 }

@@ -1,9 +1,15 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, it, expect, vi } from 'vitest'
+import { beforeEach, describe, it, expect, vi } from 'vitest'
 import { MemoryRouter } from 'react-router'
 import { ResumeCard } from './ResumeCard'
 import { createEmptyResume } from '@/features/resume/utils/resume.factory'
+import { useResumeStore } from '@/shared/stores/resume.store'
+import { createShareLink } from '@/features/share/share.service'
+
+vi.mock('@/features/share/share.service', () => ({ createShareLink: vi.fn() }))
+
+beforeEach(() => vi.clearAllMocks())
 
 const mockResume = {
   ...createEmptyResume('meridian'),
@@ -28,6 +34,28 @@ function renderCard(props = {}) {
 }
 
 describe('ResumeCard', () => {
+  it.each(['no active resume', 'another active resume'])(
+    'shares the selected card with %s',
+    async (state) => {
+      const user = userEvent.setup()
+      const copy = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined)
+      const activeResume = state === 'no active resume' ? null : createEmptyResume('mosaic')
+      useResumeStore.setState({ activeResume })
+      const link = 'https://resume.example/share#resume=v1.selected-card'
+      vi.mocked(createShareLink).mockResolvedValue(link)
+      renderCard()
+      await user.click(screen.getByRole('button', { name: 'Actions for My Developer Resume' }))
+      await user.click(screen.getByRole('menuitem', { name: 'Share' }))
+      expect(await screen.findByRole('textbox', { name: 'Share link' })).toHaveValue(link)
+      expect(createShareLink).toHaveBeenCalledWith(mockResume)
+      expect(useResumeStore.getState().activeResume).toBe(activeResume)
+      await user.click(screen.getByRole('button', { name: 'Copy link' }))
+      expect(copy).toHaveBeenCalledWith(link)
+      await user.click(screen.getByRole('button', { name: 'Close dialog' }))
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    }
+  )
+
   it('renders resume title', () => {
     renderCard()
     expect(screen.getByText('My Developer Resume')).toBeInTheDocument()

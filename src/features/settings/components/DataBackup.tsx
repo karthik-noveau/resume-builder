@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Download, Upload, HardDrive, CheckCircle2 } from 'lucide-react'
 import { Link } from 'react-router'
+import { liveQuery } from 'dexie'
 import { Button } from '@/shared/components/ui/Button/Button'
 import { Modal } from '@/shared/components/ui/Modal/Modal'
 import { useResumeStore } from '@/shared/stores/resume.store'
@@ -14,14 +15,36 @@ import {
 } from '@/shared/services/backup.service'
 import styles from './DataBackup.module.css'
 
+function formatDownloadSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  const unit = bytes < 1024 * 1024 ? 'KB' : 'MB'
+  const value = bytes / (unit === 'KB' ? 1024 : 1024 * 1024)
+  return `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })} ${unit}`
+}
+
 export function DataBackup() {
   const input = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState<'export' | 'read' | 'restore' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [backup, setBackup] = useState<ResumeBackup | null>(null)
+  const [downloadBytes, setDownloadBytes] = useState<number | null>(null)
   useEffect(() => {
     if (window.location.hash === '#backups') document.getElementById('backups')?.scrollIntoView()
+  }, [])
+  useEffect(() => {
+    // Measure the actual JSON export, including UTF-8 text and encoded photos.
+    // Dexie reruns this when resumes or images change, including in another tab.
+    const subscription = liveQuery(async () => {
+      try {
+        return new Blob([await createBackup()]).size
+      } catch {
+        // An empty workspace or unavailable storage has no downloadable size.
+        // Keep the normal download/restore error handling available.
+        return null
+      }
+    }).subscribe({ next: setDownloadBytes, error: () => setDownloadBytes(null) })
+    return () => subscription.unsubscribe()
   }, [])
 
   const exportAll = async () => {
@@ -32,7 +55,9 @@ export function DataBackup() {
       await useResumeStore.getState().saveActiveResume()
       if (useResumeStore.getState().isDirty)
         throw new Error('Save your latest changes before creating a backup.')
-      downloadBackup(await createBackup())
+      const text = await createBackup()
+      setDownloadBytes(new Blob([text]).size)
+      downloadBackup(text)
       setMessage('Backup downloaded. Keep it somewhere safe.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not create a backup. Try again.')
@@ -94,6 +119,8 @@ export function DataBackup() {
       <div className={styles.actions}>
         <Button
           variant="secondary"
+          aria-label="Download backup"
+          aria-describedby={downloadBytes === null ? undefined : 'backup-download-size'}
           onClick={() => {
             void exportAll()
           }}
@@ -101,6 +128,15 @@ export function DataBackup() {
           disabled={busy !== null}
         >
           <Download size={15} aria-hidden="true" /> Download backup
+          {downloadBytes !== null && (
+            <span
+              id="backup-download-size"
+              className={styles.downloadSize}
+              title={`${downloadBytes.toLocaleString()} bytes`}
+            >
+              {formatDownloadSize(downloadBytes)}
+            </span>
+          )}
         </Button>
         <Button
           variant="ghost"
