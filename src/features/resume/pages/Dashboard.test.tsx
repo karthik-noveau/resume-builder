@@ -25,7 +25,7 @@ function renderDashboard() {
     <MemoryRouter initialEntries={['/app']}>
       <Routes>
         <Route path="/app" element={<Dashboard />} />
-        <Route path="/templates" element={<div>Template picker page</div>} />
+        <Route path="/editor/:id/guided" element={<div>Resume editor</div>} />
       </Routes>
     </MemoryRouter>
   )
@@ -75,20 +75,16 @@ describe('Dashboard', () => {
     )
   })
 
-  it('only creates once the picked template is confirmed', async () => {
+  it('creates and opens the resume directly from its template card', async () => {
     mockStore.createResume.mockResolvedValue('new-id')
     renderDashboard()
     await userEvent.click(screen.getByRole('button', { name: /create a new resume/i }))
 
     const dialog = await screen.findByRole('dialog', { name: /choose a template/i })
-    const confirm = within(dialog).getByRole('button', { name: /create resume/i })
-    expect(confirm).toBeDisabled()
-
-    await userEvent.click(within(dialog).getByRole('option', { name: /meridian/i }))
-    expect(mockStore.createResume).not.toHaveBeenCalled()
-
-    await userEvent.click(confirm)
-    await waitFor(() => expect(mockStore.createResume).toHaveBeenCalledWith('meridian'))
+    expect(within(dialog).queryByRole('button', { name: /create resume/i })).not.toBeInTheDocument()
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Use Meridian template' }))
+    await waitFor(() => expect(mockStore.createResume).toHaveBeenCalledExactlyOnceWith('meridian'))
+    expect(await screen.findByText('Resume editor')).toBeInTheDocument()
   })
 
   it('calls loadResumeList on mount', () => {

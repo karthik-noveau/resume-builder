@@ -1,7 +1,9 @@
 import { Drawer as AntDrawer } from 'antd'
+import { useState } from 'react'
 import type { DrawerProps } from './Drawer.types'
 import { clsx } from 'clsx'
 import styles from './Drawer.module.css'
+import { useSwipeToClose } from './useSwipeToClose'
 
 export function Drawer({
   isOpen,
@@ -13,10 +15,16 @@ export function Drawer({
   flush = false,
   onAfterOpen,
 }: DrawerProps) {
+  const [panel, setPanel] = useState<HTMLDivElement | null>(null)
+  useSwipeToClose(panel, isOpen, onClose)
+
   return (
     <AntDrawer
+      panelRef={setPanel}
       open={isOpen}
-      afterOpenChange={(open) => { if (open) onAfterOpen?.() }}
+      afterOpenChange={(open) => {
+        if (open) onAfterOpen?.()
+      }}
       onClose={onClose}
       placement={position}
       title={title}

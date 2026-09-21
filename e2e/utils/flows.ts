@@ -1,19 +1,14 @@
 import { type Page, expect } from '@playwright/test';
 
 /**
- * Current creation flow: Dashboard "New Resume" -> template picker
- * (/templates?create=true) -> header "Create Resume" -> guided editor.
- * Replaces the old modal-based flow that used to live on '/'.
+ * Dashboard "New Resume" -> one template-card action -> guided editor.
  */
 export async function createResume(page: Page) {
   await page.goto('/app');
   await page.getByRole('button', { name: 'Create a new resume' }).click();
-  await expect(page).toHaveURL(/\/templates\?create=true/);
-  // The template picker route is lazy-loaded, so the URL can update slightly
-  // ahead of the route component actually committing/attaching its handlers.
-  // Wait for its heading rather than just the URL before interacting.
-  await expect(page.getByRole('heading', { name: /choose your template/i })).toBeVisible();
-  await page.getByRole('button', { name: /create resume/i }).click();
+  const picker = page.getByRole('dialog', { name: 'Choose a template' });
+  await expect(picker).toBeVisible();
+  await picker.getByRole('button', { name: 'Use Meridian template' }).click();
   await expect(page).toHaveURL(/\/editor\/[^/]+\/guided/);
 }
 

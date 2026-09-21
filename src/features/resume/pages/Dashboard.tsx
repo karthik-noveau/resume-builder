@@ -81,7 +81,6 @@ export function Dashboard() {
 
   const [showImport, setShowImport] = useState(false)
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
-  const [creating, setCreating] = useState(false)
   const [importing, setImporting] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -108,16 +107,8 @@ export function Dashboard() {
   }
 
   const handleCreateWithTemplate = async (templateId: string) => {
-    setCreating(true)
-    try {
-      const id = await createResume(templateId)
-      void navigate(`/editor/${id}/guided`)
-    } catch {
-      toast.error('Failed to create resume')
-      setShowTemplatePicker(false)
-    } finally {
-      setCreating(false)
-    }
+    const id = await createResume(templateId)
+    await navigate(`/editor/${id}/guided`)
   }
 
   const handleImport = async (rawText: string) => {
@@ -294,19 +285,13 @@ export function Dashboard() {
         )}
       </div>
 
-      {/* keepOpenOnSelect: creating navigates away, so closing first would
-          flash the empty dashboard behind the dismissing modal. */}
       <TemplatePickerModal
         isOpen={showTemplatePicker}
         onClose={() => setShowTemplatePicker(false)}
-        onSelect={(templateId) => {
-          void handleCreateWithTemplate(templateId)
-        }}
+        onSelect={handleCreateWithTemplate}
         title="Choose a template"
         intro="Pick a layout to start from — you can change it any time while editing."
-        confirmLabel="Create resume"
-        isConfirming={creating}
-        keepOpenOnSelect
+        pendingLabel="Creating…"
       />
 
       <ImportResumeModal

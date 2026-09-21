@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
-import { ArrowLeft, Check, Search, Sparkles } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Search } from 'lucide-react'
 import { clsx } from 'clsx'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
@@ -22,40 +22,30 @@ export function TemplateGallery() {
   const isCreateMode = searchParams.get('create') === 'true'
 
   const [filters, setFilters] = useState(DEFAULT_TEMPLATE_FILTERS)
-  const [isOpening, setIsOpening] = useState(false)
+  const [openingId, setOpeningId] = useState<string | null>(null)
+  const opening = useRef(false)
   const createResume = useResumeStore((s) => s.createResume)
   const availableTemplates = useTemplateStore((s) => s.availableTemplates)
 
-  // A home-page template card is an explicit choice; carry it into this draft.
-  // Direct gallery visits still start without a selection. Nothing is created
-  // until the user confirms with Create Resume.
-  const [draftTemplateId, setDraftTemplateId] = useState<string | null>(() => {
-    const requestedId = searchParams.get('template')
-    return availableTemplates.some((template) => template.id === requestedId) ? requestedId : null
-  })
-
-  const activeTemplateId = draftTemplateId
-
-  const filteredTemplates = filterTemplates(availableTemplates, filters)
+  // Put the design chosen on the home page first without creating a resume on load.
+  const requestedId = searchParams.get('template')
+  const filteredTemplates = filterTemplates(availableTemplates, filters).sort(
+    (a, b) => Number(b.id === requestedId) - Number(a.id === requestedId)
+  )
   const clearFilters = () => setFilters(DEFAULT_TEMPLATE_FILTERS)
 
-  const activeTemplate = availableTemplates.find((t) => t.id === activeTemplateId)
-
-  const handleSelect = (templateId: string) => {
-    setDraftTemplateId(templateId)
-    if (!isCreateMode) useTemplateStore.getState().setActiveTemplateId(templateId)
-  }
-
-  const createFromDraft = async () => {
-    if (!draftTemplateId || isOpening) return
-    setIsOpening(true)
+  const handleSelect = async (templateId: string) => {
+    if (opening.current) return
+    opening.current = true
+    setOpeningId(templateId)
     try {
-      const id = await createResume(draftTemplateId)
-      void navigate(`/editor/${id}/guided`)
+      const id = await createResume(templateId)
+      await navigate(`/editor/${id}/guided`)
     } catch {
       toast.error('Failed to create resume')
     } finally {
-      setIsOpening(false)
+      opening.current = false
+      setOpeningId(null)
     }
   }
 
@@ -66,9 +56,6 @@ export function TemplateGallery() {
         description="Browse 40 resume templates in one- and two-column layouts. Preview any template and start editing straight away — free and without an account."
         path="/templates"
       />
-      {/* Header — title and result count only. The commit action lives in the
-          action bar at the bottom, next to the grid it acts on. Create mode
-          additionally gets the back link and the wizard's framing. */}
       <div className={styles.header}>
         <div className={styles.headerInner}>
           <div>
@@ -76,7 +63,9 @@ export function TemplateGallery() {
               <button
                 type="button"
                 className={styles.backLink}
-                onClick={() => { void navigate('/app') }}
+                onClick={() => {
+                  void navigate('/app')
+                }}
               >
                 <ArrowLeft size={14} aria-hidden="true" />
                 Back to My Resumes
@@ -92,9 +81,14 @@ export function TemplateGallery() {
                 : `${filteredTemplates.length} of ${availableTemplates.length} templates`}
             </p>
             <p className={styles.collectionSummary}>
-              {availableTemplates.filter(template => template.designStyle === 'Simple').length} Simple
+              {availableTemplates.filter((template) => template.designStyle === 'Simple').length}{' '}
+              Simple
               {' · '}
-              {availableTemplates.filter(template => template.designStyle === 'Ultra Modern').length} Ultra Modern
+              {
+                availableTemplates.filter((template) => template.designStyle === 'Ultra Modern')
+                  .length
+              }{' '}
+              Ultra Modern
               {' — find your signature style.'}
             </p>
           </div>
@@ -110,61 +104,48 @@ export function TemplateGallery() {
           <div className={styles.grid}>
             <AnimatePresence mode="popLayout">
               {filteredTemplates.map((tpl) => (
-                <motion.div
+                <motion.button
                   key={tpl.id}
+                  type="button"
+                  onClick={() => {
+                    void handleSelect(tpl.id)
+                  }}
+                  disabled={openingId !== null}
+                  aria-busy={openingId === tpl.id}
+                  aria-label={`Use ${tpl.name} template`}
+                  aria-describedby={`template-${tpl.id}-description`}
                   layout
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  whileHover={{ y: -3 }}
                   transition={{ y: { duration: 0.25 } }}
-                  className={clsx(
-                    styles.card,
-                    activeTemplateId === tpl.id && styles.cardSelected
-                  )}
+                  className={clsx(styles.card, openingId === tpl.id && styles.cardSelected)}
                 >
                   {/* Preview */}
-                  <button
-                    type="button"
-                    onClick={() => handleSelect(tpl.id)}
-                    aria-pressed={activeTemplateId === tpl.id}
-                    aria-label={`${activeTemplateId === tpl.id ? 'Selected' : 'Select'} ${tpl.name} template`}
-                    aria-describedby={`template-${tpl.id}-description`}
-                    className={styles.previewButton}
-                  >
+                  <span className={styles.previewWrap}>
                     <ResumePreview
                       layoutTree={getTemplatePreviewTree(tpl.id)}
                       widthPx={224}
                       className={styles.previewThumb}
                     />
+                  </span>
 
-                    {/* Overlay */}
-                    <div className={styles.overlay}>
-                      <span
-                        className={clsx(
-                          styles.overlayBadge,
-                          activeTemplateId === tpl.id && styles.overlayBadgeActive
-                        )}
-                      >
-                        {activeTemplateId === tpl.id ? 'Selected' : 'Use Template'}
-                      </span>
-                    </div>
-
-                    {activeTemplateId === tpl.id && (
-                      <div className={styles.selectedCheck}>
-                        <Check size={16} strokeWidth={3} />
-                      </div>
-                    )}
-
-                  </button>
-
-                  <div className={styles.cardInfo}>
-                    <h3 className={styles.cardTitle}>{tpl.name}</h3>
-                    <p id={`template-${tpl.id}-description`} className={styles.cardDescription}>
+                  <span className={styles.cardInfo}>
+                    <span className={styles.cardTitle}>{tpl.name}</span>
+                    <span id={`template-${tpl.id}-description`} className={styles.cardDescription}>
                       {tpl.description}
-                    </p>
-                  </div>
-                </motion.div>
+                    </span>
+                    <span className={styles.selectAction}>
+                      {openingId === tpl.id ? (
+                        'Creating…'
+                      ) : (
+                        <>
+                          Use template <ArrowRight size={15} aria-hidden="true" />
+                        </>
+                      )}
+                    </span>
+                  </span>
+                </motion.button>
               ))}
             </AnimatePresence>
           </div>
@@ -181,42 +162,6 @@ export function TemplateGallery() {
               }
             />
           )}
-        </div>
-      </div>
-
-      {/* Commit action — a flex sibling of the scrolling grid rather than a
-          fixed overlay, so it is always in view without ever covering a card.
-          Restates the pick because the selected card may be scrolled away. */}
-      <div className={styles.actionBar}>
-        <div className={styles.actionBarInner}>
-          {/* Keep the selected template visible while browsing the grid. */}
-          <div className={styles.actionBarText} role="status" aria-live="polite">
-            <p className={clsx(styles.actionBarStatus, !activeTemplate && styles.actionBarStatusEmpty)}>
-              <span className={activeTemplate ? styles.actionBarName : undefined}>
-                {activeTemplate?.name ?? 'No template selected'}
-              </span>
-              {activeTemplate && (
-                <span className={styles.actionBarLayout}>
-                  {activeTemplate.layout === 'single-column' ? 'One column' : 'Two column'}
-                </span>
-              )}
-            </p>
-            {!activeTemplate && (
-              <p className={styles.actionBarEffect}>Pick one above to get started</p>
-            )}
-          </div>
-
-          <div className={styles.actionBarRight}>
-            <Button
-              variant="primary"
-              className={styles.createButton}
-              disabled={!activeTemplate || isOpening}
-              onClick={() => { void createFromDraft() }}
-            >
-              <Sparkles size={16} aria-hidden="true" />
-              Create Resume
-            </Button>
-          </div>
         </div>
       </div>
     </div>

@@ -34,19 +34,28 @@ export function TemplateFilters({
         </button>
         {(
           [
-            { id: 'single-column', label: 'One Column', Icon: RectangleVertical },
-            { id: 'two-column', label: 'Two Column', Icon: Columns2 },
+            {
+              id: 'single-column',
+              label: 'One Column',
+              mobileLabel: '1 column',
+              Icon: RectangleVertical,
+            },
+            { id: 'two-column', label: 'Two Column', mobileLabel: '2 columns', Icon: Columns2 },
           ] as const
-        ).map(({ id, label, Icon }) => (
+        ).map(({ id, label, mobileLabel, Icon }) => (
           <button
             key={id}
             type="button"
             onClick={() => onChange({ ...value, layout: id })}
+            aria-label={label}
             aria-pressed={value.layout === id}
             className={clsx(styles.filterButton, value.layout === id && styles.active)}
           >
             <Icon size={13} aria-hidden="true" />
-            {label}
+            <span className={styles.fullLabel}>{label}</span>
+            <span className={styles.mobileLabel} aria-hidden="true">
+              {mobileLabel}
+            </span>
           </button>
         ))}
       </div>

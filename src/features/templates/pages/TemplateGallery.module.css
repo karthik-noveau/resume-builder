@@ -13,8 +13,7 @@
 }
 
 .headerInner,
-.mainInner,
-.actionBarInner {
+.mainInner {
   /* Keep the gutter inside the same capped width as the app header and Settings. */
   max-width: 80rem;
   margin: 0 auto;
@@ -68,106 +67,9 @@
   margin-top: 8px;
 }
 
-/* Fixed to the viewport rather than placed after the grid: as a flex sibling
-   it depended on .main being the scroll container, and once the catalog grew
-   tall enough for the window to scroll instead, the bar sat below the fold —
-   invisible for the whole of browsing, which is the one moment it matters. */
-.actionBar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 30;
-  background-color: rgb(var(--color-surface));
-  border-top: 1px solid rgb(var(--color-divider));
-  box-shadow: var(--shadow-level-2);
-  padding: 14px 0;
-  padding-bottom: max(14px, env(safe-area-inset-bottom));
-}
-
-.actionBarInner {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-@media (min-width: 768px) {
-  .actionBarInner {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-}
-
-.actionBarText {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.actionBarStatus {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--text-md);
-}
-
-.actionBarName {
-  font-weight: 700;
-  color: rgb(var(--color-text-primary));
-}
-
-/* Nothing picked yet — reads as a prompt rather than as a chosen value. */
-.actionBarStatusEmpty {
-  color: rgb(var(--color-text-muted));
-  font-weight: 600;
-}
-
-/* Reads as metadata about the name beside it, not as another sentence. */
-.actionBarLayout {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  background-color: rgb(var(--color-surface-elevated));
-  border: 1px solid rgb(var(--color-divider));
-  color: rgb(var(--color-text-secondary));
-  white-space: nowrap;
-}
-
-.actionBarEffect {
-  font-size: var(--text-base);
-  color: rgb(var(--color-text-muted));
-}
-
-.actionBarRight {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  width: 100%;
-}
-
-.createButton {
-  height: 38px;
-}
-
-@media (min-width: 768px) {
-  .actionBarRight {
-    width: auto;
-  }
-}
-
 .main {
   flex: 1;
   padding: 24px 0;
-  /* Clears the fixed action bar so the last row of cards is never trapped
-     underneath it. */
-  padding-bottom: 140px;
 }
 
 .categories {
@@ -198,38 +100,43 @@
   }
 }
 
-@media (min-width: 768px) {
-  .main {
-    padding-bottom: 104px;
-  }
-}
-
 .card {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
   background-color: rgb(var(--color-surface));
   border: 1px solid rgb(var(--color-divider));
   border-radius: 18px;
   overflow: hidden;
-  /* Hover lift itself is driven by framer-motion's whileHover in
-     TemplateGallery.tsx, not CSS — this element is a motion.div whose own
-     inline transform (for the enter/exit scale animation) would silently
-     win over a plain CSS :hover transform. */
   transition:
     box-shadow var(--duration-normal),
     border-color var(--duration-normal);
 }
 
-.card:hover {
-  border-color: rgb(var(--color-text-muted) / 45%);
-  box-shadow: 0 18px 42px rgb(15 23 42 / 10%);
+.card:hover:not(:disabled) {
+  border-color: rgb(var(--color-primary) / 55%);
+  box-shadow: 0 4px 16px rgb(var(--color-primary) / 7%);
 }
 
-.cardSelected {
+.card:disabled {
+  cursor: wait;
+}
+
+.card:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 3px;
+}
+
+.cardSelected,
+.cardSelected:hover {
   border-color: rgb(var(--color-primary));
   box-shadow: 0 0 0 2px rgb(var(--color-primary) / 20%);
 }
 
-.previewButton {
+.previewWrap {
   width: 100%;
   background-color: rgb(var(--color-surface-elevated));
   position: relative;
@@ -238,72 +145,49 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
+  border-bottom: 1px solid rgb(var(--color-divider));
   background-image: var(--gradient-panel);
-}
-
-.previewButton:focus-visible {
-  outline: none;
-  box-shadow: var(--shadow-focus-ring-inset);
 }
 
 .previewThumb {
   border-radius: var(--radius-small);
   border: 1px solid rgb(var(--color-divider));
   box-shadow: 0 12px 32px rgb(15 23 42 / 12%);
-  transition: transform var(--duration-slow);
-}
-
-.previewButton:hover .previewThumb {
-  transform: scale(1.025);
-}
-
-.overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgb(var(--color-primary) / 18%), transparent 52%);
-  opacity: 0;
-  transition: opacity var(--duration-fast);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 22px;
-}
-
-.previewButton:hover .overlay,
-.previewButton:focus-visible .overlay {
-  opacity: 1;
-}
-
-.overlayBadge {
-  display: inline-flex;
-  align-items: center;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: var(--radius-pill);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  background-color: rgb(var(--color-surface));
-  color: rgb(var(--color-text-primary));
-}
-
-.overlayBadgeActive {
-  background-color: rgb(var(--color-primary));
-  color: #fff;
-}
-
-.selectedCheck {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background-color: rgb(var(--color-primary));
-  color: #fff;
-  padding: 6px;
-  border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-level-2);
 }
 
 .cardInfo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
   padding: 14px 16px;
+}
+
+.selectAction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px 12px;
+  margin-top: 16px;
+  border: 1px solid rgb(var(--color-primary) / 22%);
+  border-radius: 8px;
+  background: rgb(var(--color-primary) / 4%);
+  color: rgb(var(--color-primary));
+  font-size: 12px;
+  font-weight: 600;
+  transition: background-color var(--duration-fast), border-color var(--duration-fast);
+}
+.card:hover:not(:disabled) .selectAction {
+  background: rgb(var(--color-primary) / 8%);
+  border-color: rgb(var(--color-primary) / 40%);
+}
+.cardSelected .selectAction,
+.cardSelected:hover .selectAction {
+  background: rgb(var(--color-primary));
+  border-color: rgb(var(--color-primary));
+  color: #fff;
 }
 
 .cardTitle {
@@ -314,6 +198,7 @@
 }
 
 .cardDescription {
+  flex: 1;
   margin-top: 6px;
   font-size: var(--text-sm);
   line-height: 1.5;
