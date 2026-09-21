@@ -24,6 +24,10 @@
   flex-shrink: 0;
 }
 
+.mobileBrand {
+  display: none;
+}
+
 @media (min-width: 640px) {
   .brandLink {
     display: flex;
@@ -221,6 +225,14 @@
   .brandLink,
   .leftGroup .dividerDesktop,
   .autosaveWrap {
+    display: none;
+  }
+
+  .mobileBrand {
+    display: flex;
+  }
+
+  .backIcon {
     display: none;
   }
 

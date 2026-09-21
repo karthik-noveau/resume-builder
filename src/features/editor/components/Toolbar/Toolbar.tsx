@@ -69,7 +69,8 @@ export function Toolbar({
           className={clsx(styles.dividerDesktop, styles.dividerTall)}
         />
         <Link to="/app" aria-label="Back to dashboard" className={styles.backLink}>
-          <ArrowLeft size={18} aria-hidden="true" />
+          <BrandMark size="sm" className={styles.mobileBrand} />
+          <ArrowLeft size={18} aria-hidden="true" className={styles.backIcon} />
         </Link>
 
         <ResumeTitle title={resumeTitle} />

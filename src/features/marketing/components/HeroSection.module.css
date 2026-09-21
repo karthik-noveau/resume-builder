@@ -7,6 +7,9 @@
   padding: 0 32px;
   overflow: hidden;
 }
+.section[data-motion-paused='true'] {
+  --hero-motion: paused;
+}
 .intro {
   max-width: 1040px;
   margin: 0 auto;
@@ -123,14 +126,32 @@
 .windowBrand > svg {
   color: var(--home-emphasis);
 }
-.windowBrand > span {
+.windowBrand > span:not(.windowMark) {
   font-size: 11px;
   font-weight: 400;
   color: var(--home-muted);
 }
-.windowBrand > span:first-of-type {
+.windowBrand > span:nth-of-type(2) {
   padding-inline: 5px;
   color: var(--home-muted);
+}
+.windowMark {
+  display: inline-flex;
+  position: relative;
+  isolation: isolate;
+}
+.windowMark > span {
+  width: 26px;
+  height: 26px;
+}
+.windowMark::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 1px solid rgb(var(--color-primary) / 35%);
+  border-radius: 10px;
+  opacity: 0;
+  z-index: -1;
 }
 .sampleLabel {
   display: flex;
@@ -315,6 +336,11 @@
   box-shadow: 0 12px 30px #48287826;
   border: 1px solid #ced5dd;
   animation: paperIn 250ms ease;
+}
+.paperReveal {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 20%;
 }
 .detailTag {
   position: absolute;
@@ -539,7 +565,7 @@
     padding-inline: 20px;
   }
   .intro {
-    padding: 35px 0 30px;
+    padding: 56px 0 30px;
   }
   .eyebrow {
     font-size: 9px;
@@ -582,7 +608,7 @@
     gap: 7px;
     font-size: 11px;
   }
-  .windowBrand > span {
+  .windowBrand > span:not(.windowMark) {
     font-size: 9px;
   }
   .windowBrand > svg {
@@ -680,6 +706,155 @@
     font-size: 12px;
   }
 }
+
+/* The preview assembles once; readable content stays still after the entrance. */
+@media (prefers-reduced-motion: no-preference) {
+  .intro > * {
+    animation: heroReveal 750ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .intro > :nth-child(2) {
+    animation-delay: 100ms;
+  }
+  .intro > :nth-child(3) {
+    animation-delay: 200ms;
+  }
+  .intro > :nth-child(4) {
+    animation-delay: 320ms;
+  }
+  .intro > :nth-child(5) {
+    animation-delay: 420ms;
+  }
+  .workspace {
+    animation: workspaceArrival 1000ms cubic-bezier(0.22, 0.85, 0.25, 1) 260ms both;
+  }
+  .windowMark {
+    animation: markArrival 900ms cubic-bezier(0.22, 0.85, 0.25, 1) 450ms both;
+  }
+  .windowMark::before {
+    animation: markPulse 1400ms ease-out 600ms both;
+    animation-play-state: var(--hero-motion, running);
+  }
+  .templateOptions button {
+    animation: templateArrival 750ms cubic-bezier(0.22, 0.85, 0.25, 1) 640ms both;
+  }
+  .templateOptions button:nth-child(2) {
+    animation-delay: 800ms;
+  }
+  .templateOptions button:nth-child(3) {
+    animation-delay: 960ms;
+  }
+  .paperReveal {
+    animation: paperArrival 1100ms cubic-bezier(0.22, 0.85, 0.25, 1) 560ms both;
+  }
+  .previewSummary > * {
+    animation: heroReveal 700ms cubic-bezier(0.16, 1, 0.3, 1) 850ms both;
+  }
+  .previewSummary > :nth-child(n + 4) {
+    animation-delay: 1050ms;
+  }
+  .detailTag {
+    animation: detailArrival 850ms cubic-bezier(0.22, 0.85, 0.25, 1) 1100ms both;
+  }
+  .benefits > div {
+    animation: heroReveal 700ms cubic-bezier(0.16, 1, 0.3, 1) 1050ms both;
+  }
+  .benefits > div:nth-child(2) {
+    animation-delay: 1150ms;
+  }
+  .benefits > div:nth-child(3) {
+    animation-delay: 1250ms;
+  }
+  .actions > a {
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease,
+      background 180ms ease;
+  }
+  .actions > a:hover {
+    transform: translateY(-3px);
+  }
+  .actions > a:active {
+    transform: translateY(0);
+  }
+}
+@keyframes heroReveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes workspaceArrival {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes markArrival {
+  0% {
+    opacity: 0;
+    transform: scale(0.65) rotate(-10deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.06) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+@keyframes markPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  20% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.3);
+  }
+}
+@keyframes templateArrival {
+  from {
+    opacity: 0;
+    transform: translateX(-16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+@keyframes paperArrival {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.94) rotate(1.5deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0);
+  }
+}
+@keyframes detailArrival {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(14px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
 @media (max-width: 360px) {
   .section {
     padding-inline: 16px;

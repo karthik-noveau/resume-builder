@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router'
 import {
   ArrowRight,
@@ -14,6 +14,7 @@ import { ResumePreview } from '@/shared/components/ResumePreview/ResumePreview'
 import { getTemplatePreviewTree } from '@/shared/utils/templatePreview'
 import { ALL_TEMPLATES } from '@/features/templates/registry/template.registry'
 import { PillCta } from './PillCta'
+import { BrandMark } from '@/shared/components/BrandMark/BrandMark'
 import { HeroBackdrop } from './HeroBackdrop'
 import styles from './HeroSection.module.css'
 
@@ -43,10 +44,38 @@ const PREVIEWS = [
 
 export function HeroSection() {
   const [selected, setSelected] = useState(0)
+  const [motionPaused, setMotionPaused] = useState(false)
+  const [inView, setInView] = useState(true)
+  const [pageVisible, setPageVisible] = useState(true)
+  const heroRef = useRef<HTMLElement>(null)
   const template = PREVIEWS[selected]
+
+  useEffect(() => {
+    const updateVisibility = () => setPageVisible(!document.hidden)
+    updateVisibility()
+    document.addEventListener('visibilitychange', updateVisibility)
+    const observer =
+      typeof IntersectionObserver === 'undefined'
+        ? null
+        : new IntersectionObserver(([entry]) => setInView(entry.isIntersecting))
+    if (heroRef.current) observer?.observe(heroRef.current)
+    return () => {
+      document.removeEventListener('visibilitychange', updateVisibility)
+      observer?.disconnect()
+    }
+  }, [])
   return (
-    <section id="top" className={styles.section} aria-labelledby="hero-heading">
-      <HeroBackdrop />
+    <section
+      ref={heroRef}
+      id="top"
+      className={styles.section}
+      aria-labelledby="hero-heading"
+      data-motion-paused={motionPaused || !inView || !pageVisible}
+    >
+      <HeroBackdrop
+        paused={motionPaused}
+        onToggleMotion={() => setMotionPaused((value) => !value)}
+      />
       <div className={styles.intro}>
         <p className={styles.eyebrow}>
           <span /> YOUR CAREER. YOUR NEXT CHAPTER.
@@ -82,8 +111,10 @@ export function HeroSection() {
       <div className={styles.workspace}>
         <div className={styles.windowBar}>
           <span className={styles.windowBrand}>
-            <FileText size={19} aria-hidden="true" /> Resume Studio <span>/</span>{' '}
-            <span>Live preview</span>
+            <span className={styles.windowMark}>
+              <BrandMark size="sm" />
+            </span>{' '}
+            Resume Studio <span>/</span> <span>Live preview</span>
           </span>
           <span className={styles.sampleLabel}>
             <span /> Sample resume
@@ -143,8 +174,10 @@ export function HeroSection() {
               <span className={styles.pageCount}>A4 · Page 1</span>
             </div>
             <div className={styles.paperStage}>
-              <div className={styles.paper} key={template.id}>
-                <ResumePreview layoutTree={getTemplatePreviewTree(template.id)} widthPx={348} />
+              <div className={styles.paperReveal}>
+                <div className={styles.paper} key={template.id}>
+                  <ResumePreview layoutTree={getTemplatePreviewTree(template.id)} widthPx={348} />
+                </div>
               </div>
               <div className={styles.detailTag}>
                 <CheckCheck size={19} aria-hidden="true" />

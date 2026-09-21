@@ -7,6 +7,7 @@ import { PrivacyBanner } from '../components/PrivacyBanner'
 import { HowItWorks } from '../components/HowItWorks'
 import { FinalCta } from '../components/FinalCta'
 import { SiteFooter } from '../components/SiteFooter'
+import { RevealSection } from '../components/RevealSection'
 import styles from './HomePage.module.css'
 
 /** Rich-result markup for the landing page. Google accepts ld+json anywhere in the document. */
@@ -39,11 +40,21 @@ export function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
       />
       <HeroSection />
-      <TemplateShowcase />
-      <FeatureGrid />
-      <HowItWorks />
-      <PrivacyBanner />
-      <FinalCta />
+      <RevealSection>
+        <TemplateShowcase />
+      </RevealSection>
+      <RevealSection>
+        <FeatureGrid />
+      </RevealSection>
+      <RevealSection>
+        <HowItWorks />
+      </RevealSection>
+      <RevealSection>
+        <PrivacyBanner />
+      </RevealSection>
+      <RevealSection>
+        <FinalCta />
+      </RevealSection>
       <SiteFooter />
     </PageLayout>
   )

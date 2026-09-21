@@ -222,7 +222,8 @@ export function GuidedEditorPage() {
               className={clsx(styles.dividerDesktop, styles.dividerTall)}
             />
             <Link to="/app" aria-label="Back to dashboard" className={styles.backLink}>
-              <ArrowLeft size={18} aria-hidden="true" />
+              <BrandMark size="sm" className={styles.mobileBrand} />
+              <ArrowLeft size={18} aria-hidden="true" className={styles.backIcon} />
             </Link>
             <h1 className={styles.title} title={activeResume.title}>
               {activeResume.title || 'Untitled Resume'}

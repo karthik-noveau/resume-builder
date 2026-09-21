@@ -30,11 +30,11 @@
   stop-color: rgb(var(--color-accent));
 }
 .backWave {
-  fill-opacity: 0.09;
+  fill-opacity: 0.13;
 }
 .frontWave {
   fill: rgb(var(--color-accent));
-  fill-opacity: 0.055;
+  fill-opacity: 0.07;
 }
 .depth {
   transform-box: view-box;
@@ -102,22 +102,20 @@
     animation: depth 30s ease-in-out 2200ms infinite;
   }
   .trace {
-    animation: glint 12s ease-in-out 400ms infinite;
+    animation: glint 3s cubic-bezier(0.4, 0, 0.25, 1) 400ms both;
   }
   .grid {
-    animation: breathe 16s ease-in-out infinite;
+    animation:
+      gridArrival 1800ms ease-out 200ms both,
+      breathe 22s ease-in-out 2s infinite;
   }
   .arrival,
   .waves,
   .depth,
   .trace,
   .grid {
-    animation-play-state: var(--backdrop-motion, running);
+    animation-play-state: var(--hero-motion, running);
   }
-}
-
-.backdrop[data-paused='true'] {
-  --backdrop-motion: paused;
 }
 
 @keyframes arrive {
@@ -153,12 +151,9 @@
     stroke-dashoffset: 0.12;
     opacity: 0;
   }
-  10% {
-    opacity: 1;
-  }
-  40% {
-    stroke-dashoffset: -1;
-    opacity: 0;
+  20%,
+  65% {
+    opacity: 0.7;
   }
   100% {
     stroke-dashoffset: -1;
@@ -168,10 +163,21 @@
 @keyframes breathe {
   0%,
   100% {
-    opacity: 0.55;
+    opacity: 0.82;
   }
   50% {
     opacity: 1;
+  }
+}
+
+@keyframes gridArrival {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -186,8 +192,8 @@
   .motionToggle {
     top: 8px;
     right: 12px;
-    width: 30px;
-    height: 30px;
+    width: 44px;
+    height: 44px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
