@@ -5,10 +5,12 @@ import { createSampleResume } from '@/features/resume/utils/resume.factory'
 import { useResumeStore } from '@/shared/stores/resume.store'
 import { useEditorStore } from '@/shared/stores/editor.store'
 import { AtsEvaluation } from './AtsEvaluation'
+import { useResumeLayoutTree } from '../hooks/useResumeLayoutTree'
 
 function LiveEvaluation() {
   const resume = useResumeStore((state) => state.activeResume)
-  return resume && <AtsEvaluation resume={resume} />
+  const layoutTree = useResumeLayoutTree(resume)
+  return resume && <AtsEvaluation resume={resume} layoutTree={layoutTree} />
 }
 
 beforeAll(() => {
@@ -23,6 +25,50 @@ beforeEach(() => {
 })
 
 describe('ATS review and fixes', () => {
+  it('applies a suggested text-size fix directly, recalculates, and restores the exact design with Undo', async () => {
+    const original = structuredClone(useResumeStore.getState().activeResume!)
+    render(<LiveEvaluation />)
+    await userEvent.click(screen.getByRole('button', { name: 'Review & fix' }))
+    const dialog = await screen.findByRole(
+      'dialog',
+      { name: 'ATS review & fixes' },
+      { timeout: 5000 }
+    )
+    const finding = within(dialog)
+      .getByRole('heading', { name: 'Readable text size' })
+      .closest('article')!
+    await waitFor(() => expect(within(finding).getByText('Raise small text to 9 pt')).toBeVisible())
+    await userEvent.click(within(finding).getByRole('button', { name: 'Apply fix' }))
+    expect(
+      within(dialog).queryByRole('heading', { name: 'Readable text size' })
+    ).not.toBeInTheDocument()
+    expect(useResumeStore.getState().activeResume!.personalInfo).toEqual(original.personalInfo)
+    expect(useEditorStore.getState().undoStack).toHaveLength(1)
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Undo' }))
+    expect(useResumeStore.getState().activeResume!.styleOverrides).toEqual(original.styleOverrides)
+    expect(within(dialog).getByRole('heading', { name: 'Readable text size' })).toBeVisible()
+  })
+
+  it('shows the proposed design changes and resulting page count without applying them during review', async () => {
+    const original = structuredClone(useResumeStore.getState().activeResume!)
+    render(<LiveEvaluation />)
+    await userEvent.click(screen.getByRole('button', { name: 'Review & fix' }))
+    const dialog = await screen.findByRole('dialog', { name: 'ATS review & fixes' })
+    const finding = within(dialog)
+      .getByRole('heading', { name: 'Readable text size' })
+      .closest('article')!
+    await userEvent.click(within(finding).getByRole('button', { name: 'Review fix' }))
+    await waitFor(() => expect(within(dialog).getByText(/Page count: 1 → 1/)).toBeVisible())
+    expect(
+      within(dialog).getByText('All rendered text is at least 9 pt and stays within the page.')
+    ).toBeVisible()
+    expect(useResumeStore.getState().activeResume).toEqual(original)
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Apply fix' }))
+    expect(
+      within(dialog).queryByRole('heading', { name: 'Readable text size' })
+    ).not.toBeInTheDocument()
+  })
+
   it('recalculates when contact data, image visibility, and template change', () => {
     const resume = createSampleResume('mosaic')
     const { rerender } = render(<AtsEvaluation resume={resume} />)
@@ -52,7 +98,7 @@ describe('ATS review and fixes', () => {
       .getByRole('heading', { name: 'Profile graphics' })
       .closest('article')!
     await userEvent.click(within(photoCheck).getByRole('button', { name: 'Review fix' }))
-    expect(within(dialog).getByText('Shown on resume')).toBeVisible()
+    await waitFor(() => expect(within(dialog).getByText('Shown on resume')).toBeVisible())
     expect(useResumeStore.getState().activeResume!.settings.showProfileImage).toBe(true)
     await userEvent.click(within(dialog).getByRole('button', { name: 'Apply fix' }))
     expect(useResumeStore.getState().activeResume!.settings.showProfileImage).toBe(false)

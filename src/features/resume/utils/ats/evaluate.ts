@@ -1,6 +1,7 @@
 import type { Resume, SectionTitleKey, SectionType } from '@/shared/types/resume.types'
-import type { LayoutNode, LayoutTree } from '@/shared/types/layout.types'
+import type { LayoutTree } from '@/shared/types/layout.types'
 import type { TemplateDefinition } from '@/shared/types/template.types'
+import { inspectAtsLayout } from './layoutChecks'
 
 export type AtsCategory = 'Parsing & layout' | 'Contact' | 'Career history' | 'Writing' | 'Skills'
 export type AtsDestination = SectionType | 'personal' | 'design'
@@ -11,6 +12,8 @@ export type AtsFix =
   | 'deduplicate-skills'
   | 'clean-bullets'
   | 'sort-experience'
+  | 'readable-text'
+  | 'page-bounds'
 export interface AtsCheck {
   id: string
   label: string
@@ -606,24 +609,7 @@ export function evaluateAts(
   })
 
   if (layoutTree) {
-    const leaves: { node: LayoutNode; page: number; width: number; height: number }[] = []
-    layoutTree.pages.forEach((page) => {
-      const visit = (nodes: LayoutNode[]) =>
-        nodes.forEach((node) => {
-          if (node.content?.trim() && !node.children.length)
-            leaves.push({ node, page: page.pageNumber, width: page.widthPt, height: page.heightPt })
-          visit(node.children)
-        })
-      visit(page.nodes)
-    })
-    const tiny = leaves.filter(({ node }) => node.styles.fontSize < 9)
-    const outside = leaves.filter(
-      ({ node, width, height }) =>
-        node.xPt < -1 ||
-        node.yPt < -1 ||
-        node.xPt + node.widthPt > width + 1 ||
-        node.yPt + node.heightPt > height + 1
-    )
+    const { tiny, outside } = inspectAtsLayout(layoutTree)
     add(
       {
         id: 'small-text',
@@ -643,8 +629,9 @@ export function evaluateAts(
             ]
           : ['Rendered text is at least 9 pt.'],
         advice:
-          'Review small text in Design. Readability guidance is separate from machine parsing.',
+          'Increase text below 9 pt for easier reading. Readability guidance is separate from machine parsing.',
         destination: 'design',
+        fix: 'readable-text',
       },
       !tiny.length
     )
@@ -662,8 +649,9 @@ export function evaluateAts(
               .map(({ node, page }) => `Page ${page}: “${node.content}” extends past the page.`)
           : ['No text boxes extend beyond the rendered page.'],
         advice:
-          'Review the page preview, margins and text sizes. This checks text-box bounds, not PDF extraction or every possible overlap.',
+          'Adjust text sizing and page spacing to keep content on the page. This checks text-box bounds, not PDF extraction or every possible overlap.',
         destination: 'design',
+        fix: 'page-bounds',
       },
       !outside.length
     )

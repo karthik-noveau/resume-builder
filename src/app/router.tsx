@@ -46,6 +46,13 @@ const router = createBrowserRouter([
               return { Component: Settings }
             },
           },
+          {
+            path: 'share',
+            lazy: async () => {
+              const { SharedResumePage } = await import('@/features/share/SharedResumePage')
+              return { Component: SharedResumePage }
+            },
+          },
         ],
       },
       {

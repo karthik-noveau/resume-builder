@@ -83,8 +83,8 @@ export function DataBackup() {
           <HardDrive size={20} aria-hidden="true" />
         </span>
         <div>
-          <h2 id="backup-heading">Your data, in your hands</h2>
-          <p>Save an editable copy. Pick up on another device.</p>
+          <h2 id="backup-heading">Backup</h2>
+          <p>Download or restore your resumes.</p>
         </div>
       </div>
       <p className={styles.description}>

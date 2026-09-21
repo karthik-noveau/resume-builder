@@ -5,6 +5,7 @@ export interface ModalProps {
   onClose: () => void
   title?: string
   children: ReactNode
+  className?: string
   /** @default 'md' — maps to max-w-lg (512px) */
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'preview' | 'full'
 }

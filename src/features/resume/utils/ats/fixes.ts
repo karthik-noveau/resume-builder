@@ -1,5 +1,6 @@
 import type { Resume } from '@/shared/types/resume.types'
 import type { TemplateDefinition } from '@/shared/types/template.types'
+import { planDesignFix } from './designFixes'
 import {
   cleanBullet,
   dateMonth,
@@ -14,6 +15,7 @@ export interface AtsFixPlan {
   title: string
   changes: { label: string; before: string; after: string }[]
   patch: Partial<Resume>
+  layoutResult?: { beforePages: number; afterPages: number; message: string }
 }
 
 /** Generate a fresh, reviewable patch. No generated achievements, dates, or skills. */
@@ -22,6 +24,8 @@ export function planAtsFix(
   resume: Resume,
   templates: TemplateDefinition[]
 ): AtsFixPlan | null {
+  if (kind === 'readable-text' || kind === 'page-bounds')
+    return planDesignFix(kind, resume, templates)
   const changes: AtsFixPlan['changes'] = []
   let patch: Partial<Resume> = {}
   let title = ''
@@ -39,7 +43,7 @@ export function planAtsFix(
       templates.find((t) => t.layout === 'single-column' && t.name === 'Clarity') ??
       templates.find((t) => t.layout === 'single-column')
     if (template && template.id !== resume.templateId) {
-      title = 'Use a single-column layout'
+      title = `Switch to ${template.name} · single column`
       changes.push({
         label: 'Template',
         before: templates.find((t) => t.id === resume.templateId)?.name ?? resume.templateId,

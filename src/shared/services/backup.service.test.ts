@@ -36,6 +36,25 @@ describe('editable backups', () => {
     expect(result.resumes).toEqual(backup.resumes)
   })
 
+  it('backs up and restores unfinished drafts without losing their content', async () => {
+    const backup = fixture()
+    const draft = backup.resumes[0]
+    draft.skills[0].category = ''
+    draft.skills[0].skills.push({ id: 'new-skill', name: '' })
+    draft.personalInfo.email = 'alex@'
+    draft.projects[0].url = 'https://'
+    vi.mocked(db.resumes.toArray).mockResolvedValue(backup.resumes)
+    vi.mocked(db.images.toArray).mockResolvedValue([])
+
+    const parsed = parseBackup(await createBackup())
+    expect(parsed.resumes).toEqual(backup.resumes)
+    expect(await restoreBackup(parsed)).toBe(1)
+    const restored = vi.mocked(db.resumes.bulkAdd).mock.calls[0][0][0]
+    expect(restored.skills).toEqual(draft.skills)
+    expect(restored.personalInfo.email).toBe('alex@')
+    expect(restored.projects[0].url).toBe('https://')
+  })
+
   it('restores new copies and rewrites image ownership together in one transaction', async () => {
     const backup = fixture()
     backup.resumes[0].personalInfo.profileImage = 'photo'

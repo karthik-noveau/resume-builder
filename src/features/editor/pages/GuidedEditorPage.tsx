@@ -40,6 +40,8 @@ import { BrandMark } from '@/shared/components/BrandMark/BrandMark'
 import { Seo } from '@/shared/components/Seo/Seo'
 import styles from './GuidedEditorPage.module.css'
 import mobile from '@/shared/styles/mobileEditor.module.css'
+import { ShareButton } from '@/features/share/ShareButton'
+import shareStyles from '@/features/share/Share.module.css'
 
 type StepIcon = ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>
 
@@ -230,17 +232,20 @@ export function GuidedEditorPage() {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              void goToStep(STEPS.length)
-            }}
-            disabled={isNavigating}
-            className={styles.fullEditorLink}
-          >
-            <LayoutDashboard size={15} aria-hidden="true" />
-            Full Editor
-          </button>
+          <div className={shareStyles.headerActions}>
+            <ShareButton resumeId={activeResume.id} />
+            <button
+              type="button"
+              onClick={() => {
+                void goToStep(STEPS.length)
+              }}
+              disabled={isNavigating}
+              className={styles.fullEditorLink}
+            >
+              <LayoutDashboard size={15} aria-hidden="true" />
+              Full Editor
+            </button>
+          </div>
         </header>
 
         {/* Overall progress — always visible, independent of breakpoint */}

@@ -2,11 +2,36 @@ import { z } from 'zod'
 import { personalInfoSchema } from './personalInfo.schema'
 import { experienceSectionSchema } from './experience.schema'
 import { educationSectionSchema } from './education.schema'
-import { skillSectionSchema } from './skills.schema'
+import { skillSchema, skillSectionSchema } from './skills.schema'
 import { projectSectionSchema } from './projects.schema'
 import { certificationSectionSchema } from './certifications.schema'
 import { resumeSettingsSchema } from './settings.schema'
 import { isSelectableIcon } from '@/features/templates/engine/icons'
+
+// Saved resumes are drafts. Validate their structure without requiring finished
+// content; the editor schemas still provide email, URL and required-field guidance.
+// A blank skill or partially typed link must survive autosave, reload and backup.
+const draftPersonalInfoSchema = personalInfoSchema.extend({
+  email: z.string(),
+  website: z.string(),
+  linkedin: z.string(),
+  github: z.string(),
+  portfolio: z.string(),
+})
+
+const draftSkillSectionSchema = skillSectionSchema.extend({
+  category: z.string(),
+  skills: z.array(skillSchema.extend({ name: z.string() })),
+})
+
+const draftProjectSectionSchema = projectSectionSchema.extend({
+  url: z.string(),
+  github: z.string(),
+})
+
+const draftCertificationSectionSchema = certificationSectionSchema.extend({
+  credentialUrl: z.string(),
+})
 
 const sectionTypeSchema = z.enum([
   'summary',
@@ -35,7 +60,7 @@ const customSectionSchema = z.object({
   order: z.number().int().min(0),
   createdAt: z.string().min(1),
   updatedAt: z.string().min(1),
-  title: z.string().min(1),
+  title: z.string(),
   items: z.array(genericListItemSchema),
 })
 
@@ -46,7 +71,7 @@ const summarySectionSchema = z.object({
   order: z.number().int().min(0),
   createdAt: z.string().min(1),
   updatedAt: z.string().min(1),
-  content: z.string().max(3000),
+  content: z.string(),
 })
 
 const resumeMetadataSchema = z.object({
@@ -87,7 +112,7 @@ const elementStyleSchema = z.object({
 export const resumeSchema = z.object({
   id: z.string().min(1),
   schemaVersion: z.literal(1),
-  title: z.string().min(1, 'Resume title is required'),
+  title: z.string(),
   createdAt: z.string().min(1),
   updatedAt: z.string().min(1),
   templateId: z.string().min(1),
@@ -110,23 +135,23 @@ export const resumeSchema = z.object({
     panelText: z.string().optional(),
     panelSecondaryText: z.string().optional(),
   }).optional(),
-  personalInfo: personalInfoSchema,
+  personalInfo: draftPersonalInfoSchema,
   summary: summarySectionSchema,
   experience: z.array(experienceSectionSchema),
   education: z.array(educationSectionSchema),
-  skills: z.array(skillSectionSchema),
-  projects: z.array(projectSectionSchema),
-  certifications: z.array(certificationSectionSchema),
+  skills: z.array(draftSkillSectionSchema),
+  projects: z.array(draftProjectSectionSchema),
+  certifications: z.array(draftCertificationSectionSchema),
   customSections: z.array(customSectionSchema),
   sectionOrder: z.array(sectionTypeSchema),
   sectionTitles: z.object({
-    summary: z.string().min(1).max(100).optional(),
-    experience: z.string().min(1).max(100).optional(),
-    education: z.string().min(1).max(100).optional(),
-    skills: z.string().min(1).max(100).optional(),
-    projects: z.string().min(1).max(100).optional(),
-    certifications: z.string().min(1).max(100).optional(),
-    contact: z.string().min(1).max(100).optional(),
+    summary: z.string().optional(),
+    experience: z.string().optional(),
+    education: z.string().optional(),
+    skills: z.string().optional(),
+    projects: z.string().optional(),
+    certifications: z.string().optional(),
+    contact: z.string().optional(),
   }).optional(),
   // Keyed by SectionType or `custom:<id>`; values validated against the icon
   // library so a stale/unknown name can never reach the renderers.

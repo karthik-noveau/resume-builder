@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { clsx } from 'clsx'
 import { ArrowLeft, ArrowRight, Check, RotateCcw } from 'lucide-react'
 import { toast } from 'sonner'
@@ -27,6 +27,8 @@ type Props = {
   onClose: () => void
 }
 const priorityOrder = { high: 0, medium: 1, low: 2 }
+const isDesignCheck = (check: AtsCheck) =>
+  check.destination === 'design' || check.fix === 'hide-photo'
 const jobStorageKey = (id: string) => `resume-studio:ats-job:${id}`
 function readJob(id: string): { description: string; keywords: string } {
   try {
@@ -75,10 +77,16 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
         priorityOrder[a.priority] - priorityOrder[b.priority] ||
         b.max - b.points - (a.max - a.points)
     )
-  const plan =
-    selected?.mode === 'fix' && selected.check.fix
-      ? planAtsFix(selected.check.fix, resume, templates)
-      : null
+  const plans = useMemo(
+    () =>
+      new Map(
+        report.checks
+          .filter((check) => check.status === 'review' && check.fix)
+          .map((check) => [check.id, planAtsFix(check.fix!, resume, templates)])
+      ),
+    [report.checks, resume, templates]
+  )
+  const plan = selected?.mode === 'fix' ? plans.get(selected.check.id) : null
 
   useEffect(() => {
     try {
@@ -104,15 +112,19 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
     target?.focus()
   }, [selected])
 
-  const applyFix = () => {
+  const applyFix = (check: AtsCheck) => {
     const current = useResumeStore.getState().activeResume
-    if (!current || current.id !== resume.id || !selected?.check.fix) return
+    if (!current || current.id !== resume.id || !check.fix) return
     const currentPlan = planAtsFix(
-      selected.check.fix,
+      check.fix,
       current,
       useTemplateStore.getState().availableTemplates
     )
-    if (!currentPlan) return
+    if (!currentPlan) {
+      setSelected(null)
+      toast.info('This fix is no longer needed or available. Review the latest checks.')
+      return
+    }
     useResumeStore.getState().updateResume(currentPlan.patch)
     if (currentPlan.patch.templateId)
       useTemplateStore.getState().switchTemplate(currentPlan.patch.templateId)
@@ -138,7 +150,13 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
     })
 
   return (
-    <Modal isOpen onClose={onClose} title="ATS review & fixes" maxWidth="xl">
+    <Modal
+      isOpen
+      onClose={onClose}
+      title="ATS review & fixes"
+      maxWidth="xl"
+      className={styles.modal}
+    >
       <div
         className={styles.root}
         onKeyDown={(event) => {
@@ -156,17 +174,27 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
       >
         <div className={styles.overview}>
           <div className={styles.overall}>
-            <strong>
-              {report.score}
-              <span>/100</span>
-            </strong>
+            <div
+              className={styles.scoreRing}
+              style={{ '--score-progress': `${report.score}%` } as CSSProperties}
+              role="img"
+              aria-label={`Resume readiness: ${report.score} out of 100`}
+            >
+              <div aria-hidden="true">
+                <strong>{report.score}</strong>
+                <span>/ 100</span>
+              </div>
+            </div>
             <div>
               <h2>Resume readiness</h2>
               <p>
-                {findings.length} checks to review · {report.wordCount} words
+                {report.wordCount} words
                 {report.pageCount !== null &&
                   ` · ${report.pageCount} ${report.pageCount === 1 ? 'page' : 'pages'}`}
               </p>
+              <span className={clsx(styles.reviewCount, !findings.length && styles.passed)}>
+                {findings.length ? `${findings.length} checks to review` : 'All checks passed'}
+              </span>
             </div>
           </div>
           <Button variant="ghost" onClick={handleUndo} disabled={!canUndo}>
@@ -185,6 +213,18 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
               <>
                 {plan ? (
                   <>
+                    {plan.layoutResult && (
+                      <div className={styles.layoutResult} role="status">
+                        <Check size={16} aria-hidden="true" />
+                        <div>
+                          <strong>{plan.layoutResult.message}</strong>
+                          <p>
+                            Page count: {plan.layoutResult.beforePages} →{' '}
+                            {plan.layoutResult.afterPages}. Your resume content is kept.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     <div className={styles.changes}>
                       {plan.changes.map((change, index) => (
                         <div className={styles.change} key={`${change.label}-${index}`}>
@@ -204,7 +244,7 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
                     </div>
                     <div className={styles.applyRow}>
                       <p>This change is saved to your resume and can be undone.</p>
-                      <Button variant="primary" onClick={applyFix}>
+                      <Button variant="primary" onClick={() => applyFix(selected.check)}>
                         Apply fix <Check size={15} aria-hidden="true" />
                       </Button>
                     </div>
@@ -251,12 +291,18 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
               {tab === 'checks' ? (
                 <div className={styles.report}>
                   <aside className={styles.categories} aria-label="Score breakdown">
+                    <h3>Score breakdown</h3>
                     {report.categories.map((category) => (
-                      <div className={styles.category} key={category.label}>
+                      <div
+                        className={styles.category}
+                        key={category.label}
+                        data-complete={category.score === category.max}
+                      >
                         <div>
                           <span>{category.label}</span>
                           <strong>
-                            {category.score}/{category.max}
+                            {category.score}
+                            <span>/{category.max}</span>
                           </strong>
                         </div>
                         <div className={styles.track}>
@@ -285,53 +331,75 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
                         <p>Review job relevance and the final preview before applying.</p>
                       </div>
                     )}
-                    {checks.map((check) => (
-                      <article className={styles.check} key={check.id}>
-                        <div className={styles.checkHeader}>
-                          <h4>{check.label}</h4>
-                          <span
-                            className={clsx(
-                              styles.priority,
-                              check.status === 'passed'
-                                ? styles.passed
-                                : check.priority === 'high' && styles.high
-                            )}
-                          >
-                            {check.status === 'passed' ? 'Passed' : `${check.priority} priority`}
-                          </span>
-                        </div>
-                        <ul className={styles.evidence}>
-                          {check.evidence.map((text, index) => (
-                            <li key={index}>{text}</li>
-                          ))}
-                        </ul>
-                        {check.status === 'review' && (
-                          <>
-                            <p className={styles.advice}>{check.advice}</p>
-                            <div className={styles.checkActions}>
-                              {check.fix && planAtsFix(check.fix, resume, templates) && (
-                                <Button
-                                  variant="secondary"
-                                  onClick={() => setSelected({ check, mode: 'fix' })}
-                                >
-                                  Review fix <ArrowRight size={13} aria-hidden="true" />
-                                </Button>
+                    {checks.map((check) => {
+                      const suggestion = plans.get(check.id)
+                      const designFix = isDesignCheck(check) && suggestion
+                      return (
+                        <article className={styles.check} key={check.id}>
+                          <div className={styles.checkHeader}>
+                            <h4>{check.label}</h4>
+                            <span
+                              className={clsx(
+                                styles.priority,
+                                check.status === 'passed'
+                                  ? styles.passed
+                                  : check.priority === 'high' && styles.high
                               )}
-                              <Button
-                                variant="ghost"
-                                onClick={() => setSelected({ check, mode: 'edit' })}
-                              >
-                                Edit{' '}
-                                {check.destination === 'personal' ? 'details' : check.destination}
-                              </Button>
-                              <span>
-                                {check.max ? `${check.points}/${check.max} points` : 'Advisory'}
-                              </span>
-                            </div>
-                          </>
-                        )}
-                      </article>
-                    ))}
+                            >
+                              {check.status === 'passed' ? 'Passed' : `${check.priority} priority`}
+                            </span>
+                          </div>
+                          <ul className={styles.evidence}>
+                            {check.evidence.map((text, index) => (
+                              <li key={index}>{text}</li>
+                            ))}
+                          </ul>
+                          {check.status === 'review' && (
+                            <>
+                              <p className={styles.advice}>{check.advice}</p>
+                              {designFix && (
+                                <div className={styles.suggestion}>
+                                  <span>Suggested fix</span>
+                                  <strong>{designFix.title}</strong>
+                                  {designFix.layoutResult && (
+                                    <p>
+                                      {designFix.layoutResult.message} Pages:{' '}
+                                      {designFix.layoutResult.beforePages} →{' '}
+                                      {designFix.layoutResult.afterPages}.
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                              <div className={styles.checkActions}>
+                                {designFix && (
+                                  <Button variant="primary" onClick={() => applyFix(check)}>
+                                    Apply fix <Check size={13} aria-hidden="true" />
+                                  </Button>
+                                )}
+                                {suggestion && (
+                                  <Button
+                                    variant="secondary"
+                                    onClick={() => setSelected({ check, mode: 'fix' })}
+                                  >
+                                    Review fix <ArrowRight size={13} aria-hidden="true" />
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  onClick={() => setSelected({ check, mode: 'edit' })}
+                                >
+                                  Edit{' '}
+                                  {check.destination === 'personal' ? 'details' : check.destination}
+                                </Button>
+                                <span>
+                                  {check.max ? `${check.points}/${check.max} points` : 'Advisory'}
+                                </span>
+                              </div>
+                            </>
+                          )}
+                        </article>
+                      )
+                    })}
                   </div>
                 </div>
               ) : (

@@ -5,6 +5,7 @@ import { UndoRedoButtons } from './UndoRedoButtons'
 import { ZoomControls } from './ZoomControls'
 import { ExportButton } from './ExportButton'
 import { ResetButton } from './ResetButton'
+import { ShareButton } from '@/features/share/ShareButton'
 import type { ResetResumeOptions } from '@/shared/stores/resume.store'
 import { Divider } from '@/shared/components/ui/Divider/Divider'
 import { BrandMark } from '@/shared/components/BrandMark/BrandMark'
@@ -63,12 +64,11 @@ export function Toolbar({
         <Link to="/" aria-label="Resume Studio home" className={styles.brandLink}>
           <BrandMark size="sm" />
         </Link>
-        <Divider orientation="vertical" className={clsx(styles.dividerDesktop, styles.dividerTall)} />
-        <Link
-          to="/app"
-          aria-label="Back to dashboard"
-          className={styles.backLink}
-        >
+        <Divider
+          orientation="vertical"
+          className={clsx(styles.dividerDesktop, styles.dividerTall)}
+        />
+        <Link to="/app" aria-label="Back to dashboard" className={styles.backLink}>
           <ArrowLeft size={18} aria-hidden="true" />
         </Link>
 
@@ -81,12 +81,7 @@ export function Toolbar({
 
       {/* Center: undo/redo + divider + zoom */}
       <div className={styles.centerGroup}>
-        <UndoRedoButtons
-          canUndo={canUndo}
-          canRedo={canRedo}
-          onUndo={onUndo}
-          onRedo={onRedo}
-        />
+        <UndoRedoButtons canUndo={canUndo} canRedo={canRedo} onUndo={onUndo} onRedo={onRedo} />
         <div className={styles.zoomWrap}>
           <Divider orientation="vertical" className={styles.dividerTall} />
           <ZoomControls
@@ -121,7 +116,11 @@ export function Toolbar({
           <ListChecks size={16} aria-hidden="true" />
           <span className={styles.guidedLinkLabel}>Step by Step Edit</span>
         </Link>
-        <Divider orientation="vertical" className={clsx(styles.dividerDesktop, styles.dividerTall)} />
+        <Divider
+          orientation="vertical"
+          className={clsx(styles.dividerDesktop, styles.dividerTall)}
+        />
+        <ShareButton resumeId={resumeId} />
         <ExportButton
           onExport={onExport}
           onPreview={onPreview}
