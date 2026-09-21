@@ -1,6 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { exportService } from './export.service'
+import { templateRenderer } from '@/features/templates/engine/template.renderer'
 import type { Resume } from '@/shared/types/resume.types'
+
+const generateBytes = vi.hoisted(() => vi.fn())
 
 // Mocking dependencies
 vi.mock('@/features/templates/engine/template.renderer', () => ({
@@ -12,9 +15,9 @@ vi.mock('@/features/templates/engine/template.renderer', () => ({
 
 vi.mock('./pdf.generator', () => {
   return {
-    PdfGenerator: vi.fn().mockImplementation(() => ({
-      generate: vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3]))
-    }))
+    PdfGenerator: class {
+      generate = generateBytes
+    },
   }
 })
 
@@ -95,30 +98,55 @@ describe('ExportService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    // Mock URL.createObjectURL and document.createElement
+    generateBytes.mockResolvedValue(new Uint8Array([1, 2, 3]))
     global.URL.createObjectURL = vi.fn().mockReturnValue('blob:url')
     global.URL.revokeObjectURL = vi.fn()
-    document.body.appendChild = vi.fn()
-    document.body.removeChild = vi.fn()
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
   })
+  afterEach(() => vi.restoreAllMocks())
 
   it('successfully exports a valid resume', async () => {
     await expect(exportService.exportToPdf(validResume)).resolves.not.toThrow()
   })
 
-  it('throws error if full name is missing', async () => {
-    const invalidResume = {
+  it.each([
+    ['full name is missing', { fullName: '' }],
+    ['email is missing', { email: '' }],
+    ['email is unfinished', { email: 'john@' }],
+  ])('previews and exports when %s', async (_description, patch) => {
+    const draft = {
       ...validResume,
-      personalInfo: { ...validResume.personalInfo, fullName: '' }
+      personalInfo: { ...validResume.personalInfo, ...patch },
     }
-    await expect(exportService.exportToPdf(invalidResume)).rejects.toThrow('Full Name is required')
+
+    const pdf = await exportService.generatePdf(draft)
+    expect(exportService.createPreviewUrl(pdf)).toBe('blob:url')
+    expect(pdf.bytes).toEqual(new Uint8Array([1, 2, 3]))
+    if (!draft.personalInfo.fullName) expect(pdf.fileName).toMatch(/^Resume_.*\.pdf$/)
+    await expect(exportService.exportToPdf(draft)).resolves.toBeUndefined()
+    expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledOnce()
   })
 
-  it('throws error if email is missing', async () => {
-    const invalidResume = {
+  it('previews and exports an unfinished skill without changing the draft', async () => {
+    const draft: Resume = {
       ...validResume,
-      personalInfo: { ...validResume.personalInfo, email: '' }
+      skills: [{
+        id: 'skills-1', type: 'skills', visible: true, order: 1,
+        createdAt: validResume.createdAt, updatedAt: validResume.updatedAt,
+        category: '', skills: [{ id: 'skill-1', name: '' }],
+      }],
+      sectionOrder: ['summary', 'skills'],
     }
-    await expect(exportService.exportToPdf(invalidResume)).rejects.toThrow('Email is required')
+    const snapshot = structuredClone(draft)
+    const pdf = await exportService.generatePdf(draft)
+    expect(exportService.createPreviewUrl(pdf)).toBe('blob:url')
+    await expect(exportService.exportToPdf(draft)).resolves.toBeUndefined()
+    expect(templateRenderer.render).toHaveBeenCalledWith(draft, expect.anything(), expect.anything(), expect.anything())
+    expect(draft).toEqual(snapshot)
+  })
+
+  it('still reports rendering failures', async () => {
+    vi.mocked(templateRenderer.render).mockImplementationOnce(() => { throw new Error('PDF rendering failed') })
+    await expect(exportService.generatePdf(validResume)).rejects.toThrow('PDF rendering failed')
   })
 })

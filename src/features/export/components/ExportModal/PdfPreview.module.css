@@ -22,8 +22,8 @@
   gap: var(--space-0-5);
   padding: 3px;
   border-radius: var(--radius-medium);
-  background: rgb(var(--color-background));
-  box-shadow: inset 0 0 0 1px rgb(var(--color-divider) / 55%);
+  background: rgb(var(--color-surface));
+  box-shadow: inset 0 0 0 1px rgb(100 116 139 / 18%);
 }
 
 .control {
@@ -86,8 +86,8 @@
   overflow: auto;
   padding: var(--space-4);
   border-radius: var(--radius-medium);
-  background: rgb(var(--color-background));
-  box-shadow: inset 0 0 0 1px rgb(var(--color-divider) / 55%);
+  background: color-mix(in srgb, rgb(var(--color-surface)) 93%, #64748b);
+  box-shadow: inset 0 0 0 1px rgb(100 116 139 / 10%);
 }
 
 .loading {
@@ -125,7 +125,7 @@
 }
 
 .page {
-  box-shadow: var(--shadow-level-2);
+  box-shadow: 0 1px 3px rgb(15 23 42 / 8%), 0 8px 24px rgb(15 23 42 / 6%);
 }
 
 .page canvas {

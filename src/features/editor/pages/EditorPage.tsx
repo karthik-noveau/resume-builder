@@ -144,13 +144,13 @@ export function EditorPage() {
 
   const handleExport = () => {
     void prepareExport().then((latest) => {
-      if (latest?.id === resumeId && hasResumeContent(latest)) void exportToPdf(latest)
+      if (latest?.id === resumeId) void exportToPdf(latest)
     })
   }
 
   const handlePreview = () => {
     void prepareExport().then((latest) => {
-      if (latest?.id === resumeId && hasResumeContent(latest)) void previewPdf(latest)
+      if (latest?.id === resumeId) void previewPdf(latest)
     })
   }
 
@@ -185,7 +185,7 @@ export function EditorPage() {
             onExport={handleExport}
             onPreview={handlePreview}
             previewLoading={isExporting && exportMode === 'preview'}
-            exportDisabled={isExporting || !hasContent}
+            exportDisabled={isExporting}
             onReset={resetResume}
             onStartTour={tour.start}
           />

@@ -4,7 +4,6 @@ import { getTemplateById } from '@/features/templates/registry/template.registry
 import type { PdfGenerator } from './pdf.generator'
 import { logger } from '@/shared/services/logger'
 import { useThemeStore, resolveResumeTheme } from '@/shared/stores/theme.store'
-import { resumeSchema } from '@/shared/schemas/resume.schema'
 
 export interface GeneratedPdf {
   bytes: Uint8Array
@@ -46,8 +45,8 @@ export class ExportService {
   }
 
   async generatePdf(resume: Resume): Promise<GeneratedPdf> {
-    this.validateResume(resume)
-
+    // Export the current draft, including incomplete fields and sections.
+    // Content requirements belong to editing guidance, not PDF generation.
     // Let React paint the opening dialog before layout/font work occupies the
     // main thread. This yields a task rather than adding a fixed loading delay.
     await new Promise<void>(resolve => setTimeout(resolve, 0))
@@ -77,21 +76,6 @@ export class ExportService {
     link.click()
     document.body.removeChild(link)
     setTimeout(() => URL.revokeObjectURL(url), 1000)
-  }
-
-  private validateResume(resume: Resume) {
-    const result = resumeSchema.safeParse(resume)
-    if (!result.success) {
-      const issues = result.error.issues.map((i) => i.message).join(', ')
-      throw new Error(`Resume validation failed: ${issues}`)
-    }
-
-    if (!resume.personalInfo.fullName.trim()) {
-      throw new Error('Full Name is required for export')
-    }
-    if (!resume.personalInfo.email.trim()) {
-      throw new Error('Email is required for export')
-    }
   }
 
   private getExportContext(resume: Resume) {

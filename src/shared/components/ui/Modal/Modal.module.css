@@ -5,25 +5,30 @@
   max-width: calc(100vw - 32px);
 }
 
-.fullModal {
+.tallModal {
   top: 16px;
   padding-bottom: var(--space-4);
 }
 
-/* A full-window preview only needs a small entrance, not the default 0.2x
+.previewModal :global(.ant-modal-container),
+.previewModal :global(.ant-modal-header) {
+  background: rgb(var(--color-surface));
+}
+
+/* A document preview only needs a small entrance, not the default 0.2x
    zoom from the toolbar button across the entire screen. */
-.fullModal:global(.resume-preview-enter),
-.fullModal:global(.resume-preview-appear) {
+.previewModal:global(.resume-preview-enter),
+.previewModal:global(.resume-preview-appear) {
   animation: previewEnter 180ms ease-out both paused;
 }
 
-.fullModal:global(.resume-preview-leave) {
+.previewModal:global(.resume-preview-leave) {
   animation: previewLeave 140ms ease-in both paused;
 }
 
-.fullModal:global(.resume-preview-enter-active),
-.fullModal:global(.resume-preview-appear-active),
-.fullModal:global(.resume-preview-leave-active) {
+.previewModal:global(.resume-preview-enter-active),
+.previewModal:global(.resume-preview-appear-active),
+.previewModal:global(.resume-preview-leave-active) {
   animation-play-state: running;
 }
 
@@ -38,9 +43,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fullModal:global(.resume-preview-enter),
-  .fullModal:global(.resume-preview-appear),
-  .fullModal:global(.resume-preview-leave) {
+  .previewModal:global(.resume-preview-enter),
+  .previewModal:global(.resume-preview-appear),
+  .previewModal:global(.resume-preview-leave) {
     animation-duration: 1ms;
   }
 }

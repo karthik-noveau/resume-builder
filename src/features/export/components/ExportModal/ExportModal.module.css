@@ -11,7 +11,7 @@
      height to fill. The border and background that used to live here belonged
      to the <iframe> the browser's viewer was painted into. */
   /* Everything the dialog spends before the page gets any room: the 16px top
-     offset .fullModal sets, its header, and its own padding. Measured rather
+     offset .tallModal sets, its header, and its own padding. Measured rather
      than guessed — the previous value ignored the offset entirely and ran the
      dialog past the bottom of the window. */
   height: calc(var(--app-viewport-height, 100dvh) - 116px);

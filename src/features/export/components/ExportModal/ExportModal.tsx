@@ -36,9 +36,7 @@ export function ExportModal({
   const isCompleted = status === 'completed'
   const isExporting = status !== 'idle' && !isFailed && !isCompleted
 
-  // Full-bleed for the preview: 'full' is calc(100vw - 32px) and .fullModal
-  // pins it 16px from the top, so the dialog fills the window and the page is
-  // drawn as large as that height allows.
+  // Keep a document-sized dialog throughout loading, rendering, and closing.
   return (
     <Modal
       isOpen={isOpen}
@@ -52,7 +50,7 @@ export function ExportModal({
               ? 'PDF ready'
               : 'Preparing your PDF'
       }
-      maxWidth={mode === 'preview' ? 'full' : 'md'}
+      maxWidth={mode === 'preview' ? 'preview' : 'md'}
     >
       <div className={styles.body}>
         {mode === 'preview' ? (
