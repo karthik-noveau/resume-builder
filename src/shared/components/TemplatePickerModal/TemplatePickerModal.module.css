@@ -31,13 +31,17 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  padding: 2px 0 14px;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid rgb(var(--color-divider) / 70%);
+  border-radius: var(--radius-large);
   background-color: rgb(var(--color-surface));
+  box-shadow: 0 2px 6px rgb(var(--color-text-primary) / 3%);
 }
 
 .resultCount {
-  margin: 12px 0 0;
-  font-size: var(--text-sm);
+  margin: 10px 2px 0;
+  font-size: var(--text-xs);
   color: rgb(var(--color-text-muted));
 }
 

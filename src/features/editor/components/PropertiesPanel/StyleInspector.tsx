@@ -1,20 +1,24 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { ColorPicker } from 'antd'
 import {
   AlignCenter, AlignLeft, AlignRight, Bold, ChevronDown, Italic,
-  MousePointerClick, Paintbrush, RotateCcw, Underline,
+  MousePointerClick, Paintbrush, Palette, RotateCcw, Ruler, Type, Underline,
 } from 'lucide-react'
 import type { Resume } from '@/shared/types/resume.types'
 import type { FontFamily, FontWeight } from '@/shared/types/font.types'
 import type { ElementStyle, StyleRole, TextTransform } from '@/shared/types/style.types'
+import type { LayoutNode, LayoutTree } from '@/shared/types/layout.types'
 import { STYLE_ROLES, STYLE_ROLE_LABELS, isEmptyStyle } from '@/shared/types/style.types'
 import { useResumeStore } from '@/shared/stores/resume.store'
 import { useEditorStore } from '@/shared/stores/editor.store'
 import { Select } from '@/shared/components/ui/Select/Select'
 import styles from './StyleInspector.module.css'
+import { findStyleNode } from '../../utils/findStyleNode'
+import { isTextNode } from '@/features/templates/engine/style.roles'
 
 interface StyleInspectorProps {
   resume: Resume
+  layoutTree?: LayoutTree | null
 }
 
 const FONT_FAMILIES: { value: FontFamily; label: string }[] = [
@@ -49,13 +53,17 @@ const FONT_SIZE_MAX = 96
  * depends on what you just clicked — the global controls beside it are the same
  * whatever is selected, so they start collapsed.
  */
-export function SelectedElementStyle({ resume }: StyleInspectorProps) {
+export function SelectedElementStyle({ resume, layoutTree }: StyleInspectorProps) {
   const styleTarget = useEditorStore((s) => s.styleTarget)
   const clearStyleTarget = useEditorStore((s) => s.clearStyleTarget)
   const setElementStyle = useResumeStore((s) => s.setElementStyle)
   const resetElementStyle = useResumeStore((s) => s.resetElementStyle)
 
   const elementStyle = styleTarget ? resume.styleOverrides?.elements?.[styleTarget.key] : undefined
+  const selectedNode = findStyleNode(layoutTree, styleTarget?.key)
+  const hasOtherStyling = !isEmptyStyle({ ...elementStyle,
+    marginTopPt: undefined, marginRightPt: undefined, marginBottomPt: undefined, marginLeftPt: undefined,
+  })
 
   if (!styleTarget) {
     return (
@@ -87,15 +95,29 @@ export function SelectedElementStyle({ resume }: StyleInspectorProps) {
         </button>
       </div>
 
-      <StyleControls
-        value={elementStyle ?? {}}
-        onChange={(patch) => setElementStyle(styleTarget.key, patch)}
-        showSizing
-      />
+      {selectedNode?.type === 'divider' || selectedNode?.type === 'rect' ? (
+        <div className={styles.controlSections} key={styleTarget.key}>
+          <ControlGroup label={selectedNode.type === 'divider' ? 'Line' : 'Shape'} icon={<Paintbrush size={15} />}>
+            <DecorationControls node={selectedNode} value={elementStyle ?? {}}
+              onChange={(patch) => setElementStyle(styleTarget.key, patch)} />
+          </ControlGroup>
+          <SpacingControls value={elementStyle ?? {}} onChange={(patch) => setElementStyle(styleTarget.key, patch)}
+            inset={selectedNode.type === 'rect' || selectedNode.heightPt > selectedNode.widthPt} />
+        </div>
+      ) : !selectedNode || isTextNode(selectedNode) ? (
+        <StyleControls
+          key={styleTarget.key}
+          value={elementStyle ?? {}}
+          inherited={styleTarget.role ? resume.styleOverrides?.roles?.[styleTarget.role] : undefined}
+          onChange={(patch) => setElementStyle(styleTarget.key, patch)}
+        />
+      ) : (
+        <SpacingControls key={styleTarget.key} value={elementStyle ?? {}}
+          onChange={(patch) => setElementStyle(styleTarget.key, patch)} />
+      )}
 
-      {!isEmptyStyle(elementStyle) && (
+      {hasOtherStyling && (
         <div className={styles.resetRow}>
-          {!isEmptyStyle(elementStyle) && (
             <button
               type="button"
               className={styles.inlineReset}
@@ -104,9 +126,50 @@ export function SelectedElementStyle({ resume }: StyleInspectorProps) {
               <RotateCcw size={12} aria-hidden="true" />
               Reset styling
             </button>
-          )}
         </div>
       )}
+    </div>
+  )
+}
+
+function DecorationControls({ node, value, onChange }: {
+  node: LayoutNode
+  value: ElementStyle
+  onChange: (patch: ElementStyle) => void
+}) {
+  const isLine = node.type === 'divider'
+  const colorKey = isLine ? 'color' : 'backgroundColor'
+  const label = isLine ? 'Line colour' : 'Fill colour'
+  const color = value[colorKey] ?? (isLine ? node.styles.color : node.styles.backgroundColor ?? node.styles.color)
+  return (
+    <div className={styles.controls}>
+      <div className={styles.controlRow}>
+        <span className={styles.controlLabel}>{label}</span>
+        <ColorPicker aria-label={label} value={color} disabledAlpha size="small"
+          onChangeComplete={(next) => onChange({ [colorKey]: next.toHexString().toLowerCase() })} />
+      </div>
+      {isLine && <>
+        <div className={styles.controlGrid}>
+          <NumberField label="Thickness (pt)" value={value.lineThicknessPt ?? Math.min(node.widthPt, node.heightPt)}
+            min={0.25} max={8} step={0.25} commitOnBlur onChange={(lineThicknessPt) => onChange({ lineThicknessPt })} />
+          <NumberField label="Length (%)" value={value.lineLengthPercent ?? 100}
+            min={10} max={100} step={5} commitOnBlur onChange={(lineLengthPercent) => onChange({ lineLengthPercent })} />
+        </div>
+        <div className={styles.controlRow}>
+          <span className={styles.controlLabel}>Alignment</span>
+          <div className={styles.toggleGroup}>
+            <IconToggle label="Align line to start" active={(value.textAlign ?? 'left') === 'left'} onClick={() => onChange({ textAlign: 'left' })}>
+              <AlignLeft size={14} aria-hidden="true" />
+            </IconToggle>
+            <IconToggle label="Centre line" active={value.textAlign === 'center'} onClick={() => onChange({ textAlign: 'center' })}>
+              <AlignCenter size={14} aria-hidden="true" />
+            </IconToggle>
+            <IconToggle label="Align line to end" active={value.textAlign === 'right'} onClick={() => onChange({ textAlign: 'right' })}>
+              <AlignRight size={14} aria-hidden="true" />
+            </IconToggle>
+          </div>
+        </div>
+      </>}
     </div>
   )
 }
@@ -234,7 +297,7 @@ function RoleRow({
       </button>
       {open && (
         <div className={styles.roleBody}>
-          <StyleControls value={value} onChange={onChange} showSizing />
+          <StyleControls value={value} onChange={onChange} />
           {customized && (
             <button type="button" className={styles.inlineReset} onClick={onReset}>
               <RotateCcw size={12} aria-hidden="true" />
@@ -253,7 +316,7 @@ function RoleRow({
  * Every control is tri-state: unset means "inherit", and each one can be put
  * back to inherit without having to guess what the template's value was.
  */
-function StyleControls({
+function TypographyControls({
   value, onChange, showSizing,
 }: {
   value: ElementStyle
@@ -310,44 +373,6 @@ function StyleControls({
       )}
 
       <div className={styles.controlRow}>
-        <span className={styles.controlLabel}>Text colour</span>
-        <div className={styles.colorCell}>
-          <ColorPicker
-            value={value.color ?? '#111827'}
-            disabledAlpha
-            size="small"
-            onChangeComplete={(color) => onChange({ color: color.toHexString().toLowerCase() })}
-          />
-          <span className={styles.clearSlot}>
-            {value.color && (
-              <button type="button" className={styles.clearDot} onClick={() => onChange({ color: undefined })} aria-label="Clear text colour">
-                <RotateCcw size={11} aria-hidden="true" />
-              </button>
-            )}
-          </span>
-        </div>
-      </div>
-
-      <div className={styles.controlRow}>
-        <span className={styles.controlLabel}>Background</span>
-        <div className={styles.colorCell}>
-          <ColorPicker
-            value={value.backgroundColor ?? '#ffffff'}
-            disabledAlpha
-            size="small"
-            onChangeComplete={(color) => onChange({ backgroundColor: color.toHexString().toLowerCase() })}
-          />
-          <span className={styles.clearSlot}>
-            {value.backgroundColor && (
-              <button type="button" className={styles.clearDot} onClick={() => onChange({ backgroundColor: undefined })} aria-label="Clear background">
-                <RotateCcw size={11} aria-hidden="true" />
-              </button>
-            )}
-          </span>
-        </div>
-      </div>
-
-      <div className={styles.controlRow}>
         <span className={styles.controlLabel}>Emphasis</span>
         <div className={styles.toggleGroup}>
           <IconToggle
@@ -400,23 +425,112 @@ function StyleControls({
         />
       </div>
 
-      <details className={styles.spacing}>
-        <summary className={styles.spacingSummary}>
-          <span>Padding</span>
-          <ChevronDown size={13} aria-hidden="true" />
-        </summary>
-        <div className={styles.controlGrid}>
-          <NumberField label="Top (pt)" value={value.paddingTopPt} min={0} max={120} step={1}
-            onChange={(next) => onChange({ paddingTopPt: next })} />
-          <NumberField label="Right (pt)" value={value.paddingRightPt} min={0} max={120} step={1}
-            onChange={(next) => onChange({ paddingRightPt: next })} />
-          <NumberField label="Bottom (pt)" value={value.paddingBottomPt} min={0} max={120} step={1}
-            onChange={(next) => onChange({ paddingBottomPt: next })} />
-          <NumberField label="Left (pt)" value={value.paddingLeftPt} min={0} max={120} step={1}
-            onChange={(next) => onChange({ paddingLeftPt: next })} />
-        </div>
-      </details>
     </div>
+  )
+}
+
+function ControlGroup({ label, icon, children }: { label: string; icon: ReactNode; children: ReactNode }) {
+  return (
+    <details className={styles.controlSection} open>
+      <summary className={styles.sectionSummary}>
+        <span className={styles.sectionIdentity}><span aria-hidden="true">{icon}</span>{label}</span>
+        <ChevronDown size={14} aria-hidden="true" className={styles.sectionChevron} />
+      </summary>
+      <div className={styles.sectionBody}>{children}</div>
+    </details>
+  )
+}
+
+interface StyleControlProps {
+  value: ElementStyle
+  inherited?: ElementStyle
+  onChange: (patch: ElementStyle) => void
+}
+
+function StyleControls({ value, inherited, onChange }: StyleControlProps) {
+  return (
+    <div className={styles.controlSections}>
+      <ControlGroup label="Typography" icon={<Type size={15} />}>
+        <TypographyControls value={value} onChange={onChange} showSizing />
+      </ControlGroup>
+      <ControlGroup label="Colour" icon={<Palette size={15} />}>
+        {([
+          ['color', 'Text colour', '#111827', 'Clear text colour'],
+          ['backgroundColor', 'Background', '#ffffff', 'Clear background'],
+        ] as const).map(([key, label, fallback, clearLabel]) => (
+          <div key={key} className={styles.controlRow}>
+            <span className={styles.controlLabel}>{label}</span>
+            <div className={styles.colorCell}>
+              <ColorPicker aria-label={label} value={value[key] ?? fallback} disabledAlpha size="small"
+                onChangeComplete={(color) => onChange({ [key]: color.toHexString().toLowerCase() })} />
+              <span className={styles.clearSlot}>
+                {value[key] && <button type="button" className={styles.clearDot} onClick={() => onChange({ [key]: undefined })} aria-label={clearLabel}>
+                  <RotateCcw size={11} aria-hidden="true" />
+                </button>}
+              </span>
+            </div>
+          </div>
+        ))}
+      </ControlGroup>
+      <SpacingControls value={value} inherited={inherited} onChange={onChange} showPadding />
+    </div>
+  )
+}
+
+function SpacingControls({ value, inherited, onChange, inset = false, showPadding = false }: StyleControlProps & {
+  inset?: boolean
+  showPadding?: boolean
+}) {
+  return (
+    <ControlGroup label="Spacing" icon={<Ruler size={15} />}>
+      <MarginControls value={value} inherited={inherited} onChange={onChange} inset={inset} />
+      {showPadding && (
+        <fieldset className={styles.spacingFields}>
+          <legend className={styles.spacingLegend}>Padding <span>Inside the element</span></legend>
+          <div className={styles.controlGrid}>
+            {([
+              ['paddingTopPt', 'Top'], ['paddingRightPt', 'Right'],
+              ['paddingBottomPt', 'Bottom'], ['paddingLeftPt', 'Left'],
+            ] as const).map(([key, label]) => (
+              <NumberField key={key} label={`${label} (pt)`} ariaLabel={`${label} padding (pt)`}
+                value={value[key]} min={0} max={120} step={1}
+                onChange={(next) => onChange({ [key]: next })} />
+            ))}
+          </div>
+        </fieldset>
+      )}
+    </ControlGroup>
+  )
+}
+
+const MARGIN_FIELDS = [
+  ['marginTopPt', 'Top'], ['marginRightPt', 'Right'],
+  ['marginBottomPt', 'Bottom'], ['marginLeftPt', 'Left'],
+] as const
+
+function MarginControls({ value, inherited, onChange, inset = false }: {
+  value: ElementStyle
+  inherited?: ElementStyle
+  onChange: (patch: ElementStyle) => void
+  inset?: boolean
+}) {
+  const customized = MARGIN_FIELDS.some(([key]) => value[key] !== undefined)
+  return (
+    <fieldset className={styles.spacingFields}>
+      <legend className={styles.spacingLegend}>Margin <span>{inset ? 'Inset from original bounds' : 'Outside the element'}</span></legend>
+      <div className={styles.controlGrid}>
+        {MARGIN_FIELDS.map(([key, label]) => (
+          <NumberField key={key} label={`${label} (pt)`} ariaLabel={`${label} margin (pt)`}
+            value={value[key]} placeholder={String(inherited?.[key] ?? 0)}
+            min={0} max={120} step={1} commitOnBlur
+            onChange={(next) => onChange({ [key]: next })} />
+        ))}
+      </div>
+      {customized && <button type="button" className={styles.inlineReset}
+        onClick={() => onChange({ marginTopPt: undefined, marginRightPt: undefined, marginBottomPt: undefined, marginLeftPt: undefined })}>
+        <RotateCcw size={12} aria-hidden="true" /> Reset margins
+      </button>}
+    </fieldset>
   )
 }
 
@@ -444,7 +558,7 @@ function IconToggle({
 
 /** A number input that keeps "unset" distinct from zero. */
 function NumberField({
-  label, value, min, max, step, onChange,
+  label, value, min, max, step, onChange, commitOnBlur = false, ariaLabel, placeholder = 'Auto',
 }: {
   label: string
   value: number | undefined
@@ -452,25 +566,39 @@ function NumberField({
   max: number
   step: number
   onChange: (next: number | undefined) => void
+  commitOnBlur?: boolean
+  ariaLabel?: string
+  placeholder?: string
 }) {
+  const [draft, setDraft] = useState<string>()
+  const commit = (raw: string) => {
+    if (raw === '') return onChange(undefined)
+    const parsed = Number(raw)
+    if (!Number.isFinite(parsed)) return
+    const next = Math.min(max, Math.max(min, parsed))
+    if (next !== value) onChange(next)
+  }
   return (
     <label className={styles.numberField}>
       <span className={styles.numberLabel}>{label}</span>
       <input
         type="number"
         className={styles.numberInput}
-        value={value ?? ''}
-        placeholder="Auto"
+        value={draft ?? value ?? ''}
+        aria-label={ariaLabel}
+        placeholder={placeholder}
         min={min}
         max={max}
         step={step}
         onChange={(e) => {
-          const raw = e.target.value
-          if (raw === '') return onChange(undefined)
-          const parsed = Number(raw)
-          if (Number.isNaN(parsed)) return
-          onChange(Math.min(max, Math.max(min, parsed)))
+          if (commitOnBlur) setDraft(e.target.value)
+          else commit(e.target.value)
         }}
+        onBlur={() => {
+          if (draft !== undefined) commit(draft)
+          setDraft(undefined)
+        }}
+        onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur() }}
       />
     </label>
   )

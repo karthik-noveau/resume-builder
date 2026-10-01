@@ -21,10 +21,17 @@ export function EntryCard({ id, title, subtitle, isVisible, onToggleVisibility, 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
   const cardRef = useRef<HTMLDivElement | null>(null)
   const isSelected = useEditorStore((state) => state.selectedEntryId === id)
+  const hasFieldFocus = useEditorStore((state) => state.contentFocusTarget !== null)
 
   useEffect(() => {
-    if (isSelected) cardRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' })
-  }, [isSelected])
+    if (!isSelected || hasFieldFocus) return
+    const card = cardRef.current
+    const panel = card?.closest<HTMLElement>('[data-editor-tour-scroll="properties"]')
+    if (card && panel) {
+      panel.scrollTo?.({ top: Math.max(0, panel.scrollTop + card.getBoundingClientRect().top
+        - panel.getBoundingClientRect().top - 72), behavior: 'instant' })
+    }
+  }, [isSelected, hasFieldFocus])
 
   const setCardRef = (node: HTMLDivElement | null) => {
     cardRef.current = node

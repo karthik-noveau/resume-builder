@@ -21,7 +21,7 @@ function renderSidebar() {
 describe('sidebar accordions', () => {
   it('expands Template by default while keeping Page setup collapsed', () => {
     renderSidebar()
-    expect(screen.getByRole('progressbar', { name: 'ATS score' })).toBeVisible()
+    expect(screen.getByRole('progressbar', { name: 'Resume readiness score' })).toBeVisible()
     expect(screen.queryByText('Profile strength')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^Template$/ })).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByRole('button', { name: 'Change template' })).toBeVisible()

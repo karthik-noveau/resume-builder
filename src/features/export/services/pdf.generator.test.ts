@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { PDFDocument } from 'pdf-lib'
 import { PdfGenerator } from './pdf.generator'
 import type { LayoutTree } from '@/shared/types/layout.types'
+import { applyStyleOverrides } from '@/features/templates/engine/style.overrides'
+import { createEmptyResume } from '@/features/resume/utils/resume.factory'
 
 // Mocking dependencies
 vi.mock('pdf-lib', async (importOriginal) => {
@@ -110,6 +112,23 @@ describe('PdfGenerator', () => {
     const bytes = await generator.generate(mockLayoutTree)
     expect(bytes).toBeDefined()
     expect(bytes).toBeInstanceOf(Uint8Array)
+  })
+
+  it('exports the same margin-adjusted text coordinates used by the canvas', async () => {
+    const tree = structuredClone(mockLayoutTree)
+    tree.pages[0].nodes[0].editRef = { kind: 'summary' }
+    await generator.generate(tree)
+    const page = (await PDFDocument.create()).addPage()
+    const before = vi.mocked(page.drawText).mock.calls[0][1]!
+    vi.mocked(page.drawText).mockClear()
+    applyStyleOverrides(tree, {
+      ...createEmptyResume('meridian'),
+      styleOverrides: { elements: { 'summary:text': { marginTopPt: 12, marginLeftPt: 8 } } },
+    })
+    await generator.generate(tree)
+    const after = vi.mocked(page.drawText).mock.calls[0][1]!
+    expect(after.x).toBe(before.x! + 8)
+    expect(after.y).toBe(before.y! - 12)
   })
 
   it('draws stacked display names at the specified line height', async () => {

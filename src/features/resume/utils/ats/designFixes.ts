@@ -20,6 +20,10 @@ const METRIC_KEYS = [
   'paddingRightPt',
   'paddingBottomPt',
   'paddingLeftPt',
+  'marginTopPt',
+  'marginRightPt',
+  'marginBottomPt',
+  'marginLeftPt',
 ] as const satisfies readonly (keyof ElementStyle)[]
 
 function readableText(resume: Resume, tree: LayoutTree, render: Render) {

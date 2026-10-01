@@ -125,11 +125,11 @@
   border: 1px solid rgb(var(--color-divider));
   border-radius: 50%;
   cursor: pointer;
-  transition: transform var(--duration-fast), box-shadow var(--duration-fast);
+  transition: box-shadow var(--duration-fast);
 }
 
 .paletteDot:hover {
-  transform: scale(1.1);
+  box-shadow: 0 0 0 2px rgb(var(--color-primary) / 20%);
 }
 
 /* A ring held off the dot by a surface-coloured gap, so the indicator reads

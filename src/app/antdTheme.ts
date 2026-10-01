@@ -5,6 +5,8 @@ import type { ThemeColors } from '@/shared/types/theme.types'
 /** Maps the app chrome's light/dark palette onto antd's ConfigProvider tokens. */
 function toAntdTokens(colors: ThemeColors): ThemeConfig['token'] {
   return {
+    // Keep menus, tooltips, and drawers stationary when they open.
+    motion: false,
     colorPrimary: colors.primary,
     colorPrimaryHover: colors.primaryHover,
     colorPrimaryActive: colors.primaryActive,

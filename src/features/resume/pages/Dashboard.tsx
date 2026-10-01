@@ -13,7 +13,7 @@ import { ResumeCard } from '../components/ResumeCard/ResumeCard'
 import { ImportResumeModal } from '../components/ImportResumeModal/ImportResumeModal'
 import { DeleteResumeDialog } from '../components/DeleteResumeDialog/DeleteResumeDialog'
 import { useResumeStore } from '@/shared/stores/resume.store'
-import { parseResumeText } from '../utils/resumeParser'
+import { type ParsedResumeData } from '../utils/resumeParser'
 import type { Resume } from '@/shared/types/resume.types'
 import styles from './Dashboard.module.css'
 
@@ -111,13 +111,12 @@ export function Dashboard() {
     await navigate(`/editor/${id}/guided`)
   }
 
-  const handleImport = async (rawText: string) => {
+  const handleImport = async (parsed: ParsedResumeData) => {
     setImporting(true)
     try {
-      const parsed = parseResumeText(rawText)
       const id = await createResumeFromImport(IMPORT_DEFAULT_TEMPLATE_ID, parsed)
       setShowImport(false)
-      toast.success('Imported — we did our best to structure it, please review each section.')
+      toast.success('Resume imported. Your reviewed details are ready to edit.')
       void navigate(`/editor/${id}`)
     } catch {
       toast.error('Failed to import resume')
@@ -129,7 +128,6 @@ export function Dashboard() {
   const handleDuplicate = async (id: string) => {
     try {
       const newId = await duplicateResume(id)
-      toast.success('Resume duplicated')
       void navigate(`/editor/${newId}`)
     } catch {
       toast.error('Failed to duplicate resume')
@@ -277,7 +275,6 @@ export function Dashboard() {
                 onDelete={(id) => setDeleteTarget({ id, title: resume.title })}
                 onRename={async (id, title) => {
                   await renameResume(id, title)
-                  toast.success('Resume renamed')
                 }}
               />
             ))}

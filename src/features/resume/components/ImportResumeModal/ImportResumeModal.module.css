@@ -16,3 +16,65 @@
   padding-top: 8px;
   border-top: 1px solid rgb(var(--color-divider));
 }
+.scrollArea {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: auto;
+  max-height: 65dvh;
+  padding: 2px;
+}
+.fileInput,
+.reviewField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--text-base);
+}
+.fileInput {
+  padding: 16px;
+  border: 1px dashed rgb(var(--color-divider));
+  border-radius: 10px;
+}
+.fileInput span {
+  color: rgb(var(--color-text-secondary));
+  font-size: var(--text-sm);
+}
+.reviewSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: 10px;
+  padding: 16px;
+}
+.reviewSection legend {
+  padding: 0 6px;
+  font-weight: 600;
+}
+.reviewField input,
+.reviewField textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: 8px;
+  color: rgb(var(--color-text-primary));
+  background: rgb(var(--color-surface));
+  font: inherit;
+}
+.reviewField textarea {
+  resize: vertical;
+}
+.error {
+  color: rgb(var(--color-error));
+}
+@media (max-width: 640px) {
+  .reviewField input,
+  .reviewField textarea {
+    font-size: 16px;
+  }
+  .footer {
+    flex-wrap: wrap;
+  }
+}

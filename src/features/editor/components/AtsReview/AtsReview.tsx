@@ -1,4 +1,12 @@
-import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react'
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type SetStateAction,
+} from 'react'
 import { clsx } from 'clsx'
 import { ArrowLeft, ArrowRight, Check, RotateCcw } from 'lucide-react'
 import { toast } from 'sonner'
@@ -55,7 +63,13 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
   const [tab, setTab] = useState<'checks' | 'job'>('checks')
   const [showPassed, setShowPassed] = useState(false)
   const [selected, setSelected] = useState<{ check: AtsCheck; mode: 'edit' | 'fix' } | null>(null)
-  const [job, setJob] = useState(() => readJob(resume.id))
+  const job = resume.jobTarget ?? readJob(resume.id)
+  const setJob = (next: SetStateAction<{ description: string; keywords: string }>) => {
+    const current = useResumeStore.getState().activeResume
+    if (!current || current.id !== resume.id) return
+    const jobTarget = typeof next === 'function' ? next(current.jobTarget ?? job) : next
+    useResumeStore.getState().updateResume({ jobTarget })
+  }
   const { canUndo, handleUndo } = useUndoRedo()
   const formRef = useRef<HTMLDivElement>(null)
   const id = useId()
@@ -89,12 +103,14 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
   const plan = selected?.mode === 'fix' ? plans.get(selected.check.id) : null
 
   useEffect(() => {
-    try {
-      sessionStorage.setItem(jobStorageKey(resume.id), JSON.stringify(job))
-    } catch {
-      /* Optional storage. */
+    // Migrate an existing tab's target once; normal autosave now owns persistence.
+    if (resume.jobTarget) return
+    const previous = readJob(resume.id)
+    if (previous.description || previous.keywords) {
+      const current = useResumeStore.getState().activeResume
+      if (current?.id === resume.id) useResumeStore.getState().updateResume({ jobTarget: previous })
     }
-  }, [job, resume.id])
+  }, [resume.id, resume.jobTarget])
   useEffect(() => {
     if (selected?.mode !== 'edit') return
     const field = (
@@ -109,6 +125,8 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
     const target = field
       ? formRef.current?.querySelector<HTMLElement>(`[name="${field}"]`)
       : formRef.current?.querySelector<HTMLElement>('input, textarea, button')
+    const details = target?.closest('details')
+    if (details) details.open = true
     target?.focus()
   }, [selected])
 
@@ -153,7 +171,7 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
     <Modal
       isOpen
       onClose={onClose}
-      title="ATS review & fixes"
+      title="Resume readiness & job match"
       maxWidth="xl"
       className={styles.modal}
     >
@@ -407,8 +425,8 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
                   <div className={styles.jobInput}>
                     <h3>Compare with a job description</h3>
                     <p>
-                      Check keyword coverage against the role you want. Everything stays in this
-                      browser tab.
+                      Check keyword coverage against the role you want. Your job description and
+                      keywords are saved with this resume on your device.
                     </p>
                     <label htmlFor={`${id}-description`}>Job description</label>
                     <textarea

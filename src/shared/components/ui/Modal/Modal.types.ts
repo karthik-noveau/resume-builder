@@ -4,6 +4,8 @@ export interface ModalProps {
   isOpen: boolean
   onClose: () => void
   title?: string
+  headerActions?: ReactNode
+  centered?: boolean
   children: ReactNode
   className?: string
   /** @default 'md' — maps to max-w-lg (512px) */

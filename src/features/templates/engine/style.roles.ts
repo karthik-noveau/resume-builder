@@ -129,6 +129,7 @@ const TYPE_LABELS: Partial<Record<LayoutNode['type'], string>> = {
 }
 
 function labelForNode(node: LayoutNode): string {
+  if (node.type === 'section' && node.sectionType) return `${title(node.sectionType)} section`
   const ref = node.editRef
   if (ref) {
     switch (ref.kind) {

@@ -121,11 +121,7 @@
 }
 
 .actionArrow {
-  transition: transform 150ms;
-}
-
-.changeButton:hover .actionArrow {
-  transform: translateX(2px);
+  flex-shrink: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

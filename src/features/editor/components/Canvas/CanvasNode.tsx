@@ -1,15 +1,16 @@
-import type { LayoutNode } from '@/shared/types/layout.types'
+import type { EditRef, LayoutNode } from '@/shared/types/layout.types'
 import type { SectionType } from '@/shared/types/resume.types'
 import { SectionErrorBoundary } from '../SectionErrorBoundary'
 import { CanvasLeaf } from './CanvasLeaf'
 import { ptToPx } from './canvas.utils'
 import {
-  CANVAS_HOVER, CANVAS_SELECTED, CANVAS_STYLE_TARGET,
+  CANVAS_SELECTED, CANVAS_STYLE_TARGET,
   CANVAS_STATE_RADIUS, CANVAS_STATE_TRANSITION,
   type CanvasStateStyle,
 } from './canvas.constants'
 import { useEditorStore } from '@/shared/stores/editor.store'
-import { useState } from 'react'
+import { selectCanvasContent } from '../../utils/canvasSelection'
+import styles from './Canvas.module.css'
 
 const LEAF_TYPES = new Set<LayoutNode['type']>([
   'text', 'bullet', 'tag', 'divider', 'link', 'image', 'rect', 'icon',
@@ -23,6 +24,7 @@ interface CanvasNodeProps {
   onSectionClick: (id: string, type: SectionType) => void
   onEntryClick: (entryId: string, type: SectionType) => void
   interactive?: boolean
+  entryContext?: Extract<EditRef, { kind: 'entry' }>
 }
 
 export function CanvasNode({
@@ -32,10 +34,10 @@ export function CanvasNode({
   onSectionClick,
   onEntryClick,
   interactive = true,
+  entryContext,
 }: CanvasNodeProps) {
-  const [hovered, setHovered] = useState(false)
-  const [focused, setFocused] = useState(false)
-  const isStyleTarget = useEditorStore((s) => s.styleTarget?.key === node.styleKey)
+  const styleTargetKey = useEditorStore((s) => s.styleTarget?.key)
+  const isStyleTarget = !!node.styleKey && styleTargetKey === node.styleKey
   // While this element is open for inline editing, the editor draws the only
   // ring. Both drawing one produced two strokes at different radii with a sliver
   // of page between them — the "double border".
@@ -43,11 +45,15 @@ export function CanvasNode({
   // Panels, bands and rules the template paints behind the words. They are
   // selectable and stylable like anything else, but they must never rise above
   // the content sitting on them.
-  const isDecoration = node.type === 'rect' || node.type === 'divider'
+  const isDivider = node.type === 'divider'
+  const isDecoration = node.type === 'rect' || isDivider
   const isSection = node.type === 'section'
   const entryRef = node.type === 'entry' && node.editRef?.kind === 'entry' ? node.editRef : undefined
   const isEntry = entryRef !== undefined
-  const isInteractive = interactive && (isSection || isEntry)
+  const isStyleOnly = LEAF_TYPES.has(node.type) && !!node.styleKey && !node.editRef && !node.panelTarget
+    && !isSection && !isEntry && !node.iconEditable && node.type !== 'image'
+  const isInteractive = interactive && (isSection || isEntry || !!node.editRef || !!node.panelTarget || !!node.styleKey)
+  const target = { key: node.styleKey ?? '', role: node.styleRole ?? null, label: node.styleLabel ?? 'Element' }
   // Editable text leaves are the keyboard targets inside the resume. Keeping
   // their entry/section containers mouse-selectable but out of the tab order
   // prevents nested interactive controls. The properties sidebar remains the
@@ -58,15 +64,13 @@ export function CanvasNode({
 
   // One state at a time, strongest first: the element the inspector points at
   // outranks the block it sits in, which outranks a passing cursor.
-  const state: CanvasStateStyle | undefined = isEditingHere
+  const state: CanvasStateStyle | undefined = !interactive || isEditingHere
     ? undefined
     : isStyleTarget
     ? CANVAS_STYLE_TARGET
-    : isSelected
+    : isSelected && !styleTargetKey
       ? CANVAS_SELECTED
-      : (hovered || focused) && isInteractive
-        ? CANVAS_HOVER
-        : undefined
+      : undefined
 
   const positionStyle = {
     position: 'absolute' as const,
@@ -74,13 +78,13 @@ export function CanvasNode({
     top: `${ptToPx(node.yPt)}px`,
     width: `${ptToPx(node.widthPt)}px`,
     height: node.heightPt > 0 ? `${ptToPx(node.heightPt)}px` : undefined,
-    outline: state?.outline,
-    outlineOffset: state?.outlineOffset,
-    backgroundColor: state?.background,
-    boxShadow: state?.shadow,
+    outline: isDivider ? undefined : state?.outline,
+    outlineOffset: isDivider ? undefined : state?.outlineOffset,
+    backgroundColor: isDivider ? undefined : state?.background,
+    boxShadow: isDivider ? undefined : state?.shadow,
     // Only while a state is showing: a radius on every node would round the
     // page's own decorative rects and bands.
-    borderRadius: state ? CANVAS_STATE_RADIUS : undefined,
+    borderRadius: state && !isDivider ? CANVAS_STATE_RADIUS : undefined,
     // Selecting is the only thing a press does on the canvas now; reordering
     // lives in the sidebar's structure tree.
     cursor: node.styleKey && isInteractive ? 'pointer' : undefined,
@@ -104,7 +108,13 @@ export function CanvasNode({
     || (node.editRef?.kind === 'section-title' && node.editRef.sectionType === 'contact')
     || node.panelTarget === 'personal-info'
 
-  const activate = interactive && isPersonalInfo
+  const activate = interactive && isStyleOnly && !isDecoration && entryContext
+    ? () => onEntryClick(entryContext.entryId, entryContext.sectionType)
+    : interactive && isStyleOnly
+    ? () => useEditorStore.getState().openStyleInspector(target)
+    : interactive && node.editRef && node.editRef.kind !== 'entry'
+    ? () => selectCanvasContent(node.editRef!)
+    : interactive && isPersonalInfo
     ? () => useEditorStore.getState().openPersonalInfo(
         node.editRef?.kind === 'personal-info' ? node.editRef.field
           : node.editRef?.kind === 'section-title' ? 'contactTitle'
@@ -119,7 +129,7 @@ export function CanvasNode({
   const handleClick = activate
     ? (e: React.MouseEvent) => {
         e.stopPropagation()
-        activate()
+        activate?.()
       }
     : undefined
 
@@ -134,11 +144,7 @@ export function CanvasNode({
    */
   const handleStyleClickCapture = interactive && node.styleKey
     ? () => {
-        useEditorStore.getState().selectStyleTarget({
-          key: node.styleKey!,
-          role: node.styleRole ?? null,
-          label: node.styleLabel ?? 'Element',
-        })
+        useEditorStore.getState().selectStyleTarget(target)
       }
     : undefined
 
@@ -147,6 +153,7 @@ export function CanvasNode({
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
           e.stopPropagation()
+          handleStyleClickCapture?.()
           activate()
         }
       }
@@ -161,14 +168,15 @@ export function CanvasNode({
   const content = (
     <div
       style={positionStyle}
+      className={styles.canvasNode}
       data-style-key={node.styleKey}
+      data-canvas-target={isInteractive ? '' : undefined}
+      data-canvas-label={isInteractive ? target.label : undefined}
+      data-canvas-selected={state ? '' : undefined}
+      data-canvas-decoration={isDecoration ? node.type : undefined}
       onClick={handleClick}
       onClickCapture={handleStyleClickCapture}
       onKeyDown={handleKeyDown}
-      onMouseEnter={isInteractive ? () => setHovered(true) : undefined}
-      onMouseLeave={isInteractive ? () => setHovered(false) : undefined}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
       aria-label={ariaLabel}
     >
       {LEAF_TYPES.has(node.type) ? (
@@ -183,8 +191,17 @@ export function CanvasNode({
             onSectionClick={onSectionClick}
             onEntryClick={onEntryClick}
             interactive={interactive}
+            entryContext={entryRef ?? entryContext}
           />
         ))
+      )}
+      {interactive && isStyleOnly && (
+        <button
+          type="button"
+          className={node.type === 'divider' ? styles.dividerHitTarget : styles.styleHitTarget}
+          data-vertical={node.type === 'divider' && node.heightPt > node.widthPt ? '' : undefined}
+          aria-label={`Edit ${target.label.toLowerCase()}`}
+        />
       )}
     </div>
   )

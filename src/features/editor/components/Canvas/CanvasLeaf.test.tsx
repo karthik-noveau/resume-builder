@@ -146,6 +146,30 @@ describe('CanvasLeaf inline editing', () => {
     expect(screen.getByRole('button', { name: 'Edit fullName' })).toBeInTheDocument()
   })
 
+  it('allows the next edit to save after a previous edit was cancelled', () => {
+    render(<CanvasLeaf node={textNode} />)
+    fireEvent.doubleClick(screen.getByRole('button', { name: 'Edit fullName' }))
+    fireEvent.keyDown(screen.getByLabelText('Edit fullName'), { key: 'Escape' })
+    fireEvent.doubleClick(screen.getByRole('button', { name: 'Edit fullName' }))
+    const editor = screen.getByLabelText('Edit fullName')
+    editor.textContent = 'Saved after cancellation'
+    fireEvent.blur(editor)
+    expect(useResumeStore.getState().activeResume?.personalInfo.fullName).toBe('Saved after cancellation')
+  })
+
+  it('keeps the caret in place when the canvas rerenders during typing', () => {
+    const { rerender } = render(<CanvasLeaf node={textNode} />)
+    fireEvent.doubleClick(screen.getByRole('button', { name: 'Edit fullName' }))
+    const editor = screen.getByLabelText('Edit fullName')
+    const range = document.createRange()
+    range.setStart(editor.firstChild!, 3)
+    range.collapse(true)
+    window.getSelection()?.removeAllRanges()
+    window.getSelection()?.addRange(range)
+    rerender(<CanvasLeaf node={{ ...textNode, content: 'Updated display' }} />)
+    expect(window.getSelection()?.anchorOffset).toBe(3)
+  })
+
   it('opens Personal Info instead of inline editing for a panel-linked value', () => {
     render(<CanvasLeaf node={{ ...textNode, editRef: undefined, panelTarget: 'personal-info', content: 'alex@example.com' }} />)
 

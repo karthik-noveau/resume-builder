@@ -16,7 +16,7 @@ describe('MockDataButton', () => {
   it('fills only personal details, preserves other sections and design, and enables autosave and undo', async () => {
     const original = useResumeStore.getState().activeResume!
     render(<MockDataButton step="personal" />)
-    await userEvent.click(screen.getByRole('button', { name: 'Use mock data' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Fill with example' }))
 
     const { activeResume, isDirty } = useResumeStore.getState()
     expect(activeResume?.personalInfo.fullName).toBe('Alex Morgan')
@@ -35,7 +35,7 @@ describe('MockDataButton', () => {
     useResumeStore.getState().updatePersonalInfo({ fullName: 'Jordan Rivera' })
     const original = useResumeStore.getState().activeResume
     render(<MockDataButton step="personal" />)
-    await userEvent.click(screen.getByRole('button', { name: 'Use mock data' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Fill with example' }))
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
     expect(useResumeStore.getState().activeResume).toEqual(original)
@@ -44,9 +44,9 @@ describe('MockDataButton', () => {
   it('replaces existing content only after confirmation', async () => {
     useResumeStore.getState().updateSummary('My own summary')
     render(<MockDataButton step="summary" />)
-    await userEvent.click(screen.getByRole('button', { name: 'Use mock data' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Fill with example' }))
     expect(useResumeStore.getState().activeResume?.summary.content).toBe('My own summary')
-    await userEvent.click(await screen.findByRole('button', { name: 'Replace with mock data' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Replace with example' }))
     expect(useResumeStore.getState().activeResume?.personalInfo.fullName).toBe('')
     expect(useResumeStore.getState().activeResume?.summary.content).not.toBe('My own summary')
     expect(useEditorStore.getState().undoStack[0].summary.content).toBe('My own summary')
@@ -57,8 +57,8 @@ describe('MockDataButton', () => {
       const original = createSampleResume('atlas')
       useResumeStore.setState({ activeResume: original })
       render(<MockDataButton step={step} />)
-      await userEvent.click(screen.getByRole('button', { name: 'Use mock data' }))
-      await userEvent.click(await screen.findByRole('button', { name: 'Replace with mock data' }))
+      await userEvent.click(screen.getByRole('button', { name: 'Fill with example' }))
+      await userEvent.click(await screen.findByRole('button', { name: 'Replace with example' }))
 
       const updated = useResumeStore.getState().activeResume!
       const key = step === 'personal' ? 'personalInfo' : step
@@ -71,7 +71,7 @@ describe('MockDataButton', () => {
   it('does not ask to replace another section when the current section is blank', async () => {
     useResumeStore.getState().updatePersonalInfo({ fullName: 'Jordan Rivera' })
     render(<MockDataButton step="education" />)
-    await userEvent.click(screen.getByRole('button', { name: 'Use mock data' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Fill with example' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(useResumeStore.getState().activeResume?.personalInfo.fullName).toBe('Jordan Rivera')
     expect(useResumeStore.getState().activeResume?.education.length).toBeGreaterThan(0)

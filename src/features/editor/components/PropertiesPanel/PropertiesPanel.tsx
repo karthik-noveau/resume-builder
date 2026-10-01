@@ -42,7 +42,8 @@ function findSectionTitleEditRef(layoutTree: LayoutTree | null, sectionType: Sec
 
 export function PropertiesPanel({ resume, layoutTree, selectedSectionType, onClearSelection, tourStep }: PropertiesPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null)
-  const [inspectorMode, setInspectorMode] = useState<'content' | 'design'>('content')
+  const inspectorMode = useEditorStore((state) => state.inspectorMode)
+  const setInspectorMode = useEditorStore((state) => state.setInspectorMode)
   const [globalOpen, setGlobalOpen] = useState(false)
   const [selectedOpen, setSelectedOpen] = useState(true)
   // Tour previews are temporary; the user's tab and accordion choices stay intact.
@@ -50,17 +51,23 @@ export function PropertiesPanel({ resume, layoutTree, selectedSectionType, onCle
     : tourStep === 'global-design' || tourStep === 'selected-design' ? 'design' : inspectorMode
   const personalInfoOpenRequest = useEditorStore((state) => state.personalInfoOpenRequest)
   const personalInfoFocusTarget = useEditorStore((state) => state.personalInfoFocusTarget)
+  const contentFocusTarget = useEditorStore((state) => state.contentFocusTarget)
+  const contentFocusRequest = useEditorStore((state) => state.contentFocusRequest)
+  const designOpenRequest = useEditorStore((state) => state.designOpenRequest)
   const contactTitleEditRef = findSectionTitleEditRef(layoutTree, 'contact')
   const selectedTitleEditRef = selectedSectionType && selectedSectionType !== 'custom'
     ? findSectionTitleEditRef(layoutTree, selectedSectionType)
     : undefined
 
-  // The tab is the user's choice and nothing but another tab click changes it.
-  // Selecting something in the builder used to force the panel back to Content,
-  // which meant styling anything was a two-step loop: click the element, then
-  // click back to Design — and the click that took you away was the same one
-  // that chose what to style. Both tabs track the selection anyway: Content
-  // opens its form, Design points at it as the style target.
+  useEffect(() => {
+    if (!designOpenRequest) return
+    setSelectedOpen(true)
+    setGlobalOpen(false)
+    panelRef.current?.scrollTo?.({ top: 0, behavior: 'instant' })
+  }, [designOpenRequest])
+
+  // Content selections preserve the user's tab. Decorative elements explicitly
+  // open Design because they have no content form.
 
   // Scrolling back to the top belongs to Content, where a new selection swaps
   // the form out entirely. In Design the controls stay put and only their
@@ -68,27 +75,53 @@ export function PropertiesPanel({ resume, layoutTree, selectedSectionType, onCle
   useEffect(() => {
     const panel = panelRef.current
     if (activeMode !== 'content' || !panel || tourStep) return
+    const focusField = (field: HTMLElement) => {
+      field.closest('details')?.setAttribute('open', '')
+      field.focus({ preventScroll: true })
+      const rect = field.getBoundingClientRect()
+      const headerHeight = panel.querySelector('header')?.getBoundingClientRect().height ?? 0
+      panel.scrollTo?.({
+        top: Math.max(0, panel.scrollTop + rect.top - panel.getBoundingClientRect().top
+          - Math.max(headerHeight + 24, (panel.clientHeight - rect.height) / 2)),
+        behavior: 'instant',
+      })
+    }
+    if (contentFocusTarget) {
+      const target = contentFocusTarget
+      const entryId = 'entryId' in target ? target.entryId
+        : target.kind === 'custom-section-title' ? target.sectionId : null
+      const scope = entryId
+        ? Array.from(panel.querySelectorAll<HTMLElement>('[data-entry-id]')).find((entry) => entry.dataset.entryId === entryId)
+        : panel
+      const name = target.kind === 'entry-field' ? target.field
+        : target.kind === 'summary' ? 'content'
+        : target.kind === 'section-title' ? 'sectionTitle'
+        : target.kind === 'custom-section-title' ? 'title' : null
+      let field = name ? Array.from(scope?.querySelectorAll<HTMLElement>('[name]') ?? [])
+        .find((input) => input.getAttribute('name') === name) : undefined
+      if (target.kind === 'entry-list-item') {
+        field = scope?.querySelector<HTMLElement>(`[data-list-field="${target.field}"] [data-list-index="${target.index}"] textarea`) ?? undefined
+      }
+      field ??= scope?.querySelector<HTMLElement>('input:not([type="hidden"]):not(:disabled), textarea:not(:disabled)') ?? undefined
+      if (field) {
+        focusField(field)
+        return
+      }
+    }
     if (!selectedSectionType && personalInfoFocusTarget) {
       const group = panel.querySelector(`[data-personal-info-field="${personalInfoFocusTarget}"]`)
+      const details = group?.closest('details')
+      if (details) details.open = true
       const field = panel.querySelector<HTMLElement>(`input[name="${personalInfoFocusTarget}"]`)
         ?? group?.querySelector<HTMLElement>('input:checked')
         ?? group?.querySelector<HTMLElement>('input:not([type="file"]):not(:disabled), button:not(:disabled)')
       if (field) {
-        field.focus({ preventScroll: true })
-        // Scroll only the inspector, keeping the clicked resume content still.
-        // Immediate positioning avoids racing the old scroll-to-top animation.
-        const rect = field.getBoundingClientRect()
-        const headerHeight = panel.querySelector('header')?.getBoundingClientRect().height ?? 0
-        panel.scrollTo?.({
-          top: Math.max(0, panel.scrollTop + rect.top - panel.getBoundingClientRect().top
-            - Math.max(headerHeight + 24, (panel.clientHeight - rect.height) / 2)),
-          behavior: 'instant',
-        })
+        focusField(field)
         return
       }
     }
     panel.scrollTo?.({ top: 0, behavior: 'instant' })
-  }, [activeMode, selectedSectionType, personalInfoOpenRequest, personalInfoFocusTarget, tourStep])
+  }, [activeMode, selectedSectionType, personalInfoOpenRequest, personalInfoFocusTarget, contentFocusTarget, contentFocusRequest, tourStep])
 
   return (
     <div ref={panelRef} className={clsx(styles.root, mobile.controls)} data-editor-tour-scroll="properties">
@@ -202,7 +235,7 @@ export function PropertiesPanel({ resume, layoutTree, selectedSectionType, onCle
             open={tourStep === 'selected-design' || (tourStep !== 'global-design' && selectedOpen)}
             onToggle={() => setSelectedOpen((v) => !v)}
           >
-            <SelectedElementStyle resume={resume} />
+            <SelectedElementStyle resume={resume} layoutTree={layoutTree} />
           </DesignAccordion>
         </div>
       )}

@@ -1,5 +1,6 @@
-import { Columns2, RectangleVertical, Search } from 'lucide-react'
+import { Columns2, RectangleVertical, Search, SlidersHorizontal } from 'lucide-react'
 import { clsx } from 'clsx'
+import { Select } from '@/shared/components/ui/Select/Select'
 import {
   DEFAULT_TEMPLATE_FILTERS,
   hasTemplateFilters,
@@ -59,12 +60,29 @@ export function TemplateFilters({
           </button>
         ))}
       </div>
+      <div className={styles.styleFilter}>
+        <Select
+          label="Style"
+          hideLabel
+          icon={<SlidersHorizontal size={14} aria-hidden="true" />}
+          className={styles.styleSelect}
+          value={value.style ?? 'All'}
+          onChange={(event) =>
+            onChange({ ...value, style: event.target.value as TemplateFilterValues['style'] })
+          }
+          options={[
+            { value: 'All', label: 'All styles' },
+            { value: 'Simple', label: 'Simple' },
+            { value: 'Ultra Modern', label: 'Ultra Modern' },
+          ]}
+        />
+      </div>
       <div className={styles.searchWrap}>
         <Search className={styles.searchIcon} size={16} aria-hidden="true" />
         <input
           type="search"
           aria-label="Search templates"
-          placeholder="Search templates..."
+          placeholder="Search…"
           value={value.search}
           onChange={(event) => onChange({ ...value, search: event.target.value })}
           className={styles.searchInput}

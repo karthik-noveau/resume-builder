@@ -94,6 +94,18 @@ describe('ready-to-apply design fixes', () => {
     expect(planAtsFix('readable-text', resume, ALL_TEMPLATES)).toBeNull()
   })
 
+  it('can reset excessive margins while preserving colors and content', () => {
+    const resume = createSampleResume('experienced-icon-minimal')
+    resume.styleOverrides = { roles: { body: { marginTopPt: 120, marginBottomPt: 120, color: '#234567' } } }
+    expect(inspectAtsLayout(render(resume)).outside.length).toBeGreaterThan(0)
+    const plan = planAtsFix('page-bounds', resume, ALL_TEMPLATES)!
+    expect(plan).not.toBeNull()
+    const fixed = { ...resume, ...plan.patch }
+    expect(inspectAtsLayout(render(fixed)).outside).toHaveLength(0)
+    expect(fixed.styleOverrides?.roles?.body?.color).toBe('#234567')
+    expect(fixed.experience).toEqual(resume.experience)
+  })
+
   it('connects design warnings to the corresponding fixes and handles unavailable templates', () => {
     const resume = createSampleResume('mosaic')
     const report = evaluateAts(getTemplateById(resume.templateId)!, resume, render(resume))

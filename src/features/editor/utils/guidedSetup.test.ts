@@ -5,7 +5,7 @@ import { getGuidedMockPatch, getGuidedStepErrors, hasGuidedStepContent, type Gui
 const steps: GuidedStep[] = ['personal', 'summary', 'experience', 'education', 'skills']
 
 describe('guided setup requirements', () => {
-  it.each(steps)('requires content in the %s step, and its mock data satisfies the requirements', (step) => {
+  it.each(steps)('requires %s content and accepts complete example entries', (step) => {
     const resume = createEmptyResume('meridian')
     expect(getGuidedStepErrors(resume, step).length).toBeGreaterThan(0)
     expect(hasGuidedStepContent(resume, step)).toBe(false)

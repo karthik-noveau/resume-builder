@@ -1,12 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { Eye, MousePointer2 } from 'lucide-react'
 import type { LayoutTree } from '@/shared/types/layout.types'
 import type { SectionType } from '@/shared/types/resume.types'
 import { CanvasPage } from './CanvasPage'
+import { CanvasElementLabel } from './CanvasElementLabel'
 import { PageIndicator } from './PageIndicator'
 import { CANVAS_PAGE_GAP_PX, PAGE_DIMENSIONS_PX } from './canvas.constants'
 import { Skeleton } from '@/shared/components/ui/Skeleton/Skeleton'
 import { EditorErrorBoundary } from '../EditorErrorBoundary'
 import { useEditorStore } from '@/shared/stores/editor.store'
+import { findStyleNode } from '../../utils/findStyleNode'
 import styles from './Canvas.module.css'
 
 interface CanvasProps {
@@ -70,6 +73,11 @@ export function Canvas({
   const activePage = useEditorStore((s) => s.activePage)
   const setActivePage = useEditorStore((s) => s.setActivePage)
   const pageCount = layoutTree?.pages.length ?? 0
+  const [inspecting, setInspecting] = useState(true)
+  const [elementLabel, setElementLabel] = useState<string | null>(null)
+  const editingKey = useEditorStore((s) => s.editingKey)
+  const styleTarget = useEditorStore((s) => s.styleTarget)
+  const selectedNode = useMemo(() => findStyleNode(layoutTree, styleTarget?.key), [layoutTree, styleTarget?.key])
 
   /**
    * Shrink-to-fit factor for viewports narrower than a page. An A4 page is
@@ -155,11 +163,26 @@ export function Canvas({
 
   return (
     <div className={styles.viewport}>
+      <div className={styles.canvasToolbar} role="toolbar" aria-label="Canvas editing controls">
+        <div className={styles.canvasContext}>
+          {inspecting ? <MousePointer2 size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}
+          <span>{inspecting ? selectedNode?.styleLabel ?? elementLabel ?? 'Click content to edit' : 'Resume preview'}</span>
+        </div>
+        <button
+          type="button"
+          className={styles.previewToggle}
+          aria-label="Clean preview"
+          aria-pressed={!inspecting}
+          onClick={() => setInspecting((value) => !value)}
+        >
+          <Eye size={15} aria-hidden="true" /> Clean preview
+        </button>
+      </div>
       <div
         ref={containerRef}
         data-editor-tour="canvas"
         className={styles.scrollArea}
-        onClick={onCanvasClick}
+        onClick={inspecting ? onCanvasClick : undefined}
         aria-label="Resume canvas"
         tabIndex={0}
       >
@@ -177,13 +200,14 @@ export function Canvas({
           <div
             ref={contentRef}
             style={{
+              '--canvas-scale': scale,
               transform: `scale(${scale})`,
               transformOrigin: 'top left',
               display: 'flex',
               flexDirection: 'column',
               gap: `${CANVAS_PAGE_GAP_PX}px`,
               width: 'max-content',
-            }}
+            } as CSSProperties}
             onClick={(e) => e.stopPropagation()}
           >
             <EditorErrorBoundary>
@@ -202,6 +226,8 @@ export function Canvas({
                     selectedEntryId={selectedEntryId}
                     onSectionClick={onSectionClick}
                     onEntryClick={onEntryClick}
+                    onBackgroundClick={onCanvasClick}
+                    interactive={inspecting}
                   />
                 </div>
               ))
@@ -212,6 +238,9 @@ export function Canvas({
           </div>
         </div>
       </div>
+
+      {inspecting && !editingKey && <CanvasElementLabel canvasRef={containerRef} layoutTree={layoutTree} scale={scale}
+        selectionKey={styleTarget?.key ?? selectedEntryId ?? selectedSectionId ?? ''} onLabelChange={setElementLabel} />}
 
       {pageCount > 1 && (
         <PageIndicator

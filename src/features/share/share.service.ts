@@ -101,6 +101,7 @@ export async function createShareLink(
   if (typeof CompressionStream === 'undefined')
     throw new Error('Use a current browser to create a share link.')
   const snapshot = structuredClone(resume)
+  delete snapshot.jobTarget
   const photo = snapshot.personalInfo.profileImage
   const asset = photo && !getBuiltinImageUrl(photo) ? await db.images.get(photo) : undefined
   if (photo && !getBuiltinImageUrl(photo) && !asset)

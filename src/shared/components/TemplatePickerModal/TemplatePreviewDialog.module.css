@@ -1,0 +1,271 @@
+.dialog:global(.ant-modal) {
+  top: 0;
+  padding-bottom: 0;
+}
+
+.dialog:global(.ant-modal) :global(.ant-modal-container) {
+  display: flex;
+  flex-direction: column;
+  height: min(860px, calc(var(--app-viewport-height, 100dvh) - 48px));
+  padding: 0;
+  overflow: hidden;
+  background: rgb(var(--color-surface));
+  border-radius: var(--radius-xl);
+}
+
+.dialog:global(.ant-modal) :global(.ant-modal-header) {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 16px 72px 10px 24px;
+  background: rgb(var(--color-surface));
+}
+
+.dialog :global(.ant-modal-title) {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.dialog:global(.ant-modal) :global(.ant-modal-close) {
+  top: 14px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+}
+
+.dialog:global(.ant-modal) :global(.ant-modal-body) {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.root {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-weight: 400;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: rgb(var(--color-text-secondary));
+  font-size: var(--text-sm);
+}
+
+.pagination > span {
+  padding-inline: 4px;
+  white-space: nowrap;
+}
+
+.zoomControls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fitButton:global(.ant-btn) {
+  height: 36px;
+  padding-inline: 14px;
+  border-radius: 8px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.fitButton:global(.ant-btn)[aria-pressed='true'] {
+  color: rgb(var(--color-primary));
+  background: rgb(var(--color-primary) / 4%);
+}
+
+.zoomButtons {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: 8px;
+  background: rgb(var(--color-surface));
+}
+
+.zoomButton:global(.ant-btn) {
+  width: 36px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.zoomButton:global(.ant-btn):focus-visible {
+  outline-offset: -3px;
+}
+
+.zoomValue {
+  display: grid;
+  place-items: center;
+  min-width: 52px;
+  border-inline: 1px solid rgb(var(--color-divider));
+  font-size: var(--text-sm);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: rgb(var(--color-text-primary));
+  white-space: nowrap;
+}
+
+.iconButton:global(.ant-btn) {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 7px;
+}
+
+.paper {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable both-edges;
+  padding: 28px;
+  background: rgb(var(--color-background));
+}
+
+.paper > div {
+  margin-inline: auto;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 6%), 0 8px 24px rgb(0 0 0 / 8%);
+}
+
+.paper:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: -2px;
+}
+
+.footer {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 16px 24px;
+  border-top: 1px solid rgb(var(--color-divider) / 65%);
+}
+
+.details {
+  flex-shrink: 0;
+  min-width: 0;
+  padding: 0 24px 16px;
+  border-bottom: 1px solid rgb(var(--color-divider) / 65%);
+}
+
+.description {
+  color: rgb(var(--color-text-secondary));
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 0;
+  margin-top: 6px;
+  color: rgb(var(--color-text-muted));
+  font-size: var(--text-xs);
+}
+
+.meta > span + span::before {
+  content: '·';
+  padding-inline: 8px;
+}
+
+.footerActions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.footerActions :global(.ant-btn) {
+  height: 40px;
+}
+
+.error {
+  flex-shrink: 0;
+  padding: 12px 24px;
+  color: rgb(var(--color-error));
+}
+
+@media (max-width: 1023px), (max-height: 599px) {
+  .dialog:global(.ant-modal) {
+    top: 0;
+    padding-bottom: 0;
+  }
+
+  .dialog:global(.ant-modal) :global(.ant-modal-container) {
+    height: calc(var(--app-viewport-height, 100dvh) - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+
+  .dialog:global(.ant-modal) :global(.ant-modal-close) {
+    top: 8px;
+    right: 8px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .iconButton:global(.ant-btn),
+  .fitButton:global(.ant-btn),
+  .footerActions :global(.ant-btn) {
+    min-width: 44px;
+    height: 44px;
+  }
+
+  .zoomButton:global(.ant-btn) {
+    width: 44px;
+    height: 42px;
+  }
+}
+
+@media (max-width: 639px) {
+  .dialog:global(.ant-modal) :global(.ant-modal-header) {
+    padding: 16px 16px 12px;
+  }
+
+  .dialog :global(.ant-modal-title) > div > span {
+    padding-right: 40px;
+  }
+
+  .controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .details {
+    padding: 0 16px 14px;
+  }
+
+  .paper {
+    padding: 16px;
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+
+  .footerActions {
+    width: 100%;
+  }
+
+  .footerActions :global(.ant-btn) {
+    flex: 1;
+    padding-inline: 10px;
+  }
+}

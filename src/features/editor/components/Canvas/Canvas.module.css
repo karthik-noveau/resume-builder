@@ -1,14 +1,15 @@
 .viewport {
   position: relative;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .scrollArea {
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   overflow: auto;
   background-color: rgb(var(--color-canvas));
-  background-image: radial-gradient(rgb(var(--color-primary) / 15%) 0.7px, transparent 0.7px);
-  background-size: 20px 20px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -24,26 +25,16 @@
   box-shadow: var(--shadow-level-2);
 }
 
-/* A hover here sits inside a block that is already showing its own state, so it
-   stays a whisper: a wash and a hairline, no drop shadow. Three cues stacked on
-   one line of text was what made the canvas feel like a debug view. */
+/* The outer node owns hover and selection; leaves only add keyboard focus. */
 .editableLeaf {
   position: relative;
-  /* Inherits the node's grab. A text caret here would promise that clicking
-     places one, which it no longer does — editing is a double click. */
-  cursor: inherit;
+  cursor: pointer;
   border-radius: 4px;
   outline: 1px solid transparent;
   outline-offset: 2px;
   transition:
     background-color var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1),
     outline-color var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.editableLeaf:hover {
-  z-index: 20;
-  outline-color: rgb(var(--color-primary) / 20%);
-  background-color: rgb(var(--color-primary) / 5%);
 }
 
 /* Keyboard focus is a commitment, not a passing cursor, so it reads closer to
@@ -54,55 +45,11 @@
   background-color: rgb(var(--color-primary) / 6%);
 }
 
-.editableHint {
-  position: absolute;
-  top: -23px;
-  right: 0;
-  z-index: 30;
-  padding: 3px 7px;
-  border: 1px solid rgb(var(--color-primary) / 16%);
-  border-radius: var(--radius-pill);
-  background: rgb(var(--color-surface) / 96%);
-  color: rgb(var(--color-primary));
-  box-shadow: 0 2px 8px rgb(15 23 42 / 8%);
-  backdrop-filter: blur(6px);
-  font-family: Inter, sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: 0;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(3px) scale(0.96);
-  transform-origin: bottom right;
-  transition: opacity var(--duration-fast) ease, transform var(--duration-fast) ease;
-  white-space: nowrap;
-}
-
-.editableLeaf:hover .editableHint,
-.editableLeaf:focus-visible .editableHint {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
 /* Keep the template's measured title width intact. Reserving inline space for
    editor chrome made short headings wrap and invalidated the renderer's layout
    measurements. The affordance floats above the title only on interaction. */
 .editableSectionTitle {
   box-sizing: border-box;
-}
-
-.editableSectionTitle .editableHint {
-  top: -23px;
-  right: 0;
-  padding: 3px 7px;
-  opacity: 0;
-  transform: translateY(3px) scale(0.96);
-}
-
-.editableSectionTitle:hover .editableHint,
-.editableSectionTitle:focus-visible .editableHint {
-  transform: translateY(0) scale(1);
 }
 
 /* The only ring on screen while typing — the enclosing node stands its own down
@@ -138,8 +85,7 @@
   outline-offset: 2px;
   background: transparent;
   color: inherit;
-  /* Draggable like everything else on the canvas. */
-  cursor: inherit;
+  cursor: pointer;
   text-align: inherit;
   transition: background-color var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1), outline-color var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -156,14 +102,6 @@
   border-radius: inherit;
 }
 
-.panelLinkedLeaf:hover,
-.panelLinkedIcon:hover,
-.panelLinkedImage:hover {
-  z-index: 20;
-  outline-color: rgb(var(--color-primary) / 20%);
-  background-color: rgb(var(--color-primary) / 5%);
-}
-
 .panelLinkedLeaf:focus-visible,
 .panelLinkedIcon:focus-visible,
 .panelLinkedImage:focus-visible {
@@ -172,43 +110,132 @@
   background-color: rgb(var(--color-primary) / 6%);
 }
 
-.panelLinkedHint {
-  position: absolute;
-  top: -23px;
-  right: 0;
-  z-index: 30;
-  padding: 3px 7px;
-  border: 1px solid rgb(var(--color-primary) / 16%);
-  border-radius: var(--radius-pill);
-  background: rgb(var(--color-surface) / 96%);
-  color: rgb(var(--color-primary));
-  box-shadow: 0 2px 8px rgb(15 23 42 / 8%);
-  backdrop-filter: blur(6px);
-  font-family: Inter, sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  line-height: 1.2;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(3px) scale(0.96);
-  transform-origin: bottom right;
-  transition: opacity var(--duration-fast) ease, transform var(--duration-fast) ease;
-  white-space: nowrap;
+.canvasToolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 46px;
+  padding: 6px 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgb(var(--color-divider));
+  background: rgb(var(--color-surface));
+  color: rgb(var(--color-text-secondary));
+  font-size: var(--text-sm);
 }
 
-.panelLinkedLeaf:hover .panelLinkedHint,
-.panelLinkedLeaf:focus-visible .panelLinkedHint {
-  opacity: 1;
-  transform: translateY(0) scale(1);
+.canvasContext {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 1 auto;
+  margin-left: auto;
+  min-width: 0;
+}
+
+.canvasContext svg { flex-shrink: 0; }
+.canvasContext span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.canvasToolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 8px;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: rgb(var(--color-text-secondary));
+  cursor: pointer;
+}
+
+.canvasToolbar button:hover { background: rgb(var(--color-surface-elevated)); color: rgb(var(--color-text-primary)); }
+.canvasToolbar button:focus-visible { outline: 2px solid rgb(var(--color-primary)); outline-offset: 2px; }
+.canvasToolbar .previewToggle { border-color: rgb(var(--color-divider)); }
+.canvasToolbar .previewToggle[aria-pressed='true'] { background: rgb(var(--color-primary) / 8%); color: rgb(var(--color-primary)); border-color: rgb(var(--color-primary) / 35%); }
+
+/* Only the deepest target under the pointer gets a hover outline. */
+.canvasNode[data-canvas-target]:hover:not(:has([data-canvas-target]:hover)):not([data-canvas-selected]):not([data-canvas-decoration='divider']) {
+  outline: 1px solid rgb(var(--color-primary) / 40%);
+  outline-offset: 3px;
+  border-radius: 3px;
+  background-color: rgb(var(--color-primary) / 2%);
+}
+
+/* Trace the stroke itself without the padded frame used for text fields. */
+.canvasNode[data-canvas-decoration='divider'][data-canvas-target]:hover,
+.canvasNode[data-canvas-decoration='divider'][data-canvas-selected],
+.canvasNode[data-canvas-decoration='divider']:has(> .dividerHitTarget:focus-visible) {
+  outline: calc(1px / var(--canvas-scale, 1)) solid rgb(var(--color-primary) / 65%);
+  outline-offset: 0;
+  border-radius: 0;
+}
+
+.elementLabel {
+  position: absolute;
+  z-index: 30;
+  max-width: min(220px, calc(100% - 16px));
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: rgb(var(--color-primary));
+  color: white;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.styleHitTarget,
+.dividerHitTarget {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dividerHitTarget[data-vertical] {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  right: auto;
+  min-height: 0;
+  min-width: calc(14px / var(--canvas-scale, 1));
+  transform: translateX(-50%);
+}
+
+.dividerHitTarget {
+  top: 50%;
+  bottom: auto;
+  min-height: calc(14px / var(--canvas-scale, 1));
+  transform: translateY(-50%);
+}
+
+.styleHitTarget:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 2px;
+}
+
+.dividerHitTarget:focus-visible { outline: none; }
+
+@media (max-width: 1023px) {
+  .canvasToolbar button { min-height: 40px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .editableLeaf,
-  .editableHint,
   .panelLinkedLeaf,
   .panelLinkedIcon,
-  .panelLinkedImage,
-  .panelLinkedHint {
+  .panelLinkedImage {
     transition: none;
   }
 }

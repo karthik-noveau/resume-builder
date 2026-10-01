@@ -36,17 +36,14 @@ function Editor({ mobile = false }: { mobile?: boolean }) {
       onClearSelection={() => useEditorStore.getState().clearSelection()} />
   if (!mobile) return <>{canvas}{properties}</>
   return <EditorLayout toolbar={null} sidebar={null} canvas={canvas} propertiesPanel={properties}
-    propertiesRequest={String(request)} onPropertiesOpened={() => {
-      const editor = useEditorStore.getState()
-      if (editor.personalInfoFocusTarget) editor.openPersonalInfo(editor.personalInfoFocusTarget)
-    }} />
+    propertiesRequest={String(request)} />
 }
 
 describe('profile inspector focus', () => {
   beforeEach(() => {
     useResumeStore.setState({ activeResume: createSampleResume('clarity'), isDirty: false })
     useEditorStore.setState({
-      selectedSectionId: 'summary', selectedSectionType: 'summary', selectedEntryId: null,
+      inspectorMode: 'content', selectedSectionId: 'summary', selectedSectionType: 'summary', selectedEntryId: null,
       personalInfoOpenRequest: 0, personalInfoFocusTarget: null, editingKey: null, styleTarget: null,
     })
   })
@@ -99,10 +96,11 @@ describe('profile inspector focus', () => {
     expect(screen.getByRole('textbox', { name: 'Full name' })).toHaveFocus()
   })
 
-  it('retains field focus after the mobile properties drawer finishes opening', async () => {
+  it('opens the mobile content view and focuses a field selected in preview', async () => {
     render(<Editor mobile />)
+    await userEvent.click(screen.getByRole('button', { name: 'Preview' }))
     fireEvent.click(screen.getByRole('button', { name: 'Edit fullName' }))
-    await waitFor(() => expect(useEditorStore.getState().personalInfoOpenRequest).toBe(2))
+    await waitFor(() => expect(useEditorStore.getState().personalInfoOpenRequest).toBe(1))
     expect(screen.getByRole('textbox', { name: 'Full name' })).toHaveFocus()
   })
 })

@@ -148,3 +148,12 @@ describe('self-contained resume links', () => {
     await expect(createShareLink(resume, origin)).rejects.toThrow(/too large/)
   })
 })
+
+it('keeps the saved job target private when creating a share link', async () => {
+  const resume = createSampleResume('meridian')
+  resume.jobTarget = { description: 'Private application target', keywords: 'SQL' }
+  const url = new URL(await createShareLink(resume, 'https://example.com'))
+  const shared = await decodeShareLink(url.hash)
+  expect(shared.resume.jobTarget).toBeUndefined()
+  expect(resume.jobTarget.description).toBe('Private application target')
+})

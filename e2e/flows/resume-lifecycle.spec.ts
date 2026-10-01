@@ -11,11 +11,11 @@ test.describe('Resume Lifecycle', () => {
 
     await panel.getByRole('textbox', { name: /full name/i }).fill('John Doe');
     await panel.getByRole('textbox', { name: /full name/i }).blur();
-    await expect(page.getByText('Saved')).toBeVisible();
+    await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 
     await panel.getByRole('textbox', { name: /email/i }).fill('john@example.com');
     await panel.getByRole('textbox', { name: /email/i }).blur();
-    await expect(page.getByText('Saved')).toBeVisible();
+    await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 
     // 3. Verify persistence
     await page.reload();
@@ -29,11 +29,11 @@ test.describe('Resume Lifecycle', () => {
     const panel = page.getByLabel('Properties panel');
     await panel.getByRole('textbox', { name: /full name/i }).fill('Jane Doe');
     await panel.getByRole('textbox', { name: /full name/i }).blur();
-    await expect(page.getByText('Saved')).toBeVisible();
+    await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 
-    // Template switching lives in the sidebar's collapsible Appearance panel.
-    await page.getByRole('button', { name: 'Appearance' }).click();
-    await page.getByRole('option', { name: /spectrum/i }).click();
+    // Switch designs with the shared template picker.
+    await page.getByRole('button', { name: 'Change template', exact: true }).click();
+    await page.getByRole('dialog', { name: 'Change template' }).getByRole('button', { name: 'Use Horizon template' }).click();
 
     // Verify data still there
     await expect(panel.getByRole('textbox', { name: /full name/i })).toHaveValue('Jane Doe');
@@ -47,7 +47,7 @@ test.describe('Resume Lifecycle', () => {
     await panel.getByRole('textbox', { name: /full name/i }).blur();
     await panel.getByRole('textbox', { name: /email/i }).fill('exporter@example.com');
     await panel.getByRole('textbox', { name: /email/i }).blur();
-    await expect(page.getByText('Saved')).toBeVisible();
+    await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 
     // Trigger export
     const downloadPromise = page.waitForEvent('download');
@@ -67,11 +67,11 @@ test.describe('Resume Lifecycle', () => {
     const nameInput = panel.getByRole('textbox', { name: /full name/i });
     await nameInput.fill('Initial');
     await nameInput.blur();
-    await expect(page.getByText('Saved')).toBeVisible();
+    await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 
     await nameInput.fill('Changed');
     await nameInput.blur();
-    await expect(page.getByText('Saved')).toBeVisible();
+    await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 
     // Click Undo
     await page.getByRole('button', { name: /undo/i }).click();
@@ -88,7 +88,7 @@ test.describe('Resume Lifecycle', () => {
     const panel = page.getByLabel('Properties panel');
     await panel.getByRole('textbox', { name: /full name/i }).fill('Recover Me');
     await panel.getByRole('textbox', { name: /full name/i }).blur();
-    await expect(page.getByText('Saved')).toBeVisible();
+    await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 
     // Simulate "unexpected" refresh by just reloading
     await page.reload();

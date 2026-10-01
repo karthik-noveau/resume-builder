@@ -19,7 +19,7 @@ pnpm preview
 pnpm audit --prod
 ```
 
-CI runs the tests, lint, build, and production dependency audit on pull requests and pushes to main. The existing Playwright suite can be run separately with `pnpm test:e2e` after installing its browsers; native Chrome review supplements the unit/integration suite.
+CI runs the tests, lint, build, and production dependency audit on pull requests and pushes to main or master. Run the Playwright suite with `pnpm test:e2e` after installing its browsers; CI also runs the Chromium, Firefox and WebKit browser suites. Browser tests build the app and start an isolated production preview on port 5186. Failed checks retain traces and screenshots for inspection.
 
 ## Deploy
 
@@ -28,6 +28,14 @@ CI runs the tests, lint, build, and production dependency audit on pull requests
 3. Netlify uses the included `netlify.toml`: SPA fallback, security headers, immutable hashed assets, and revalidated HTML. Other hosts need equivalent configuration.
 4. Verify direct navigation to `/templates`, `/app`, `/settings`, and `/editor/<id>`, and the generated `robots.txt`/`sitemap.xml` on the deployed origin.
 5. Smoke-test creating a resume, reloading after an edit, PDF preview/download, and backup restore on the deployed site. Storage is origin-specific; localhost resumes do not automatically appear in production.
+
+## Import and editing
+
+Import a PDF, DOCX or TXT file (up to 10 MB), or paste text. Extraction runs locally; PDF import requires selectable text and supports up to 30 pages. Review the extracted contact details, jobs, education and other sections before creating a resume. Complex layouts may need correction; scanned PDFs need OCR before import.
+
+Guided setup requires the key fields in each section before advancing: name and email, a summary, work experience, education, and a skill category with at least one skill. Full Editor remains available at any point and preserves unfinished drafts without requiring completion. On mobile, Content, Design and Preview have separate views. Template thumbnails open a larger preview; only **Use template** creates a draft or applies a design.
+
+Resume readiness shows completion guidance until career content has been added. Job descriptions and keywords are saved with each resume and included in backups, but are excluded from share links and PDF exports.
 
 ## Storage and recovery
 

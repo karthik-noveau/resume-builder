@@ -229,6 +229,8 @@ export interface Resume {
   styleOverrides?: ResumeStyleOverrides
   settings: ResumeSettings
   metadata: ResumeMetadata
+  /** Private application target; saved with backups, omitted from share links. */
+  jobTarget?: { description: string; keywords: string }
 }
 
 // ─── Derived Types ────────────────────────────────────────────────────────────

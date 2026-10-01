@@ -49,7 +49,7 @@ describe('template picker filters', () => {
   it('shows all forty templates with the same gallery filter controls', () => {
     setup()
     expect(
-      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button')
+      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
     ).toHaveLength(40)
     expect(screen.getByRole('status')).toHaveTextContent('40 of 40 templates')
     const layoutFilters = within(screen.getByRole('group', { name: 'Filter by column layout' }))
@@ -76,19 +76,19 @@ describe('template picker filters', () => {
     const search = screen.getByRole('searchbox')
     await user.type(search, 'Simple')
     expect(
-      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button')
+      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
     ).toHaveLength(20)
     expect(screen.getByRole('status')).toHaveTextContent('20 of 40 templates')
     expect(screen.queryByRole('button', { name: 'Use Horizon template' })).not.toBeInTheDocument()
     await user.clear(search)
     await user.type(search, 'Ultra Modern')
     expect(
-      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button')
+      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
     ).toHaveLength(20)
     expect(screen.getByRole('button', { name: 'Use Horizon template' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Two Column' }))
     expect(
-      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button')
+      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
     ).toHaveLength(
       ALL_TEMPLATES.filter(
         (template) => template.designStyle === 'Ultra Modern' && template.layout === 'two-column'
@@ -97,11 +97,11 @@ describe('template picker filters', () => {
     await user.clear(search)
     await user.type(search, 'Horizon')
     expect(
-      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button')
+      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
     ).toHaveLength(1)
     await user.click(screen.getByRole('button', { name: 'All Templates' }))
     expect(
-      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button')
+      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
     ).toHaveLength(40)
     expect(screen.getByRole('searchbox')).toHaveValue('')
     expect(screen.getByRole('button', { name: 'All Templates' })).toHaveAttribute(
@@ -115,7 +115,7 @@ describe('template picker filters', () => {
     await user.click(screen.getByRole('button', { name: 'Two Column' }))
     const expected = ALL_TEMPLATES.filter((template) => template.layout === 'two-column')
     expect(
-      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button')
+      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
     ).toHaveLength(expected.length)
     expect(screen.getByRole('button', { name: 'Two Column' })).toHaveAttribute(
       'aria-pressed',
@@ -123,7 +123,7 @@ describe('template picker filters', () => {
     )
     await user.click(screen.getByRole('button', { name: 'One Column' }))
     expect(
-      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button')
+      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
     ).toHaveLength(ALL_TEMPLATES.filter((template) => template.layout === 'single-column').length)
   })
 
@@ -132,13 +132,13 @@ describe('template picker filters', () => {
     const search = screen.getByRole('searchbox', { name: 'Search templates' })
     await user.type(search, '  hOrIzOn  ')
     expect(
-      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button')
+      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
     ).toHaveLength(1)
     expect(screen.getByRole('button', { name: 'Use Horizon template' })).toBeInTheDocument()
     await user.clear(search)
     await user.type(search, 'editorial')
     expect(
-      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button')
+      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
     ).toHaveLength(ALL_TEMPLATES.filter((template) => template.tags.includes('editorial')).length)
   })
 
@@ -167,7 +167,7 @@ describe('template picker filters', () => {
     expect(screen.getByText('No templates found')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Clear all filters' }))
     expect(
-      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button')
+      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
     ).toHaveLength(40)
     expect(screen.getByRole('searchbox')).toHaveValue('')
   })
@@ -179,7 +179,7 @@ describe('template picker filters', () => {
     rerender(<TemplatePickerModal {...props} isOpen />)
     expect(screen.getByRole('searchbox')).toHaveValue('')
     expect(
-      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button')
+      within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
     ).toHaveLength(40)
   })
 

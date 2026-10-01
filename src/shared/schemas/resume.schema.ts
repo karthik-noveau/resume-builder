@@ -107,6 +107,12 @@ const elementStyleSchema = z.object({
   paddingRightPt: z.number().min(0).max(120).optional(),
   paddingBottomPt: z.number().min(0).max(120).optional(),
   paddingLeftPt: z.number().min(0).max(120).optional(),
+  marginTopPt: z.number().min(0).max(120).optional(),
+  marginRightPt: z.number().min(0).max(120).optional(),
+  marginBottomPt: z.number().min(0).max(120).optional(),
+  marginLeftPt: z.number().min(0).max(120).optional(),
+  lineThicknessPt: z.number().min(0.25).max(8).optional(),
+  lineLengthPercent: z.number().min(10).max(100).optional(),
 })
 
 export const resumeSchema = z.object({
@@ -163,6 +169,7 @@ export const resumeSchema = z.object({
   }).optional(),
   settings: resumeSettingsSchema,
   metadata: resumeMetadataSchema,
+  jobTarget: z.object({ description: z.string().max(20000), keywords: z.string().max(2000) }).optional(),
 })
 
 export type ResumeInput = z.infer<typeof resumeSchema>

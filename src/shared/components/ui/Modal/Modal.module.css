@@ -15,8 +15,7 @@
   background: rgb(var(--color-surface));
 }
 
-/* A document preview only needs a small entrance, not the default 0.2x
-   zoom from the toolbar button across the entire screen. */
+/* Fade previews in place so dialog controls stay stationary. */
 .previewModal:global(.resume-preview-enter),
 .previewModal:global(.resume-preview-appear) {
   animation: previewEnter 180ms ease-out both paused;
@@ -33,13 +32,13 @@
 }
 
 @keyframes previewEnter {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes previewLeave {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(4px); }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -52,6 +51,48 @@
 
 .body {
   padding-top: var(--space-1);
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+
+/* Keep dialog actions stationary from the first frame: scaling a modal can move a button between pointerdown and pointerup and lose a click. */
+.modal:global(.resume-dialog-enter),
+.modal:global(.resume-dialog-appear) {
+  animation: dialogEnter 140ms ease-out both paused;
+}
+
+.modal:global(.resume-dialog-leave) {
+  animation: dialogLeave 100ms ease-in both paused;
+}
+
+.modal:global(.resume-dialog-enter-active),
+.modal:global(.resume-dialog-appear-active),
+.modal:global(.resume-dialog-leave-active) {
+  animation-play-state: running;
+}
+
+@keyframes dialogEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dialogLeave {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal:global(.resume-dialog-enter),
+  .modal:global(.resume-dialog-appear),
+  .modal:global(.resume-dialog-leave) {
+    animation-duration: 1ms;
+  }
 }
 
 @media (max-width: 1023px), (max-height: 599px) {

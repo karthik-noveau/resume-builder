@@ -5,6 +5,8 @@ import type { FontPreset } from '@/shared/types/font.types'
 import type { ResumeStyleOverrides } from '@/shared/types/style.types'
 import { applyStyleOverrides, toRoleTypography, withRoleTypography } from './style.overrides'
 import { annotateStyleTargets } from './style.roles'
+import { createEmptyResume } from '@/features/resume/utils/resume.factory'
+import { resumeSchema } from '@/shared/schemas/resume.schema'
 
 const BASE_STYLE: LayoutStyles = {
   fontFamily: 'Inter',
@@ -146,6 +148,29 @@ describe('text styles (role tier)', () => {
 })
 
 describe('element overrides', () => {
+  it('styles a divider without moving neighbouring text, with saved geometry retained by validation', () => {
+    const line = node({ type: 'divider', xPt: 20, yPt: 100, widthPt: 300, heightPt: 0.5 })
+    const text = node({ yPt: 115, content: 'Unchanged content' })
+    const layout = tree([line, text])
+    applyStyleOverrides(layout, resumeWith())
+    const style = { color: '#208475', lineThicknessPt: 3, lineLengthPercent: 60, textAlign: 'center' as const }
+    const resume = createEmptyResume('clarity')
+    resume.styleOverrides = { elements: { [line.styleKey!]: style } }
+    expect(resumeSchema.parse(resume).styleOverrides?.elements?.[line.styleKey!]).toEqual(style)
+    applyStyleOverrides(layout, resume)
+    expect(line).toMatchObject({ xPt: 80, yPt: 98.75, widthPt: 180, heightPt: 3 })
+    expect(line.styles.color).toBe('#208475')
+    expect(text.yPt).toBe(115)
+  })
+
+  it('applies thickness and length along the correct axes for vertical dividers', () => {
+    const line = node({ type: 'divider', xPt: 20, yPt: 10, widthPt: 0.5, heightPt: 200 })
+    const layout = tree([line])
+    applyStyleOverrides(layout, resumeWith())
+    applyStyleOverrides(layout, resumeWith({ elements: { [line.styleKey!]: { lineThicknessPt: 2, lineLengthPercent: 50, textAlign: 'right' } } }))
+    expect(line).toMatchObject({ xPt: 19.25, yPt: 110, widthPt: 2, heightPt: 100 })
+  })
+
   it('applies an element override over its text style', () => {
     const summary = node({ content: 'Hello', editRef: { kind: 'summary' } })
     applyStyleOverrides(tree([summary]), resumeWith({

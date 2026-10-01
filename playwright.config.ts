@@ -2,15 +2,15 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
-  globalSetup: './e2e/global-setup.ts',
   fullyParallel: true,
+  timeout: 45000,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 2 : 3,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:5173',
-    trace: 'on-first-retry',
+    baseURL: 'http://127.0.0.1:5186',
+    trace: 'retain-on-failure',
   },
   projects: [
     {
@@ -27,8 +27,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
+    // Exercise the shipped bundle without development dependency reloads racing clicks.
+    command: 'pnpm build && pnpm preview --host 127.0.0.1 --port 5186 --strictPort',
+    url: 'http://127.0.0.1:5186',
+    reuseExistingServer: false,
+    timeout: 120000,
   },
 });

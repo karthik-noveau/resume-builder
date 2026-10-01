@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -76,4 +76,14 @@ describe('direct template creation', () => {
     expect(createResume).toHaveBeenCalledTimes(2)
     expect(await screen.findByText('Resume editor')).toBeInTheDocument()
   })
+})
+
+it('previews a template without creating a draft and creates only after choosing Use template', async () => {
+  createResume.mockReset().mockResolvedValue('new-resume')
+  const user = setup()
+  await user.click(screen.getByRole('button', { name: 'Preview Meridian template' }))
+  const preview = await screen.findByRole('dialog', { name: 'Meridian preview' })
+  expect(createResume).not.toHaveBeenCalled()
+  await user.click(within(preview).getByRole('button', { name: 'Use Meridian template' }))
+  expect(createResume).toHaveBeenCalledExactlyOnceWith('meridian')
 })

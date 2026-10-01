@@ -116,9 +116,9 @@
     border-color var(--duration-normal);
 }
 
-.card:hover:not(:disabled) {
-  border-color: rgb(var(--color-primary) / 55%);
-  box-shadow: 0 4px 16px rgb(var(--color-primary) / 7%);
+.card:focus-within {
+  border-color: rgb(var(--color-primary) / 50%);
+  box-shadow: 0 12px 28px rgb(var(--color-primary) / 20%);
 }
 
 .card:disabled {
@@ -177,17 +177,46 @@
   color: rgb(var(--color-primary));
   font-size: 12px;
   font-weight: 600;
-  transition: background-color var(--duration-fast), border-color var(--duration-fast);
+  transition: background-color var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast), box-shadow var(--duration-fast);
 }
-.card:hover:not(:disabled) .selectAction {
-  background: rgb(var(--color-primary) / 8%);
-  border-color: rgb(var(--color-primary) / 40%);
-}
+.card:focus-within .selectAction:not(:disabled),
 .cardSelected .selectAction,
 .cardSelected:hover .selectAction {
   background: rgb(var(--color-primary));
   border-color: rgb(var(--color-primary));
   color: #fff;
+}
+
+.previewWrap:focus-visible,
+.selectAction:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: -4px;
+}
+
+.selectAction:focus-visible {
+  outline-color: #fff;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    z-index: 1;
+    border-color: rgb(var(--color-primary) / 50%);
+    box-shadow: 0 12px 28px rgb(var(--color-primary) / 20%);
+  }
+
+  .card:hover .selectAction:not(:disabled) {
+    background: rgb(var(--color-primary));
+    border-color: rgb(var(--color-primary));
+    color: #fff;
+    box-shadow: 0 4px 12px rgb(var(--color-primary) / 24%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .selectAction {
+    transition: none;
+  }
 }
 
 .cardTitle {

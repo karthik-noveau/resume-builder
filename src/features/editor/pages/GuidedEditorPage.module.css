@@ -272,9 +272,9 @@
 }
 
 .mobileStepNumberDone {
-  background-color: rgb(var(--color-success));
-  color: white;
-  border-color: transparent;
+  background-color: rgb(var(--color-success) / 14%);
+  color: rgb(var(--color-success));
+  border-color: rgb(var(--color-success) / 45%);
 }
 
 /* Stepper (desktop) */
@@ -298,20 +298,20 @@
 }
 
 .desktopStepItemSpaced {
-  padding-bottom: 28px;
+  padding-bottom: 24px;
 }
 
 .desktopStepConnector {
   position: absolute;
-  left: 20px;
-  top: 40px;
+  left: 16px;
+  top: 38px;
   bottom: 0;
   width: 1px;
   background-color: rgb(var(--color-divider));
 }
 
 .desktopStepConnectorDone {
-  background-color: rgb(var(--color-success));
+  background-color: rgb(var(--color-success) / 35%);
 }
 
 .desktopStepButton {
@@ -319,7 +319,7 @@
   z-index: 10;
   width: 100%;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-3);
   text-align: left;
   background: none;
@@ -331,11 +331,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-pill);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-medium);
   flex-shrink: 0;
-  transition: all var(--duration-fast);
+  transition: color var(--duration-fast), border-color var(--duration-fast), background-color var(--duration-fast);
   background-color: rgb(var(--color-surface));
   color: rgb(var(--color-text-muted));
   border: 1px solid rgb(var(--color-divider));
@@ -348,18 +348,17 @@
 .desktopStepIconActive {
   background-color: rgb(var(--color-primary));
   color: white;
-  box-shadow: var(--shadow-level-2);
+  box-shadow: 0 0 0 3px rgb(var(--color-primary) / 10%);
   border-color: transparent;
 }
 
 .desktopStepIconDone {
-  background-color: rgb(var(--color-success));
-  color: white;
-  border-color: transparent;
+  background-color: rgb(var(--color-success) / 14%);
+  color: rgb(var(--color-success));
+  border-color: rgb(var(--color-success) / 45%);
 }
 
 .desktopStepLabelWrap {
-  padding-top: var(--space-3);
   min-width: 0;
 }
 
@@ -377,7 +376,7 @@
 
 .desktopStepHint {
   display: block;
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   color: rgb(var(--color-text-muted));
   white-space: nowrap;
   overflow: hidden;
@@ -755,3 +754,5 @@
     scroll-padding-bottom: 72px;
   }
 }
+
+.stepActionsBar { flex-wrap: wrap; }

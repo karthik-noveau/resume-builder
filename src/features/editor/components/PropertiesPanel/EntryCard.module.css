@@ -4,13 +4,12 @@
   border: 1px solid rgb(var(--color-divider));
   background-color: rgb(var(--color-surface));
   box-shadow: 0 1px 2px rgb(15 23 42 / 3%);
-  transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease, transform var(--duration-fast) ease;
+  transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
 }
 
 .card:hover {
   border-color: rgb(var(--color-primary) / 30%);
   box-shadow: 0 8px 22px rgb(15 23 42 / 7%);
-  transform: translateY(-1px);
 }
 
 .cardSelected {
@@ -124,10 +123,6 @@
     opacity: 1;
   }
 
-  .card:hover {
-    transform: none;
-  }
-
   .header {
     padding-inline: 4px;
     gap: 2px;
@@ -137,9 +132,5 @@
 @media (prefers-reduced-motion: reduce) {
   .card {
     transition: none;
-  }
-
-  .card:hover {
-    transform: none;
   }
 }

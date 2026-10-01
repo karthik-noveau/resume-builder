@@ -374,35 +374,89 @@
   }
 }
 
-.spacing {
-  border-top: 1px solid rgb(var(--color-divider));
-  padding-top: var(--space-2);
+.controlSections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
 }
 
-.spacingSummary {
+.controlSection {
+  min-width: 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgb(var(--color-divider));
+}
+
+.controlSection:last-child { padding-bottom: 0; border-bottom: 0; }
+
+.sectionSummary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-2);
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgb(var(--color-primary) / 4%);
   list-style: none;
   cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: rgb(var(--color-text-primary));
+  transition: background-color var(--duration-fast);
+}
+
+.sectionSummary::-webkit-details-marker { display: none; }
+.sectionSummary:hover { background: rgb(var(--color-primary) / 7%); }
+.sectionSummary:focus-visible { outline: 2px solid rgb(var(--color-primary) / 45%); outline-offset: 2px; }
+
+.sectionIdentity {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sectionIdentity > span { display: inline-flex; color: rgb(var(--color-text-muted)); }
+.sectionChevron { color: rgb(var(--color-text-muted)); }
+.controlSection[open] > .sectionSummary .sectionChevron { transform: rotate(180deg); }
+
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 14px 0 0;
+}
+
+.spacingFields {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.spacingFields + .spacingFields { margin-top: 4px; }
+.spacingFields > .inlineReset { margin-top: 10px; }
+
+.spacingLegend {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 0 0 10px;
   font-size: var(--text-sm);
   font-weight: 600;
-  color: rgb(var(--color-text-secondary));
+  color: rgb(var(--color-text-primary));
 }
 
-.spacingSummary::-webkit-details-marker {
-  display: none;
+.spacingLegend span {
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.5;
+  color: rgb(var(--color-text-muted));
 }
 
-.spacing[open] .spacingSummary {
-  margin-bottom: var(--space-2);
-}
-
-.spacing[open] .spacingSummary svg {
-  transform: rotate(180deg);
-}
-
-.spacingSummary svg {
-  transition: transform var(--duration-fast) ease;
+@media (max-width: 1023px), (pointer: coarse) {
+  .sectionSummary { min-height: 44px; }
 }

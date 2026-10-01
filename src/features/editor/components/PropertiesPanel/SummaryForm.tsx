@@ -18,12 +18,16 @@ export function SummaryForm({ section }: { section: SummarySection }) {
     resolver: zodResolver(schema),
     defaultValues: { content: section.content },
   })
-  const { control, handleSubmit, formState: { errors } } = form
+  const { control, formState: { errors } } = form
   const source = useMemo(() => ({ content: section.content }), [section.content])
   const commit = useResumeFormSync(form, source, (data) => { updateSummary(data.content) })
   const guided = useGuidedForm(form, commit)
 
-  const save = handleSubmit(commit)
+  // Store the draft before async validation so Saved never describes the previous field value.
+  const save = () => {
+    void commit(form.getValues())
+    void form.trigger()
+  }
 
   return (
     <form className={styles.form} onSubmit={(e) => e.preventDefault()}>

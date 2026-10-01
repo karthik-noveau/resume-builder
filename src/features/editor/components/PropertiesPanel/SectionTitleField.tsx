@@ -37,6 +37,7 @@ export function SectionTitleField({ resume, editRef }: SectionTitleFieldProps) {
     <div className={styles.root}>
       <Input
         label="Section title"
+        name="sectionTitle"
         value={value}
         maxLength={100}
         error={error}

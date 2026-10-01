@@ -16,39 +16,40 @@ test.describe('Complete Resume Journey', () => {
 
     await panel.getByRole('textbox', { name: /full name/i }).fill('Alexander Hamilton');
     await panel.getByRole('textbox', { name: /full name/i }).blur();
-    await expect(page.getByText('Saved')).toBeVisible();
+    await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 
     await panel.getByRole('textbox', { name: /professional headline/i }).fill('Founding Father');
     await panel.getByRole('textbox', { name: /email/i }).fill('alex@treasury.gov');
+    await panel.locator('summary').filter({ hasText: 'More contact details' }).click();
     await panel.getByRole('textbox', { name: /location/i }).fill('New York, NY');
     await panel.getByRole('textbox', { name: /location/i }).blur();
-    await expect(page.getByText('Saved')).toBeVisible();
+    await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 
 
     // --- 3. Data Entry: Summary ---
     await page.getByLabel(/edit summary section/i).click();
     await panel.getByRole('textbox', { name: 'Summary' }).fill('I am not throwing away my shot.');
     await panel.getByRole('textbox', { name: 'Summary' }).blur();
-    await expect(page.getByText('Saved')).toBeVisible();
+    await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 
 
     // --- 4. Sidebar Interaction & Section Selection ---
-    // Template ships with sample skill categories — the new one is appended last.
+    // Add a skill category to the blank draft.
     await page.getByLabel(/edit skills section/i).click();
     await panel.getByRole('button', { name: /add skill category/i }).click();
     await expect(panel.getByRole('textbox', { name: /category name/i }).last()).toBeVisible();
     await panel.getByRole('textbox', { name: /category name/i }).last().fill('Political Strategy');
     await panel.getByRole('textbox', { name: /category name/i }).last().blur();
-    await expect(page.getByText('Saved')).toBeVisible();
+    await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 
 
-    // --- 5. Template Switching (lives in the sidebar's Appearance panel) ---
-    await page.getByRole('button', { name: 'Appearance' }).click();
-    await page.getByRole('option', { name: /foundation/i }).click();
+    // --- 5. Template switching ---
+    await page.getByRole('button', { name: 'Change template', exact: true }).click();
+    await page.getByRole('dialog', { name: 'Change template' }).getByRole('button', { name: 'Use Foundation template' }).click();
 
     // Selecting the Skills section earlier collapsed Personal Info in favor of
     // the Skills form; clear the selection to bring the full-name field back.
-    await page.getByRole('button', { name: 'Back to layout settings' }).click();
+    await page.getByRole('button', { name: 'Back to personal info' }).click();
     await expect(panel.getByRole('textbox', { name: /full name/i })).toHaveValue('Alexander Hamilton');
 
 
@@ -71,8 +72,8 @@ test.describe('Complete Resume Journey', () => {
     await page.getByRole('link', { name: /back to dashboard/i }).click();
     await expect(page).toHaveURL(/\/app$/);
 
-    const resumeCard = page.locator('article').filter({ hasText: 'Alexander Hamilton' }).first();
-    await resumeCard.getByRole('button', { name: 'Resume actions' }).click();
+    const resumeCard = page.getByRole('article', { name: 'Untitled Resume', exact: true });
+    await resumeCard.getByRole('button', { name: /^Actions for / }).click();
     await page.getByRole('menuitem', { name: /delete/i }).click();
 
     const deleteDialog = page.getByRole('dialog');

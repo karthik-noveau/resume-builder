@@ -17,11 +17,15 @@ export function SkillsForm({ section }: { section: SkillSection }) {
     resolver: zodResolver(skillSectionSchema),
     defaultValues: section,
   })
-  const { control, handleSubmit, formState: { errors } } = form
+  const { control, formState: { errors } } = form
   const commit = useResumeFormSync<SkillSectionInput>(form, section, (data) => { updateSection('skills', section.id, data) })
   const guided = useGuidedForm(form, commit)
 
-  const save = handleSubmit(commit)
+  // Store the draft before async validation so Saved never describes the previous field value.
+  const save = () => {
+    void commit(form.getValues())
+    void form.trigger()
+  }
   const onSaved = () => { void save() }
 
   const addSkill = () => {

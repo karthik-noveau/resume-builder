@@ -15,12 +15,16 @@ export function ExperienceForm({ section }: { section: ExperienceSection }) {
     resolver: zodResolver(experienceSectionSchema),
     defaultValues: section,
   })
-  const { control, handleSubmit, formState: { errors } } = form
+  const { control, formState: { errors } } = form
   const commit = useResumeFormSync<ExperienceSectionInput>(form, section, (data) => { updateSection('experience', section.id, data) })
   const guided = useGuidedForm(form, commit)
 
   const current = useWatch({ control, name: 'current' })
-  const save = handleSubmit(commit)
+  // Store the draft before async validation so Saved never describes the previous field value.
+  const save = () => {
+    void commit(form.getValues())
+    void form.trigger()
+  }
   const onSaved = () => { void save() }
 
   return (
@@ -35,6 +39,7 @@ export function ExperienceForm({ section }: { section: ExperienceSection }) {
       <ControlledCheckbox control={control} name="current" label="Currently working here" onSaved={onSaved} />
 
       <StringListField
+        name="description"
         label="Achievements / bullet points"
         items={section.description}
         onChange={(description) => updateSection('experience', section.id, { description })}

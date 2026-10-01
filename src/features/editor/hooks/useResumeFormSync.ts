@@ -20,6 +20,9 @@ export function useResumeFormSync<T extends FieldValues>(
   }, [source, reset])
 
   return (data, event) => {
+    // Moving between selected fields must not create a save or an undo step.
+    if (Object.keys(data).every((key) => key === 'updatedAt'
+      || JSON.stringify(data[key]) === JSON.stringify(source[key]))) return
     lastSaved.current = data
     return onSave(data, event)
   }

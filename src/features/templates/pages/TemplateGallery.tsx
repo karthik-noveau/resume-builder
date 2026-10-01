@@ -2,7 +2,6 @@ import { useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { ArrowLeft, ArrowRight, Search } from 'lucide-react'
 import { clsx } from 'clsx'
-import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { useTemplateStore } from '@/shared/stores/template.store'
 import { useResumeStore } from '@/shared/stores/resume.store'
@@ -14,6 +13,8 @@ import { ResumePreview } from '@/shared/components/ResumePreview/ResumePreview'
 import { getTemplatePreviewTree } from '@/shared/utils/templatePreview'
 import { TemplateFilters } from '@/shared/components/TemplateFilters/TemplateFilters'
 import { DEFAULT_TEMPLATE_FILTERS, filterTemplates } from '@/shared/utils/templateFilters'
+import { TemplatePreviewDialog } from '@/shared/components/TemplatePickerModal/TemplatePreviewDialog'
+import type { TemplateDefinition } from '@/shared/types/template.types'
 import styles from './TemplateGallery.module.css'
 
 export function TemplateGallery() {
@@ -21,6 +22,7 @@ export function TemplateGallery() {
   const [searchParams] = useSearchParams()
   const isCreateMode = searchParams.get('create') === 'true'
 
+  const [preview, setPreview] = useState<TemplateDefinition | null>(null)
   const [filters, setFilters] = useState(DEFAULT_TEMPLATE_FILTERS)
   const [openingId, setOpeningId] = useState<string | null>(null)
   const opening = useRef(false)
@@ -95,6 +97,15 @@ export function TemplateGallery() {
         </div>
       </div>
 
+      {preview && (
+        <TemplatePreviewDialog
+          key={preview.id}
+          template={preview}
+          onClose={() => setPreview(null)}
+          onSelect={() => void handleSelect(preview.id)}
+          pending={openingId !== null}
+        />
+      )}
       {/* Main Content */}
       <div className={styles.main}>
         <div className={styles.mainInner}>
@@ -102,52 +113,48 @@ export function TemplateGallery() {
 
           {/* Grid */}
           <div className={styles.grid}>
-            <AnimatePresence mode="popLayout">
-              {filteredTemplates.map((tpl) => (
-                <motion.button
-                  key={tpl.id}
+            {filteredTemplates.map((tpl) => (
+              <article
+                key={tpl.id}
+                className={clsx(styles.card, openingId === tpl.id && styles.cardSelected)}
+              >
+                {/* Preview */}
+                <button
                   type="button"
-                  onClick={() => {
-                    void handleSelect(tpl.id)
-                  }}
-                  disabled={openingId !== null}
-                  aria-busy={openingId === tpl.id}
-                  aria-label={`Use ${tpl.name} template`}
-                  aria-describedby={`template-${tpl.id}-description`}
-                  layout
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ y: { duration: 0.25 } }}
-                  className={clsx(styles.card, openingId === tpl.id && styles.cardSelected)}
+                  className={styles.previewWrap}
+                  aria-label={`Preview ${tpl.name} template`}
+                  onClick={() => setPreview(tpl)}
                 >
-                  {/* Preview */}
-                  <span className={styles.previewWrap}>
-                    <ResumePreview
-                      layoutTree={getTemplatePreviewTree(tpl.id)}
-                      widthPx={224}
-                      className={styles.previewThumb}
-                    />
-                  </span>
+                  <ResumePreview
+                    layoutTree={getTemplatePreviewTree(tpl.id)}
+                    widthPx={224}
+                    className={styles.previewThumb}
+                  />
+                </button>
 
-                  <span className={styles.cardInfo}>
-                    <span className={styles.cardTitle}>{tpl.name}</span>
-                    <span id={`template-${tpl.id}-description`} className={styles.cardDescription}>
-                      {tpl.description}
-                    </span>
-                    <span className={styles.selectAction}>
-                      {openingId === tpl.id ? (
-                        'Creating…'
-                      ) : (
-                        <>
-                          Use template <ArrowRight size={15} aria-hidden="true" />
-                        </>
-                      )}
-                    </span>
+                <span className={styles.cardInfo}>
+                  <span className={styles.cardTitle}>{tpl.name}</span>
+                  <span id={`template-${tpl.id}-description`} className={styles.cardDescription}>
+                    {tpl.description}
                   </span>
-                </motion.button>
-              ))}
-            </AnimatePresence>
+                  <button
+                    type="button"
+                    className={styles.selectAction}
+                    disabled={openingId !== null}
+                    aria-label={`Use ${tpl.name} template`}
+                    onClick={() => void handleSelect(tpl.id)}
+                  >
+                    {openingId === tpl.id ? (
+                      'Creating…'
+                    ) : (
+                      <>
+                        Use template <ArrowRight size={15} aria-hidden="true" />
+                      </>
+                    )}
+                  </button>
+                </span>
+              </article>
+            ))}
           </div>
 
           {filteredTemplates.length === 0 && (

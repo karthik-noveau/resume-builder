@@ -100,13 +100,11 @@
   background: var(--home-surface);
   transition:
     border-color 150ms,
-    box-shadow 150ms,
-    transform 150ms;
+    box-shadow 150ms;
 }
 .card:hover {
   border-color: var(--home-violet);
   box-shadow: 0 12px 30px var(--home-shadow);
-  transform: translateY(-4px);
 }
 .previewStage {
   position: relative;
@@ -151,11 +149,6 @@
   transform: translateX(-50%) scale(0.94);
   transform-origin: top center;
   box-shadow: 0 4px 17px #13233725;
-  transition: transform 200ms;
-}
-.card:hover .paper,
-.card:focus-visible .paper {
-  transform: translateX(-50%) translateY(-5px) scale(0.94);
 }
 .useTemplate {
   position: absolute;
@@ -164,7 +157,7 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  transform: translate(-50%, 5px);
+  transform: translateX(-50%);
   padding: 11px 16px;
   background: var(--gradient-brand);
   color: #fff;
@@ -173,14 +166,11 @@
   font-weight: 500;
   white-space: nowrap;
   opacity: 0;
-  transition:
-    opacity 150ms,
-    transform 150ms;
+  transition: opacity 150ms;
 }
 .card:hover .useTemplate,
 .card:focus-visible .useTemplate {
   opacity: 1;
-  transform: translate(-50%, 0);
 }
 .cardFooter {
   display: flex;
@@ -219,10 +209,6 @@
   .paper {
     transform: translateX(-50%) scale(0.78);
   }
-  .card:hover .paper,
-  .card:focus-visible .paper {
-    transform: translateX(-50%) translateY(-5px) scale(0.78);
-  }
   .previewStage {
     height: 284px;
   }
@@ -248,10 +234,6 @@
   }
   .paper {
     transform: translateX(-50%) scale(0.94);
-  }
-  .card:hover .paper,
-  .card:focus-visible .paper {
-    transform: translateX(-50%) translateY(-5px) scale(0.94);
   }
   .collectionNote {
     display: none;
@@ -295,10 +277,6 @@
   .paper {
     top: 38px;
     transform: translateX(-50%) scale(0.56);
-  }
-  .card:hover .paper,
-  .card:focus-visible .paper {
-    transform: translateX(-50%) translateY(-3px) scale(0.56);
   }
   .index {
     left: 10px;

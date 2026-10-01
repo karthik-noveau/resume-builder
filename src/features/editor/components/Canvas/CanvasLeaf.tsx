@@ -1,5 +1,5 @@
 import { safeLink } from '@/shared/utils/safeLink'
-import { useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useRef, useState, type CSSProperties } from 'react'
 import { ICON_PATHS, ICON_VIEWBOX_PX } from '@/features/templates/engine/icons'
 import type { LayoutNode, EditRef, IconName, PersonalInfoPanelField } from '@/shared/types/layout.types'
 import { layoutStylesToCSS } from './canvas.utils'
@@ -9,6 +9,7 @@ import type { ClipShape } from '@/shared/types/layout.types'
 import { useResumeStore } from '@/shared/stores/resume.store'
 import { useEditorStore } from '@/shared/stores/editor.store'
 import { getEditRefValue, applyEditRefValue } from '../../utils/editRefResolver'
+import { selectCanvasContent } from '../../utils/canvasSelection'
 import styles from './Canvas.module.css'
 
 interface CanvasLeafProps {
@@ -114,6 +115,7 @@ export function CanvasLeaf({ node, interactive = true }: CanvasLeafProps) {
       return (
         <a
           href={safeLink(node.href)}
+          onClick={(event) => event.preventDefault()}
           target="_blank"
           rel="noopener noreferrer"
           style={{ ...css, display: 'inline-block', width: '100%' }}
@@ -172,47 +174,16 @@ function openPersonalInfo(e: React.MouseEvent | React.KeyboardEvent, field?: Per
   useEditorStore.getState().openPersonalInfo(field)
 }
 
-/** Keep direct canvas editing and the inspector in sync. Editable leaves stop
- * their click before it reaches the enclosing section, so they must explicitly
- * select the matching inspector destination. */
-function openEditRefInPanel(editRef: EditRef) {
-  const editor = useEditorStore.getState()
-  switch (editRef.kind) {
-    case 'personal-info':
-      editor.openPersonalInfo()
-      break
-    case 'summary':
-      editor.selectSection('summary', 'summary')
-      break
-    case 'section-title':
-      if (editRef.sectionType === 'contact') editor.openPersonalInfo()
-      else editor.selectSection(editRef.sectionType, editRef.sectionType)
-      break
-    case 'custom-section-title':
-      editor.selectSection(editRef.sectionId, 'custom')
-      break
-    case 'entry':
-    case 'entry-field':
-    case 'entry-list-item':
-      editor.selectEntry(editRef.entryId, editRef.sectionType)
-      break
-  }
-}
-
 function PanelLinkedLeaf({ displayContent, css, field }: { displayContent: string; css: CSSProperties; field?: PersonalInfoPanelField }) {
   return (
     <button
       type="button"
       onClick={(e) => openPersonalInfo(e, field)}
       aria-label={`Open ${displayContent} in Personal Info`}
-      title="Open in Personal Info"
       className={styles.panelLinkedLeaf}
       style={{ ...css, width: '100%', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}
     >
       {displayContent}
-      <span className={styles.panelLinkedHint} aria-hidden="true">
-        Personal info
-      </span>
     </button>
   )
 }
@@ -223,7 +194,6 @@ function PanelLinkedIcon({ name, color, field }: { name: IconName; color: string
       type="button"
       onClick={(e) => openPersonalInfo(e, field)}
       aria-label="Open Personal Info"
-      title="Open Personal Info"
       className={styles.panelLinkedIcon}
     >
       <svg
@@ -250,22 +220,14 @@ function PanelLinkedIcon({ name, color, field }: { name: IconName; color: string
  * all, so the picker was only ever found by accident.
  */
 function EditableIcon({ name, color }: { name: IconName; color: string }) {
-  const [hovered, setHovered] = useState(false)
-
   return (
     <span
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      title="Click to change this section's icon"
       style={{
         display: 'block',
         width: '100%',
         height: '100%',
-        cursor: 'grab',
+        cursor: 'pointer',
         borderRadius: '3px',
-        outline: hovered ? '2px solid rgb(var(--color-primary) / 0.5)' : undefined,
-        outlineOffset: '2px',
-        transition: 'outline-color 120ms',
       }}
     >
       <svg
@@ -339,7 +301,8 @@ function EditableLeaf({
   const startEditing = () => {
     const resume = useResumeStore.getState().activeResume
     if (!resume) return
-    openEditRefInPanel(editRef)
+    revertedRef.current = false
+    selectCanvasContent(editRef, false)
     useEditorStore.getState().setEditingKey(styleKey ?? null)
     setEditingSeed(getEditRefValue(editRef, resume))
   }
@@ -380,7 +343,7 @@ function EditableLeaf({
     }
   }
 
-  const focusAtEnd = (el: HTMLDivElement | null) => {
+  const focusAtEnd = useCallback((el: HTMLDivElement | null) => {
     if (!el) return
     el.focus()
     const range = document.createRange()
@@ -389,7 +352,7 @@ function EditableLeaf({
     const selection = window.getSelection()
     selection?.removeAllRanges()
     selection?.addRange(range)
-  }
+  }, [])
 
   if (isEditing) {
     return (
@@ -404,6 +367,8 @@ function EditableLeaf({
         className={styles.inlineEditor}
         style={{
           ...css,
+          color: 'rgb(var(--color-text-primary))',
+          backgroundColor: 'rgb(var(--color-surface))',
           width: '100%',
           wordBreak: 'break-word',
           whiteSpace: 'pre-wrap',
@@ -416,9 +381,8 @@ function EditableLeaf({
 
   return (
     <div
-      // Double click to edit, not single: a single click now selects the
-      // element and hands it to the right panel, and is the start of a drag.
-      // Opening a text caret on every click would make both impossible.
+      // Single click opens the matching field; double click keeps the optional
+      // inline editing shortcut without making ordinary selection start typing.
       onDoubleClick={(e) => {
         e.stopPropagation()
         startEditing()
@@ -433,7 +397,6 @@ function EditableLeaf({
       tabIndex={0}
       role="button"
       aria-label={`Edit ${describeEditRef(editRef)}`}
-      title={isSectionTitle ? 'Double-click to rename' : 'Double-click to edit'}
       className={`${styles.editableLeaf}${isSectionTitle ? ` ${styles.editableSectionTitle}` : ''}`}
       style={{
         ...css,
@@ -443,9 +406,6 @@ function EditableLeaf({
       }}
     >
       {displayContent}
-      <span className={styles.editableHint} aria-hidden="true">
-        {isSectionTitle ? 'Double-click to rename' : 'Double-click to edit'}
-      </span>
     </div>
   )
 }
@@ -488,7 +448,6 @@ function ImageLeaf({
       type="button"
       onClick={(e) => openPersonalInfo(e, 'profileImage')}
       aria-label="Open profile photo in Personal Info"
-      title="Open profile photo settings"
       className={styles.panelLinkedImage}
     >
       {image}

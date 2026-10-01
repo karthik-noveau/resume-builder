@@ -74,15 +74,6 @@
   font-weight: 600;
   color: #fff;
   box-shadow: var(--shadow-glow);
-  transition: transform var(--duration-fast);
-}
-
-.cta:hover {
-  transform: scale(1.02);
-}
-
-.cta:active {
-  transform: scale(0.98);
 }
 
 .ctaIconWrap {
@@ -95,9 +86,4 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform var(--duration-fast);
-}
-
-.cta:hover .ctaIconWrap {
-  transform: translateX(2px);
 }

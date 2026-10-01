@@ -475,11 +475,9 @@
 @keyframes paperIn {
   from {
     opacity: 0.6;
-    transform: translateX(-50%) translateY(5px);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
   }
 }
 @media (max-width: 1050px) {
@@ -707,7 +705,7 @@
   }
 }
 
-/* The preview assembles once; readable content stays still after the entrance. */
+/* Fade content in place without shifting the preview or its controls. */
 @media (prefers-reduced-motion: no-preference) {
   .intro > * {
     animation: heroReveal 750ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -766,92 +764,70 @@
   }
   .actions > a {
     transition:
-      transform 180ms ease,
       box-shadow 180ms ease,
       background 180ms ease;
-  }
-  .actions > a:hover {
-    transform: translateY(-3px);
-  }
-  .actions > a:active {
-    transform: translateY(0);
   }
 }
 @keyframes heroReveal {
   from {
     opacity: 0;
-    transform: translateY(18px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 @keyframes workspaceArrival {
   from {
     opacity: 0;
-    transform: translateY(32px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
   }
 }
 @keyframes markArrival {
   0% {
     opacity: 0;
-    transform: scale(0.65) rotate(-10deg);
   }
   70% {
     opacity: 1;
-    transform: scale(1.06) rotate(2deg);
   }
   100% {
     opacity: 1;
-    transform: scale(1) rotate(0);
   }
 }
 @keyframes markPulse {
   0% {
     opacity: 0;
-    transform: scale(0.7);
   }
   20% {
     opacity: 0.7;
   }
   100% {
     opacity: 0;
-    transform: scale(2.3);
   }
 }
 @keyframes templateArrival {
   from {
     opacity: 0;
-    transform: translateX(-16px) scale(0.96);
   }
   to {
     opacity: 1;
-    transform: translateX(0) scale(1);
   }
 }
 @keyframes paperArrival {
   from {
     opacity: 0;
-    transform: translateY(28px) scale(0.94) rotate(1.5deg);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1) rotate(0);
   }
 }
 @keyframes detailArrival {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(14px) scale(0.94);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
   }
 }
 

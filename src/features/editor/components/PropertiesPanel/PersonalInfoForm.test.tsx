@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createSampleResume } from '@/features/resume/utils/resume.factory'
 import { useResumeStore } from '@/shared/stores/resume.store'
@@ -20,6 +20,13 @@ function Form() {
   return <PersonalInfoForm resumeId={resume.id} personalInfo={resume.personalInfo} />
 }
 
+function renderProfile() {
+  const result = render(<Form />)
+  const details = result.container.querySelector<HTMLDetailsElement>('details[data-personal-info-field="profileImage"]')
+  if (details) details.open = true
+  return result
+}
+
 describe('profile image options', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -28,7 +35,7 @@ describe('profile image options', () => {
   })
 
   it('shows a built-in avatar without filling blank photo data', () => {
-    const { container } = render(<Form />)
+    const { container } = renderProfile()
     expect(container.querySelector('img')?.getAttribute('src')).toBe('/profile-avatar-male-transparent-v1.png')
     expect(screen.getByRole('radio', { name: /Avatar image/ })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Show profile image on resume' })).toBeChecked()
@@ -38,7 +45,7 @@ describe('profile image options', () => {
   it('switches styles and colors without losing an uploaded photo or other settings', async () => {
     useResumeStore.getState().updatePersonalInfo({ profileImage: 'existing-upload' })
     const original = useResumeStore.getState().activeResume!
-    render(<Form />)
+    renderProfile()
     await userEvent.click(screen.getByRole('radio', { name: /Color & initials/ }))
     await userEvent.click(screen.getByRole('radio', { name: 'Slate' }))
     expect(useResumeStore.getState().activeResume?.settings).toEqual({
@@ -52,7 +59,7 @@ describe('profile image options', () => {
 
   it('shows one shared background selector for avatars and initials and colors both thumbnails', async () => {
     useResumeStore.getState().updateSettings({ showProfileImage: false })
-    const { container } = render(<Form />)
+    const { container } = renderProfile()
     const colors = screen.getByRole('group', { name: 'Profile color' })
     expect(colors).toBeVisible()
     await userEvent.click(screen.getByRole('radio', { name: 'Mint' }))
@@ -66,7 +73,9 @@ describe('profile image options', () => {
     await userEvent.click(screen.getByRole('radio', { name: /Color & initials/ }))
     expect(screen.getAllByRole('group', { name: 'Profile color' })).toHaveLength(1)
     expect(screen.getByRole('radio', { name: 'Mint' })).toBeChecked()
-    expect(screen.getByText('AM', { exact: true })).toHaveStyle({ backgroundColor: '#d1fae5' })
+    for (const initials of screen.getAllByText('AM', { exact: true })) {
+      expect(initials).toHaveStyle({ backgroundColor: '#d1fae5' })
+    }
     await userEvent.click(screen.getByRole('radio', { name: 'Peach' }))
     await userEvent.click(screen.getByRole('radio', { name: /Avatar image/ }))
     expect(screen.getByRole('radio', { name: 'Peach' })).toBeChecked()
@@ -78,7 +87,7 @@ describe('profile image options', () => {
 
   it('chooses Male or Female without changing personal details and remembers the choice across styles', async () => {
     const original = useResumeStore.getState().activeResume!
-    const { container } = render(<Form />)
+    const { container } = renderProfile()
     expect(screen.getByRole('radio', { name: 'Male' })).toBeChecked()
     await userEvent.click(screen.getByRole('radio', { name: 'Female' }))
     expect(container.querySelector('img')?.getAttribute('src')).toBe('/profile-avatar-female-transparent-v1.png')
@@ -99,7 +108,7 @@ describe('profile image options', () => {
   it('keeps an uploaded photo active until removal, then restores the preferred cartoon avatar', async () => {
     useResumeStore.getState().updateSettings({ profileAvatarVariant: 'female' })
     useResumeStore.getState().updatePersonalInfo({ profileImage: 'existing-upload' })
-    const { container } = render(<Form />)
+    const { container } = renderProfile()
     expect(screen.queryByRole('radio', { name: 'Female' })).not.toBeInTheDocument()
     expect(container.querySelector('img')?.getAttribute('src')).toBe('/uploaded-test-photo.png')
     await userEvent.click(screen.getByRole('radio', { name: 'Sky' }))
@@ -114,7 +123,7 @@ describe('profile image options', () => {
     useResumeStore.getState().updatePersonalInfo({ profileImage: 'existing-upload' })
     useResumeStore.getState().updateSettings({ showProfileImage: true, profileImageStyle: 'initials', profileAvatarVariant: 'female', profileImageBackground: '#334155' })
     const original = useResumeStore.getState().activeResume!
-    render(<Form />)
+    renderProfile()
     const toggle = screen.getByRole('checkbox', { name: 'Show profile image on resume' })
     expect(toggle).toBeChecked()
     await userEvent.click(toggle)
@@ -131,7 +140,7 @@ describe('profile image options', () => {
   it('keeps personal details and page settings intact when uploading a replacement', async () => {
     useResumeStore.getState().updatePersonalInfo({ profileImage: 'existing-upload' })
     const original = useResumeStore.getState().activeResume!
-    const { container } = render(<Form />)
+    const { container } = renderProfile()
     await userEvent.upload(container.querySelector('input[type="file"]')!, new File(['image'], 'profile.png', { type: 'image/png' }))
     await waitFor(() => expect(useResumeStore.getState().activeResume?.personalInfo.profileImage).toBe('new-upload'))
     expect(useResumeStore.getState().activeResume?.personalInfo).toEqual({ ...original.personalInfo, profileImage: 'new-upload' })
@@ -140,4 +149,18 @@ describe('profile image options', () => {
     expect(imageService.deleteImage).toHaveBeenCalledWith('existing-upload')
     expect(useEditorStore.getState().undoStack[0]).toEqual(original)
   })
+})
+
+it('marks the latest draft unsaved synchronously on blur, including unfinished contact details', () => {
+  useResumeStore.setState({ activeResume: createSampleResume('meridian'), isDirty: false })
+  render(<Form />)
+  const name = screen.getByRole('textbox', { name: 'Full name' })
+  fireEvent.change(name, { target: { value: 'Latest draft' } })
+  fireEvent.blur(name)
+  expect(useResumeStore.getState().activeResume?.personalInfo.fullName).toBe('Latest draft')
+  expect(useResumeStore.getState().isDirty).toBe(true)
+  const email = screen.getByRole('textbox', { name: 'Email' })
+  fireEvent.change(email, { target: { value: 'unfinished@' } })
+  fireEvent.blur(email)
+  expect(useResumeStore.getState().activeResume?.personalInfo.email).toBe('unfinished@')
 })

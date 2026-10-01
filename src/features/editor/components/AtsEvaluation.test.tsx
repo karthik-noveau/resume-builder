@@ -1,7 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { createSampleResume } from '@/features/resume/utils/resume.factory'
+import { createEmptyResume, createSampleResume } from '@/features/resume/utils/resume.factory'
 import { useResumeStore } from '@/shared/stores/resume.store'
 import { useEditorStore } from '@/shared/stores/editor.store'
 import { AtsEvaluation } from './AtsEvaluation'
@@ -31,7 +31,7 @@ describe('ATS review and fixes', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Review & fix' }))
     const dialog = await screen.findByRole(
       'dialog',
-      { name: 'ATS review & fixes' },
+      { name: 'Resume readiness & job match' },
       { timeout: 5000 }
     )
     const finding = within(dialog)
@@ -53,7 +53,7 @@ describe('ATS review and fixes', () => {
     const original = structuredClone(useResumeStore.getState().activeResume!)
     render(<LiveEvaluation />)
     await userEvent.click(screen.getByRole('button', { name: 'Review & fix' }))
-    const dialog = await screen.findByRole('dialog', { name: 'ATS review & fixes' })
+    const dialog = await screen.findByRole('dialog', { name: 'Resume readiness & job match' })
     const finding = within(dialog)
       .getByRole('heading', { name: 'Readable text size' })
       .closest('article')!
@@ -73,7 +73,7 @@ describe('ATS review and fixes', () => {
     const resume = createSampleResume('mosaic')
     const { rerender } = render(<AtsEvaluation resume={resume} />)
     const score = () =>
-      Number(screen.getByRole('progressbar', { name: 'ATS score' }).getAttribute('aria-valuenow'))
+      Number(screen.getByRole('progressbar', { name: 'Resume readiness score' }).getAttribute('aria-valuenow'))
     const initial = score()
     const missingContact = { ...resume, personalInfo: { ...resume.personalInfo, email: '' } }
     rerender(<AtsEvaluation resume={missingContact} />)
@@ -91,7 +91,7 @@ describe('ATS review and fixes', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Review & fix' }))
     const dialog = await screen.findByRole(
       'dialog',
-      { name: 'ATS review & fixes' },
+      { name: 'Resume readiness & job match' },
       { timeout: 5000 }
     )
     const photoCheck = within(dialog)
@@ -120,7 +120,7 @@ describe('ATS review and fixes', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Review & fix' }))
     const dialog = await screen.findByRole(
       'dialog',
-      { name: 'ATS review & fixes' },
+      { name: 'Resume readiness & job match' },
       { timeout: 5000 }
     )
     const emailCheck = within(dialog)
@@ -145,7 +145,7 @@ describe('ATS review and fixes', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Review & fix' }))
     const dialog = await screen.findByRole(
       'dialog',
-      { name: 'ATS review & fixes' },
+      { name: 'Resume readiness & job match' },
       { timeout: 5000 }
     )
     await userEvent.click(within(dialog).getByRole('button', { name: 'Job match' }))
@@ -155,8 +155,7 @@ describe('ATS review and fixes', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: 'Extract keywords' }))
     expect(within(dialog).getByLabelText('Keywords to compare')).toHaveValue('Python, SQL, Figma')
     expect(within(dialog).getByText('67%')).toBeVisible()
-    const id = useResumeStore.getState().activeResume!.id
-    const savedJob: unknown = JSON.parse(sessionStorage.getItem(`resume-studio:ats-job:${id}`)!)
+    const savedJob = useResumeStore.getState().activeResume!.jobTarget
     expect(savedJob).toMatchObject({ description: 'We require SQL, Figma, and Python.' })
     await userEvent.click(
       within(dialog).getByRole('button', { name: 'Clear job description and keywords' })
@@ -170,4 +169,11 @@ describe('ATS review and fixes', () => {
     expect(screen.getByText('Unavailable')).toBeVisible()
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
+})
+
+it('shows completion guidance for an empty draft without a numeric readiness score', () => {
+  render(<AtsEvaluation resume={createEmptyResume('meridian')} />)
+  expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
+  expect(screen.getByText('Getting started')).toBeVisible()
+  expect(screen.getByText('Add your name.')).toBeVisible()
 })

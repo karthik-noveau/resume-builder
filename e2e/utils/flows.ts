@@ -3,18 +3,19 @@ import { type Page, expect } from '@playwright/test';
 /**
  * Dashboard "New Resume" -> one template-card action -> guided editor.
  */
-export async function createResume(page: Page) {
+export async function createResume(page: Page, template = 'Meridian') {
+  await page.addInitScript(() => localStorage.setItem('resume-studio:editor-tour:v1', 'seen'));
   await page.goto('/app');
   await page.getByRole('button', { name: 'Create a new resume' }).click();
   const picker = page.getByRole('dialog', { name: 'Choose a template' });
   await expect(picker).toBeVisible();
-  await picker.getByRole('button', { name: 'Use Meridian template' }).click();
+  await picker.getByRole('button', { name: `Use ${template} template`, exact: true }).click();
   await expect(page).toHaveURL(/\/editor\/[^/]+\/guided/);
 }
 
 /** Navigates from the guided editor to the full editor and waits for it to be ready. */
 export async function goToFullEditor(page: Page) {
-  await page.getByRole('link', { name: /full editor/i }).click();
+  await page.getByRole('button', { name: 'Full Editor', exact: true }).click();
   await expect(page).toHaveURL(/\/editor\/[^/]+$/);
   await expect(page.getByLabel('Properties panel')).toBeVisible();
 }
@@ -33,6 +34,6 @@ export async function createResumeInFullEditor(page: Page) {
  * `getByRole('option', ...)` matches the former, so target the latter directly.
  */
 export async function selectAntOption(page: Page, label: string | RegExp, optionName: string | RegExp) {
-  await page.getByLabel(label).click();
+  await page.getByRole('combobox', { name: label }).click();
   await page.locator('.ant-select-item-option').filter({ hasText: optionName }).click();
 }

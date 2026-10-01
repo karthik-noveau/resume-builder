@@ -74,7 +74,6 @@
   background: rgb(var(--color-surface));
   box-shadow: 0 1px 2px rgb(15 23 42 / 8%), 0 2px 6px rgb(15 23 42 / 5%);
   pointer-events: none;
-  transition: transform var(--duration-normal) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Its own width plus the gap lands it exactly on the second column. */
@@ -364,3 +363,5 @@
     transition: none !important;
   }
 }
+
+@media (max-width: 1023px) { .inspectorHeader { display: none; } }

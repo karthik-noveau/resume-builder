@@ -24,38 +24,58 @@ export function AtsEvaluation({
     [template, resume, layoutTree]
   )
   const [open, setOpen] = useState(false)
+  const hasCareerContent =
+    (resume.summary.visible && resume.summary.content.trim().length >= 30) ||
+    resume.experience.some(
+      (entry) =>
+        entry.visible && !!entry.role.trim() && entry.description.join(' ').trim().length >= 30
+    ) ||
+    resume.projects.some(
+      (entry) => entry.visible && !!entry.title.trim() && entry.description.trim().length >= 30
+    ) ||
+    (resume.education.some((entry) => entry.visible && entry.institution.trim()) &&
+      resume.skills.some(
+        (entry) => entry.visible && entry.skills.some((skill) => skill.name.trim())
+      ))
+  const ready = hasCareerContent
   const issues = report?.checks.filter((check) => check.status === 'review').length ?? 0
 
   return (
-    <section className={styles.root} aria-label="ATS evaluation">
+    <section className={styles.root} aria-label="Resume readiness">
       <div className={styles.scoreRow}>
-        <h2 className={styles.label}>ATS score</h2>
-        <span className={styles.score}>
-          {report ? (
-            <>
-              {report.score}
-              <span className={styles.maximum}> / 100</span>
-            </>
-          ) : (
-            'Unavailable'
+        <div className={styles.summary}>
+          <h2 className={styles.label}>Resume readiness</h2>
+          {report && ready ? <>
+            <p className={styles.estimate}>Estimated score</p>
+            <p className={styles.checks}>
+              {issues ? `${issues} ${issues === 1 ? 'check' : 'checks'} to review` : 'All checks passed'}
+            </p>
+          </> : (
+            <p className={styles.state}>{ready ? 'Unavailable' : 'Getting started'}</p>
           )}
-        </span>
-      </div>
-      {report ? (
-        <>
+        </div>
+        {report && ready && (
           <div
-            className={styles.track}
+            className={styles.meter}
             role="progressbar"
-            aria-label="ATS score"
+            aria-label="Resume readiness score"
             aria-valuenow={report.score}
             aria-valuemin={0}
             aria-valuemax={100}
           >
-            <div className={styles.fill} style={{ width: `${report.score}%` }} />
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <circle className={styles.track} cx="32" cy="32" r="28" />
+              <circle className={styles.fill} cx="32" cy="32" r="28" pathLength="100"
+                strokeDasharray="100" strokeDashoffset={100 - report.score} />
+            </svg>
+            <span className={styles.score} aria-hidden="true">
+              {report.score}<span className={styles.maximum}>/ 100</span>
+            </span>
           </div>
-          <p className={styles.caption}>
-            {issues ? `${issues} checks to review` : 'All readiness checks passed'} · Estimated
-          </p>
+        )}
+      </div>
+      {report && ready ? (
+        <>
           <button
             type="button"
             className={styles.toggle}
@@ -69,7 +89,7 @@ export function AtsEvaluation({
             <Suspense
               fallback={
                 <p className={styles.caption} role="status">
-                  Opening ATS review…
+                  Opening resume review…
                 </p>
               }
             >
@@ -84,7 +104,22 @@ export function AtsEvaluation({
           )}
         </>
       ) : (
-        <p className={styles.caption}>Choose an available template to evaluate this resume.</p>
+        <div className={styles.caption}>
+          {report ? (
+            <>
+              <p>Add your details to start a useful review.</p>
+              <ul>
+                {!resume.personalInfo.fullName.trim() && <li>Add your name.</li>}
+                {!resume.personalInfo.email.trim() && <li>Add a contact email.</li>}
+                {!hasCareerContent && (
+                  <li>Add a summary, role, project, or education and skills.</li>
+                )}
+              </ul>
+            </>
+          ) : (
+            <p>Choose an available template to evaluate this resume.</p>
+          )}
+        </div>
       )}
     </section>
   )

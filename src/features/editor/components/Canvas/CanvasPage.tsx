@@ -11,6 +11,7 @@ interface CanvasPageProps {
   onSectionClick: (id: string, type: SectionType) => void
   onEntryClick: (entryId: string, type: SectionType) => void
   interactive?: boolean
+  onBackgroundClick?: () => void
 }
 
 export function CanvasPage({
@@ -21,10 +22,12 @@ export function CanvasPage({
   onSectionClick,
   onEntryClick,
   interactive = true,
+  onBackgroundClick,
 }: CanvasPageProps) {
   return (
     <div
       aria-label={`Page ${pageIndex + 1}`}
+      onClick={interactive ? onBackgroundClick : undefined}
       style={{
         position: 'relative',
         width: `${ptToPx(page.widthPt)}px`,

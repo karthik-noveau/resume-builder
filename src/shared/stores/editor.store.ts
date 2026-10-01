@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { SectionType, ResumeSnapshot } from '@/shared/types/resume.types'
 import type { StyleRole } from '@/shared/types/style.types'
-import type { PersonalInfoPanelField } from '@/shared/types/layout.types'
+import type { EditRef, PersonalInfoPanelField } from '@/shared/types/layout.types'
 
 const MAX_UNDO_STACK = 100
 const ZOOM_MIN = 0.5
@@ -18,6 +18,8 @@ export interface StyleTarget {
 }
 
 interface EditorState {
+  inspectorMode: 'content' | 'design'
+
   selectedSectionId: string | null
   selectedSectionType: SectionType | null
   /** The specific entry (e.g. one experience item) selected on canvas, if any — distinct from selectedSectionId, which targets a whole section-type block. */
@@ -34,16 +36,23 @@ interface EditorState {
   redoStack: ResumeSnapshot[]
   personalInfoOpenRequest: number
   personalInfoFocusTarget: PersonalInfoPanelField | null
+  contentFocusTarget: EditRef | null
+  contentFocusRequest: number
+  designOpenRequest: number
 }
 
 interface EditorActions {
+  setInspectorMode(mode: 'content' | 'design'): void
+
   selectSection(id: string, type: SectionType): void
   selectEntry(entryId: string, type: SectionType): void
   clearSelection(): void
   selectStyleTarget(target: StyleTarget): void
+  openStyleInspector(target: StyleTarget): void
   clearStyleTarget(): void
   setEditingKey(key: string | null): void
   openPersonalInfo(field?: PersonalInfoPanelField): void
+  requestContentFocus(target: EditRef): void
   setZoom(level: number): void
   zoomIn(): void
   zoomOut(): void
@@ -62,6 +71,8 @@ const clampZoom = (level: number) =>
 
 export const useEditorStore = create<EditorStore>((set, get) => ({
   // ─── State ──────────────────────────────────────────────────────────────────
+  inspectorMode: 'content',
+  setInspectorMode: (inspectorMode) => set({ inspectorMode }),
   selectedSectionId: null,
   selectedSectionType: null,
   selectedEntryId: null,
@@ -73,22 +84,29 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   redoStack: [],
   personalInfoOpenRequest: 0,
   personalInfoFocusTarget: null,
+  contentFocusTarget: null,
+  contentFocusRequest: 0,
+  designOpenRequest: 0,
 
   // ─── Selection ──────────────────────────────────────────────────────────────
   selectSection(id, type) {
-    set({ selectedSectionId: id, selectedSectionType: type, selectedEntryId: null, personalInfoFocusTarget: null })
+    set({ selectedSectionId: id, selectedSectionType: type, selectedEntryId: null, personalInfoFocusTarget: null, contentFocusTarget: null })
   },
 
   selectEntry(entryId, type) {
-    set({ selectedSectionId: null, selectedSectionType: type, selectedEntryId: entryId, personalInfoFocusTarget: null })
+    set({ selectedSectionId: null, selectedSectionType: type, selectedEntryId: entryId, personalInfoFocusTarget: null, contentFocusTarget: null })
   },
 
   clearSelection() {
-    set({ selectedSectionId: null, selectedSectionType: null, selectedEntryId: null, styleTarget: null, editingKey: null, personalInfoFocusTarget: null })
+    set({ selectedSectionId: null, selectedSectionType: null, selectedEntryId: null, styleTarget: null, editingKey: null, personalInfoFocusTarget: null, contentFocusTarget: null })
   },
 
   selectStyleTarget(target) {
     set({ styleTarget: target })
+  },
+
+  openStyleInspector(target) {
+    set((state) => ({ styleTarget: target, inspectorMode: 'design', designOpenRequest: state.designOpenRequest + 1 }))
   },
 
   clearStyleTarget() {
@@ -106,7 +124,12 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       selectedEntryId: null,
       personalInfoOpenRequest: state.personalInfoOpenRequest + 1,
       personalInfoFocusTarget: field ?? null,
+      contentFocusTarget: null,
     }))
+  },
+
+  requestContentFocus(contentFocusTarget) {
+    set((state) => ({ contentFocusTarget, contentFocusRequest: state.contentFocusRequest + 1 }))
   },
 
   // ─── Zoom ───────────────────────────────────────────────────────────────────

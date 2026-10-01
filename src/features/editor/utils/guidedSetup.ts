@@ -44,7 +44,7 @@ export function getGuidedStepErrors(resume: Resume, step: GuidedStep): string[] 
       })
       break
     case 'skills':
-      if (!resume.skills.length) errors.push('Add a skill category with at least one skill.')
+      if (!resume.skills.length) errors.push('Add at least one skill category and skill.')
       resume.skills.forEach((entry, i) => {
         required(entry.category, `Category name for skill group ${i + 1}`)
         if (!entry.skills.length) errors.push(`Add at least one skill to skill group ${i + 1}.`)

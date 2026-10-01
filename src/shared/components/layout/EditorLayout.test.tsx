@@ -19,11 +19,11 @@ describe('mobile editor panels', () => {
   it('opens the form directly after a selection and closes the sections drawer', async () => {
     const { rerender } = render(<EditorLayout {...props} propertiesRequest="0" />)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    await userEvent.click(screen.getByRole('button', { name: 'Open sections panel' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Sections' }))
     expect(screen.getByRole('dialog', { name: 'Sections' })).toBeVisible()
     rerender(<EditorLayout {...props} propertiesRequest="1" />)
     expect(screen.queryByRole('dialog', { name: 'Sections' })).not.toBeInTheDocument()
-    expect(screen.getByRole('dialog', { name: 'Properties' })).toBeVisible()
+    expect(screen.getByRole('main', { name: 'Properties panel' })).toBeVisible()
   })
 
   it('does not open a drawer on desktop or while touring', () => {

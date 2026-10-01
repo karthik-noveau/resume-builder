@@ -101,7 +101,7 @@
 
 .chevron {
   flex-shrink: 0;
-  transition: transform var(--duration-fast), opacity var(--duration-fast);
+  transition: opacity var(--duration-fast);
   opacity: 0;
 }
 

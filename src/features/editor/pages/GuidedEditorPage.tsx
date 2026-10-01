@@ -22,7 +22,7 @@ import { SummaryForm } from '../components/PropertiesPanel/SummaryForm'
 import { SectionProperties } from '../components/PropertiesPanel/SectionProperties'
 import { MockDataButton } from '../components/MockDataButton'
 import { GuidedFormContext, type GuidedFormSave } from '../hooks/useGuidedForm'
-import { getGuidedStepErrors, type GuidedStep } from '../utils/guidedSetup'
+import { getGuidedStepErrors, hasGuidedStepContent, type GuidedStep } from '../utils/guidedSetup'
 import { useActiveResume } from '../hooks/useActiveResume'
 import { ResumeLoadError } from '../components/ResumeLoadError'
 import { useResumeLayoutTree } from '../hooks/useResumeLayoutTree'
@@ -73,8 +73,8 @@ export function GuidedEditorPage() {
       formSavers.current.delete(save)
     }
   }, [])
-  const saveForms = useCallback(async () => {
-    const results = await Promise.all([...formSavers.current].map((save) => save()))
+  const saveForms = useCallback(async (validate = true) => {
+    const results = await Promise.all([...formSavers.current].map((save) => save(validate)))
     return results.every(Boolean)
   }, [])
   const isDesktop = useMediaQuery('(min-width: 1024px) and (min-height: 600px)')
@@ -149,13 +149,14 @@ export function GuidedEditorPage() {
     })
   }
 
-  const goToStep = async (targetIndex: number) => {
+  const goToStep = async (targetIndex: number, openFullEditor = false) => {
     if (navigationLock.current || targetIndex === stepIndex) return
     navigationLock.current = true
     setIsNavigating(true)
     try {
-      // Await validation and the final field's save, rather than racing its blur.
-      const formsValid = await saveForms()
+      // Full Editor and Back preserve unfinished drafts; advancing validates all prior steps.
+      const validateStep = !openFullEditor && targetIndex > stepIndex
+      const formsValid = await saveForms(validateStep)
       if (targetIndex < stepIndex) {
         clearValidation()
         setStepIndex(targetIndex)
@@ -169,20 +170,21 @@ export function GuidedEditorPage() {
       }
       const resume = useResumeStore.getState().activeResume
       if (!resume) return
-      // Stepper clicks and Finish enforce the same requirements as Next.
-      const firstIncomplete = STEPS.slice(0, targetIndex).findIndex(
-        (step) => getGuidedStepErrors(resume, step.id).length > 0
-      )
-      if (firstIncomplete !== -1) {
-        setStepIndex(firstIncomplete)
-        focusInvalidField()
-        return
+      if (validateStep) {
+        const firstIncomplete = STEPS.slice(0, targetIndex).findIndex(
+          (step) => getGuidedStepErrors(resume, step.id).length > 0
+        )
+        if (firstIncomplete !== -1) {
+          setStepIndex(firstIncomplete)
+          focusInvalidField()
+          return
+        }
       }
       clearValidation()
       if (targetIndex === STEPS.length) {
         await saveActiveResume()
         if (useResumeStore.getState().error) {
-          setFinishError('Could not save your latest changes. Please try Finish again.')
+          setFinishError('Could not save your latest changes. Please try again.')
           return
         }
         void navigate(`/editor/${resume.id}`)
@@ -238,7 +240,7 @@ export function GuidedEditorPage() {
             <button
               type="button"
               onClick={() => {
-                void goToStep(STEPS.length)
+                void goToStep(STEPS.length, true)
               }}
               disabled={isNavigating}
               className={styles.fullEditorLink}
@@ -264,7 +266,7 @@ export function GuidedEditorPage() {
               <ol className={styles.mobileStepperList}>
                 {STEPS.map((step, i) => {
                   const isActive = i === stepIndex
-                  const isDone = getGuidedStepErrors(activeResume, step.id).length === 0
+                  const isDone = hasGuidedStepContent(activeResume, step.id) && getGuidedStepErrors(activeResume, step.id).length === 0
                   return (
                     <li key={step.id}>
                       <button
@@ -303,7 +305,7 @@ export function GuidedEditorPage() {
               <ol>
                 {STEPS.map((step, i) => {
                   const isActive = i === stepIndex
-                  const isDone = getGuidedStepErrors(activeResume, step.id).length === 0
+                  const isDone = hasGuidedStepContent(activeResume, step.id) && getGuidedStepErrors(activeResume, step.id).length === 0
                   const isLast = i === STEPS.length - 1
                   return (
                     <li
@@ -341,7 +343,7 @@ export function GuidedEditorPage() {
                           )}
                         >
                           {isDone ? (
-                            <Check size={16} strokeWidth={3} aria-hidden="true" />
+                            <Check size={16} strokeWidth={2.5} aria-hidden="true" />
                           ) : (
                             <step.Icon size={16} aria-hidden={true} />
                           )}
@@ -395,7 +397,7 @@ export function GuidedEditorPage() {
                       Step {stepIndex + 1} of {STEPS.length}
                     </p>
                     <p className={styles.requiredHint}>
-                      <span aria-hidden="true">*</span> Required fields
+                      Fields marked * are required. Full Editor is available anytime.
                     </p>
                   </div>
                 </div>

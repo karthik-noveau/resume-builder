@@ -2,14 +2,19 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  min-width: 0;
+  width: 100%;
 }
 
 .group {
   display: flex;
-  flex-wrap: nowrap;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: var(--radius-medium);
+  background-color: rgb(var(--color-background));
 }
 
 .mobileLabel {
@@ -18,25 +23,23 @@
 
 .filterButton {
   display: inline-flex;
-  flex-shrink: 0;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  min-height: 38px;
-  padding: 7px 14px;
-  border-radius: var(--radius-pill);
-  font-size: var(--text-base);
-  font-weight: 600;
-  white-space: nowrap;
-  background-color: rgb(var(--color-surface));
+  min-height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
   color: rgb(var(--color-text-secondary));
-  border: 1px solid rgb(var(--color-divider));
-  transition:
-    background-color var(--duration-fast),
-    color var(--duration-fast);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color var(--duration-fast), color var(--duration-fast);
 }
 
 .filterButton:hover {
-  background-color: rgb(var(--color-surface-elevated));
+  background-color: rgb(var(--color-surface) / 60%);
   color: rgb(var(--color-text-primary));
 }
 
@@ -47,15 +50,34 @@
 
 .active,
 .active:hover {
-  background-image: var(--gradient-brand);
-  background-color: rgb(var(--color-primary));
-  color: #fff;
-  border-color: transparent;
+  background-color: rgb(var(--color-surface));
+  color: rgb(var(--color-primary));
+  box-shadow: 0 1px 3px rgb(var(--color-text-primary) / 10%);
+  font-weight: 600;
+}
+
+.styleFilter {
+  flex: 0 0 158px;
+  min-width: 0;
+}
+
+.styleSelect:global(.ant-select) {
+  height: 40px;
+  border-radius: var(--radius-medium);
+  font-size: var(--text-sm);
+}
+
+.styleSelect :global(.ant-select-prefix) {
+  display: flex;
+  align-items: center;
+  margin-inline-end: 8px;
+  color: rgb(var(--color-text-muted));
 }
 
 .searchWrap {
   position: relative;
-  width: 100%;
+  flex: 1 1 180px;
+  min-width: 0;
 }
 
 .searchIcon {
@@ -69,16 +91,14 @@
 
 .searchInput {
   width: 100%;
-  height: var(--control-lg);
-  padding: 0 16px 0 40px;
+  height: 40px;
+  padding: 0 12px 0 36px;
   background-color: rgb(var(--color-surface));
   border: 1px solid rgb(var(--color-divider));
-  border-radius: var(--radius-control);
-  font-size: var(--text-base);
+  border-radius: var(--radius-medium);
+  font-size: var(--text-sm);
   color: rgb(var(--color-text-primary));
-  transition:
-    border-color var(--duration-fast),
-    box-shadow var(--duration-fast);
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
 }
 
 .searchInput::placeholder {
@@ -95,88 +115,33 @@
   box-shadow: var(--shadow-focus-ring);
 }
 
-@media (min-width: 768px) {
-  .searchWrap {
-    width: 16rem;
-    margin-left: auto;
-  }
-}
-
 .compact {
   gap: 8px;
 }
 
-.compact .filterButton {
-  min-height: 36px;
-  padding: 6px 11px;
-  font-size: var(--text-sm);
-}
-
-.compact .group {
-  gap: 6px;
-}
-
-.compact .searchWrap {
-  flex: 0 1 240px;
-}
-
-.compact .searchInput {
-  height: 36px;
-  font-size: var(--text-sm);
-}
-
 @media (max-width: 1023px), (pointer: coarse) {
-  .filterButton,
-  .compact .filterButton {
+  .filterButton {
     min-height: 44px;
   }
 
   .searchInput,
-  .compact .searchInput {
+  .styleSelect:global(.ant-select) {
     height: 44px;
     font-size: 16px;
   }
 }
 
 @media (max-width: 639px) {
-  .filters,
-  .filters.compact {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
-    width: 100%;
-    min-width: 0;
-  }
-
-  .group,
-  .compact .group {
+  .group {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 4px;
     width: 100%;
-    padding: 4px;
-    border: 1px solid rgb(var(--color-divider));
-    border-radius: 12px;
-    background-color: rgb(var(--color-surface-elevated));
   }
 
-  .filterButton,
-  .compact .filterButton {
-    justify-content: center;
+  .filterButton {
     min-width: 0;
-    min-height: 44px;
-    padding: 8px 4px;
-    border-color: transparent;
-    border-radius: 8px;
-    background-color: transparent;
-    font-size: var(--text-base);
+    padding: 0 4px;
     touch-action: manipulation;
-  }
-
-  .filterButton.active,
-  .compact .filterButton.active {
-    background-color: rgb(var(--color-primary));
-    box-shadow: 0 2px 6px rgb(var(--color-primary) / 18%);
   }
 
   .allSuffix,
@@ -189,18 +154,11 @@
     display: inline;
   }
 
-  .searchWrap,
-  .compact .searchWrap {
-    width: 100%;
-    min-width: 0;
-    margin: 0;
+  .styleFilter {
+    flex-basis: 144px;
   }
 
-  .searchInput,
-  .compact .searchInput {
-    min-width: 0;
-    height: 46px;
-    border-radius: 12px;
-    font-size: 16px;
+  .searchWrap {
+    flex-basis: 120px;
   }
 }

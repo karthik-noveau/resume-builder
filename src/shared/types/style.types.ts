@@ -71,6 +71,14 @@ export interface ElementStyle {
   paddingRightPt?: number
   paddingBottomPt?: number
   paddingLeftPt?: number
+  /** Extra outer spacing, in points, added to the template's layout. */
+  marginTopPt?: number
+  marginRightPt?: number
+  marginBottomPt?: number
+  marginLeftPt?: number
+  /** Divider geometry only; text and other shapes ignore these overrides. */
+  lineThicknessPt?: number
+  lineLengthPercent?: number
 }
 
 export interface PageStyle {
@@ -97,6 +105,8 @@ export const ELEMENT_STYLE_KEYS: (keyof ElementStyle)[] = [
   'lineHeight', 'letterSpacing', 'textAlign', 'textTransform',
   'fontStyle', 'textDecoration',
   'paddingTopPt', 'paddingRightPt', 'paddingBottomPt', 'paddingLeftPt',
+  'marginTopPt', 'marginRightPt', 'marginBottomPt', 'marginLeftPt',
+  'lineThicknessPt', 'lineLengthPercent',
 ]
 
 export function isEmptyStyle(style: ElementStyle | undefined): boolean {

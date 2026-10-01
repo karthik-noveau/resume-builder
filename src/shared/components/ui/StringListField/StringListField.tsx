@@ -5,6 +5,7 @@ import { useAutoGrowTextarea } from '@/shared/hooks/useAutoGrowTextarea'
 import styles from './StringListField.module.css'
 
 interface StringListFieldProps {
+  name?: string
   label: string
   items: string[]
   onChange: (items: string[]) => void
@@ -19,17 +20,20 @@ function AutoGrowRow({
   placeholder,
   onChange,
   className,
+  label,
 }: {
   value: string
   placeholder?: string
   onChange: (value: string) => void
   className: string
+  label: string
 }) {
   const autoGrowRef = useAutoGrowTextarea(value)
   return (
     <textarea
       ref={autoGrowRef}
       rows={1}
+      aria-label={label}
       value={value}
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
@@ -40,6 +44,7 @@ function AutoGrowRow({
 
 /** Add/edit/remove list of plain strings — used for bullet points and tech/tag lists. */
 export function StringListField({
+  name,
   label,
   items,
   onChange,
@@ -62,14 +67,15 @@ export function StringListField({
   const fieldClasses = clsx(styles.field, multiline ? styles.fieldMultiline : styles.fieldSingle)
 
   return (
-    <div className={styles.root}>
+    <div className={styles.root} data-list-field={name}>
       <p className={styles.label}>{label}</p>
 
       {items.map((item, index) => (
-        <div key={index} className={styles.row}>
+        <div key={index} className={styles.row} data-list-index={index}>
           {multiline ? (
             <AutoGrowRow
               value={item}
+              label={`${label} item ${index + 1}`}
               placeholder={placeholder}
               onChange={(value) => updateItem(index, value)}
               className={fieldClasses}
@@ -77,6 +83,7 @@ export function StringListField({
           ) : (
             <input
               type="text"
+              aria-label={`${label} item ${index + 1}`}
               value={item}
               placeholder={placeholder}
               onChange={(e) => updateItem(index, e.target.value)}

@@ -5,6 +5,7 @@ import type { ElementStyle, ResumeStyleOverrides, StyleRole, TextTransform } fro
 import { HEADING_ROLES, ROLE_SCALE_KEY, STYLE_ROLES } from '@/shared/types/style.types'
 import { annotateStyleTargets, isTextNode } from './style.roles'
 import { estimateStyledTextHeight } from './layout.utils'
+import { applyMarginOverrides } from './style.margins'
 
 /**
  * Applies a resume's per-element design overrides.
@@ -97,6 +98,7 @@ export function applyStyleOverrides(tree: LayoutTree, resume: Resume): LayoutTre
       const baseline = new Map<LayoutNode, TextMetrics>()
       applyToNodes(page.nodes, roles, elements, baseline)
       repairFlow(page.nodes, baseline)
+      applyMarginOverrides(page.nodes, roles, elements)
     }
   }
 
@@ -149,6 +151,27 @@ function applyToNodes(
       }
 
       node.styles = next
+      if (node.type === 'divider' && elementStyle) {
+        const vertical = node.heightPt > node.widthPt
+        const length = vertical ? node.heightPt : node.widthPt
+        const thickness = vertical ? node.widthPt : node.heightPt
+        const nextLength = length * Math.min(100, Math.max(10, elementStyle.lineLengthPercent ?? 100)) / 100
+        const nextThickness = elementStyle.lineThicknessPt === undefined ? thickness
+          : Math.min(8, Math.max(0.25, elementStyle.lineThicknessPt))
+        const shift = (length - nextLength) * (next.textAlign === 'right' ? 1 : next.textAlign === 'center' ? 0.5 : 0)
+        // Grow around the original centreline, preserving neighbouring content.
+        if (vertical) {
+          node.xPt += (thickness - nextThickness) / 2
+          node.yPt += shift
+          node.widthPt = nextThickness
+          node.heightPt = nextLength
+        } else {
+          node.xPt += shift
+          node.yPt += (thickness - nextThickness) / 2
+          node.widthPt = nextLength
+          node.heightPt = nextThickness
+        }
+      }
       if (node.content !== undefined && next.textTransform && next.textTransform !== 'none') {
         // Transforming the content string rather than painting it means the PDF
         // exporter, which only reads `content`, stays in step with the canvas

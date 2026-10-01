@@ -1,18 +1,29 @@
-/* Keep Sonner's positioning and stacking; only restyle the notification surface. */
+/* Compact, neutral notices with color confined to the status icon. */
+.toaster[data-sonner-toaster] {
+  font-family: var(--font-sans);
+}
+
 .toast[data-sonner-toast] {
   --toast-status-color: var(--color-text-muted);
   font-family: var(--font-sans);
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   line-height: 1.5;
-  min-height: 56px;
-  padding: var(--space-3) 48px var(--space-3) var(--space-3);
-  gap: var(--space-3);
+  min-height: 52px;
+  padding: 14px 48px 14px 16px;
+  gap: 10px;
   align-items: center;
   background-color: rgb(var(--color-surface));
   color: rgb(var(--color-text-primary));
-  border: 1px solid rgb(var(--color-divider) / 80%);
-  border-radius: var(--radius-medium);
-  box-shadow: var(--shadow-level-2);
+  border: 1px solid rgb(var(--color-text-muted) / 25%);
+  border-radius: var(--radius-large);
+  box-shadow: 0 4px 20px rgb(0 0 0 / 10%);
+  transition: opacity var(--duration-fast);
+  animation: none;
+}
+
+/* Fade in place; Sonner's default entrance/exit offsets move the whole card. */
+.toast[data-sonner-toast]:not([data-swiping='true']):not([data-swipe-out='true']) {
+  transform: translateY(calc(var(--lift) * var(--offset, 0px)));
 }
 
 .toast[data-sonner-toast][data-type='success'] {
@@ -48,13 +59,12 @@
 }
 
 .toast[data-sonner-toast] .icon {
-  width: 28px;
-  height: 28px;
+  width: 18px;
+  height: 20px;
+  flex-shrink: 0;
   margin: 0;
   justify-content: center;
-  border-radius: var(--radius-control);
-  background-color: rgb(var(--toast-status-color) / 10%);
-  color: color-mix(in srgb, rgb(var(--toast-status-color)) 65%, rgb(var(--color-text-primary)));
+  color: rgb(var(--toast-status-color));
 }
 
 .toast[data-sonner-toast] .icon svg {
@@ -64,12 +74,12 @@
 /* Reserve space for a visible, centered dismiss control, including long messages.
    Sonner's default control sits outside the card and hides poorly on touch devices. */
 .toast[data-sonner-toast] .closeButton[data-close-button] {
-  right: 10px;
+  right: 8px;
   left: auto;
   top: 50%;
   transform: translateY(-50%);
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border: none;
   border-radius: var(--radius-small);
   background-color: transparent;
@@ -87,4 +97,20 @@
 .toast[data-sonner-toast] .closeButton[data-close-button]:focus-visible {
   outline: 2px solid rgb(var(--color-primary));
   outline-offset: 2px;
+}
+
+/* Sonner switches to full-width notices at 600px. Narrow desktop, tablet and
+   short landscape editors also need clearance above their bottom actions. */
+@media (min-width: 601px) and (max-width: 1279px), (min-width: 601px) and (max-height: 599px) {
+  .toaster[data-sonner-toaster][data-y-position='bottom'] {
+    bottom: calc(112px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (pointer: coarse), (max-width: 600px) {
+  .toast[data-sonner-toast] .closeButton[data-close-button] {
+    width: 44px;
+    height: 44px;
+    right: 2px;
+  }
 }

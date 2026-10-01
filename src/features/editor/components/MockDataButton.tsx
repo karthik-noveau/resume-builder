@@ -1,6 +1,5 @@
 import { useContext, useState } from 'react'
 import { FileText } from 'lucide-react'
-import { toast } from 'sonner'
 import { getGuidedMockPatch, GUIDED_STEP_LABELS, hasGuidedStepContent, type GuidedStep } from '../utils/guidedSetup'
 import { GuidedFormContext } from '../hooks/useGuidedForm'
 import { useResumeStore } from '@/shared/stores/resume.store'
@@ -22,7 +21,6 @@ export function MockDataButton({ step, onApplied }: { step: GuidedStep; onApplie
     updateResume(getGuidedMockPatch(resume, step))
     setConfirming(false)
     onApplied?.()
-    toast.success(`Mock data added to ${GUIDED_STEP_LABELS[step].toLowerCase()}.`, { id: 'guided-mock-data' })
   }
 
   const handleClick = async () => {
@@ -35,18 +33,18 @@ export function MockDataButton({ step, onApplied }: { step: GuidedStep; onApplie
 
   return (
     <>
-      <Button variant="secondary" className={styles.trigger} onClick={() => { void handleClick() }} disabled={!activeResume}
-        title={`Fill only ${GUIDED_STEP_LABELS[step].toLowerCase()} with mock data`}>
+      <Button variant="ghost" className={styles.trigger} onClick={() => { void handleClick() }} disabled={!activeResume}
+        title={`Fill only ${GUIDED_STEP_LABELS[step].toLowerCase()} with an example`}>
         <FileText size={16} strokeWidth={1.75} aria-hidden="true" />
-        Use mock data
+        Fill with example
       </Button>
       <ConfirmDialog
         isOpen={confirming}
         onClose={() => setConfirming(false)}
         onConfirm={applyMockData}
-        title={`Replace ${GUIDED_STEP_LABELS[step].toLowerCase()} with mock data?`}
+        title={`Replace ${GUIDED_STEP_LABELS[step].toLowerCase()} with an example?`}
         description="Only this section will be replaced. Your other sections and design stay unchanged, and you can undo this change."
-        confirmLabel="Replace with mock data"
+        confirmLabel="Replace with example"
       />
     </>
   )

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { Navigate, useNavigate, useParams } from 'react-router'
+import { useState } from 'react'
+import { useNavigate, useParams } from 'react-router'
 import { FilePenLine } from 'lucide-react'
 import { EditorLayout } from '@/shared/components/layout/EditorLayout'
 import { Toolbar } from '../components/Toolbar/Toolbar'
@@ -28,21 +28,17 @@ import { EditorTour } from '../components/EditorTour/EditorTour'
 import styles from './EditorPage.module.css'
 import { ResumeLoadError } from '../components/ResumeLoadError'
 import { prepareExport } from '../utils/prepareExport'
+import { findStyleNode } from '../utils/findStyleNode'
 
 export function EditorPage() {
   const { resumeId } = useParams<{ resumeId: string }>()
   const navigate = useNavigate()
-  const openedResumeId = useRef<string | null>(null)
   const [inspectorRequest, setInspectorRequest] = useState(0)
   const personalInfoRequest = useEditorStore((s) => s.personalInfoOpenRequest)
+  const contentFocusRequest = useEditorStore((s) => s.contentFocusRequest)
 
   const { activeResume, isLoading, loadError, retry } = useActiveResume(resumeId)
   const hasContent = activeResume !== null && hasResumeContent(activeResume)
-  useEffect(() => {
-    if (!isLoading && activeResume?.id === resumeId && hasContent) {
-      openedResumeId.current = resumeId ?? null
-    }
-  }, [activeResume?.id, resumeId, isLoading, hasContent])
   const isSaving = useResumeStore((s) => s.isSaving)
   const isDirty = useResumeStore((s) => s.isDirty)
   const saveError = useResumeStore((s) => s.error)
@@ -122,18 +118,18 @@ export function EditorPage() {
     )
   }
 
-  // New/reopened blank drafts belong in setup. If content was cleared while
-  // editing, keep the toolbar and undo history instead of showing a blank page.
-  if (!hasContent && openedResumeId.current !== activeResume.id) {
-    return <Navigate to={`/editor/${activeResume.id}/guided`} replace />
-  }
-
   const continueSetup = async () => {
     await saveActiveResume()
     if (!useResumeStore.getState().error) void navigate(`/editor/${activeResume.id}/guided`)
   }
 
   const handleSelectSection = (type: SectionType) => {
+    const section = findStyleNode(layoutTree, `section:${type}`)
+    if (section?.styleKey) {
+      useEditorStore.getState().selectStyleTarget({
+        key: section.styleKey, role: null, label: section.styleLabel ?? `${type} section`,
+      })
+    } else useEditorStore.getState().clearStyleTarget()
     selectSection(type, type)
     setInspectorRequest((value) => value + 1)
   }
@@ -159,13 +155,7 @@ export function EditorPage() {
       {/* Titled with the resume so browser tabs and history stay distinguishable. */}
       <Seo title={`Editing ${activeResume.title}`} description="Resume editor." noindex />
       <EditorLayout
-        propertiesRequest={`${inspectorRequest}:${personalInfoRequest}`}
-        onPropertiesOpened={() => {
-          // The drawer focuses its container on opening. Restore the requested
-          // field once that focus transfer and the opening transition finish.
-          const editor = useEditorStore.getState()
-          if (editor.personalInfoFocusTarget) editor.openPersonalInfo(editor.personalInfoFocusTarget)
-        }}
+        propertiesRequest={`${inspectorRequest}:${personalInfoRequest}:${contentFocusRequest}`}
         tourOpen={tour.isOpen}
         toolbar={
           <Toolbar

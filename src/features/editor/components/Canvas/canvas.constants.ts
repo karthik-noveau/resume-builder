@@ -17,17 +17,7 @@ export const DEFAULT_MARGINS_PT = DEFAULT_MARGINS_MM * MM_TO_PT
 
 export const CANVAS_PAGE_GAP_PX = 24
 
-/**
- * The three states a canvas node can show, in deliberate order of weight.
- *
- * Only the style target draws a full-strength stroke. A resume is mostly text,
- * and a saturated 2px box around a line of it reads as a debug outline rather
- * than product chrome — so hover and selection carry their meaning with a wash
- * and a soft halo instead. That difference in kind, not just in colour, is what
- * lets a selected entry and a targeted element inside it be legible at once;
- * the previous pair were both hard rings, and the dash used to tell them apart
- * only added texture to the noise.
- */
+/** Selection uses a single outline; ancestors stand down for a selected field. */
 export interface CanvasStateStyle {
   outline: string
   outlineOffset: string
@@ -42,17 +32,15 @@ export const CANVAS_HOVER: CanvasStateStyle = {
 }
 
 export const CANVAS_SELECTED: CanvasStateStyle = {
-  outline: '1px solid rgb(var(--color-primary) / 30%)',
-  outlineOffset: '4px',
-  background: 'rgb(var(--color-primary) / 4%)',
-  shadow: '0 0 0 5px rgb(var(--color-primary) / 6%)',
+  outline: '1.5px solid rgb(var(--color-primary) / 65%)',
+  outlineOffset: '3px',
+  background: 'rgb(var(--color-primary) / 2%)',
 }
 
 export const CANVAS_STYLE_TARGET: CanvasStateStyle = {
-  outline: '1.5px solid rgb(var(--color-primary) / 85%)',
+  outline: '1.5px solid rgb(var(--color-primary) / 70%)',
   outlineOffset: '3px',
-  background: 'rgb(var(--color-primary) / 6%)',
-  shadow: '0 0 0 4px rgb(var(--color-primary) / 13%)',
+  background: 'rgb(var(--color-primary) / 2%)',
 }
 
 /** Rounded enough to read as a surface, not so round it looks like a pill. */

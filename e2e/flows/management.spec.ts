@@ -13,17 +13,17 @@ test.describe('Management Flows', () => {
     // Fill in name to make it unique
     await panel.getByRole('textbox', { name: /full name/i }).fill('Management Test');
     await panel.getByRole('textbox', { name: /full name/i }).blur();
-    await expect(page.getByText('Saved')).toBeVisible();
+    await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 
     // 2. Go back to dashboard
     await page.getByRole('link', { name: /back to dashboard/i }).click();
     await expect(page).toHaveURL(/\/app$/);
 
     // 3. Duplicate (via the card's "Resume actions" menu)
-    const resumeCard = page.locator('article').filter({ hasText: /management test|untitled resume/i }).first();
+    const resumeCard = page.getByRole('article', { name: 'Untitled Resume', exact: true });
     await expect(resumeCard).toBeVisible();
 
-    await resumeCard.getByRole('button', { name: 'Resume actions' }).click();
+    await resumeCard.getByRole('button', { name: /^Actions for / }).click();
     await page.getByRole('menuitem', { name: /duplicate/i }).click();
 
     // Should redirect to the new copy's editor
@@ -36,8 +36,8 @@ test.describe('Management Flows', () => {
     await expect(page).toHaveURL(/\/app$/);
 
     // Delete the original (one without "Copy")
-    const originalCard = page.locator('article').filter({ hasText: /management test/i }).filter({ hasNotText: /copy/i }).first();
-    await originalCard.getByRole('button', { name: 'Resume actions' }).click();
+    const originalCard = page.getByRole('article', { name: 'Untitled Resume', exact: true });
+    await originalCard.getByRole('button', { name: /^Actions for / }).click();
     await page.getByRole('menuitem', { name: /delete/i }).click();
 
     const confirmDialog = page.getByRole('dialog');
