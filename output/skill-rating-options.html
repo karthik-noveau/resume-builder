@@ -1,0 +1,418 @@
+<div id="skill-rating-options" aria-label="Skill rating design options">
+  <div class="sr-choices" aria-label="Choose a skill rating design"></div>
+  <div class="sr-selection">
+    <span class="sr-selection-label" aria-live="polite">No design selected</span>
+    <button class="sr-implement" type="button" disabled>Implement selection</button>
+  </div>
+  <p class="sr-feedback" role="status" hidden></p>
+</div>
+
+<style>
+  #skill-rating-options {
+    --sr-surface: light-dark(#ffffff, #232129);
+    --sr-soft: light-dark(#f8f7fc, #2c2934);
+    --sr-text: light-dark(#262137, #f2eefb);
+    --sr-muted: light-dark(#706980, #b5aec5);
+    --sr-line: light-dark(#e7e2ef, #45404f);
+    --sr-track: light-dark(#e6e1ee, #51495e);
+    --sr-purple: light-dark(#7943ce, #ba94fa);
+    --sr-purple-soft: light-dark(#f0e8fc, #403052);
+    --sr-on-purple: light-dark(#ffffff, #22152f);
+    --sr-danger: light-dark(#b43750, #fda2b7);
+    --sr-row-gap: 14px;
+    color: var(--sr-text);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    width: 100%;
+  }
+  #skill-rating-options * { box-sizing: border-box; }
+  #skill-rating-options button, #skill-rating-options input, #skill-rating-options select { font: inherit; }
+  #skill-rating-options button, #skill-rating-options select { cursor: pointer; }
+  #skill-rating-options button { color: inherit; }
+  #skill-rating-options .sr-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  #skill-rating-options .sr-option { min-width: 0; border: 1px solid var(--sr-line); border-radius: 12px; background: var(--sr-surface); }
+  #skill-rating-options .sr-option[data-chosen="true"] { border-color: var(--sr-purple); }
+  #skill-rating-options .sr-option-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; border-bottom: 1px solid var(--sr-line); }
+  #skill-rating-options .sr-option-number { color: var(--sr-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  #skill-rating-options .sr-option-title { flex: 1; font-weight: 500; }
+  #skill-rating-options .sr-pick { margin: 0; width: 16px; height: 16px; accent-color: var(--sr-purple); cursor: pointer; }
+  #skill-rating-options .sr-demo { padding: 16px; }
+  #skill-rating-options .sr-category { display: flex; justify-content: space-between; color: var(--sr-muted); font-size: 12px; margin-bottom: 14px; }
+  #skill-rating-options .sr-rows { display: flex; flex-direction: column; gap: var(--sr-row-gap); }
+  #skill-rating-options .sr-row { min-width: 0; position: relative; }
+  #skill-rating-options .sr-name-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  #skill-rating-options .sr-name { border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--sr-text); padding: 5px 6px; margin-left: -6px; min-width: 0; width: 100%; height: 32px; }
+  #skill-rating-options .sr-name:hover { border-color: var(--sr-line); }
+  #skill-rating-options .sr-name:focus { background: var(--sr-soft); }
+  #skill-rating-options .sr-remove { display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 32px; padding: 0; border: 0; background: transparent; color: var(--sr-muted); border-radius: 5px; }
+  #skill-rating-options .sr-remove:hover { color: var(--sr-danger); background: var(--sr-soft); }
+  #skill-rating-options .sr-remove svg { width: 14px; height: 14px; }
+  #skill-rating-options .sr-rating-row { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  #skill-rating-options .sr-rating-control { display: flex; align-items: center; gap: 0; min-width: 0; }
+  #skill-rating-options .sr-value { color: var(--sr-muted); white-space: nowrap; font-size: 12px; font-variant-numeric: tabular-nums; min-width: 25px; }
+  #skill-rating-options .sr-point { display: grid; place-items: center; width: 32px; height: 30px; flex-shrink: 0; border: 0; background: transparent; padding: 0; border-radius: 4px; color: var(--sr-muted); }
+  #skill-rating-options .sr-point:hover { background: var(--sr-soft); }
+  #skill-rating-options .sr-dot { width: 7px; height: 7px; background: var(--sr-track); border-radius: 50%; }
+  #skill-rating-options .sr-dash { width: 22px; height: 4px; background: var(--sr-track); border-radius: 3px; }
+  #skill-rating-options .sr-tick { width: 4px; height: 14px; background: var(--sr-track); border-radius: 2px; }
+  #skill-rating-options .sr-point[data-filled="true"] .sr-dot,
+  #skill-rating-options .sr-point[data-filled="true"] .sr-dash,
+  #skill-rating-options .sr-point[data-filled="true"] .sr-tick { background: var(--sr-purple); }
+  #skill-rating-options .sr-numeral { display: grid; place-items: center; width: 25px; height: 25px; border-radius: 50%; }
+  #skill-rating-options .sr-point[aria-pressed="true"] .sr-numeral { background: var(--sr-purple-soft); color: var(--sr-purple); font-weight: 500; }
+  #skill-rating-options .sr-underlined { height: 28px; display: grid; place-items: center; width: 24px; border-bottom: 2px solid transparent; }
+  #skill-rating-options .sr-point[aria-pressed="true"] .sr-underlined { color: var(--sr-purple); border-bottom-color: var(--sr-purple); font-weight: 500; }
+  #skill-rating-options .sr-stepper { border: 1px solid var(--sr-line); border-radius: 6px; display: flex; align-items: center; height: 32px; }
+  #skill-rating-options .sr-step-button { border: 0; background: transparent; width: 32px; height: 30px; display: grid; place-items: center; padding: 0; }
+  #skill-rating-options .sr-step-button svg { width: 13px; height: 13px; }
+  #skill-rating-options .sr-step-button:disabled { color: var(--sr-track); cursor: default; }
+  #skill-rating-options .sr-step-value { min-width: 40px; text-align: center; font-variant-numeric: tabular-nums; font-size: 12px; }
+  #skill-rating-options .sr-slider { width: 160px; max-width: 100%; height: 30px; margin: 0; accent-color: var(--sr-purple); }
+  #skill-rating-options .sr-inline .sr-name-row { min-height: 52px; border-bottom: 1px solid var(--sr-line); }
+  #skill-rating-options .sr-inline .sr-rating-row { flex: 0 0 auto; gap: 0; }
+  #skill-rating-options .sr-inline .sr-rating-control { flex: 0 0 auto; }
+  #skill-rating-options .sr-menu { border: 0; background: var(--sr-surface); color: var(--sr-purple); height: 32px; width: 57px; padding: 0 0 0 4px; font-size: 13px; }
+  #skill-rating-options .sr-number-wrap { display: flex; align-items: center; border-bottom: 1px solid var(--sr-line); height: 32px; color: var(--sr-muted); font-size: 12px; }
+  #skill-rating-options .sr-direct { width: 32px; min-width: 0; padding: 0; border: 0; text-align: center; height: 30px; background: transparent; color: var(--sr-text); font-variant-numeric: tabular-nums; appearance: textfield; -moz-appearance: textfield; }
+  #skill-rating-options .sr-direct::-webkit-inner-spin-button, #skill-rating-options .sr-direct::-webkit-outer-spin-button { appearance: none; margin: 0; }
+  #skill-rating-options .sr-popup-wrap { position: static; }
+  #skill-rating-options .sr-score-button { background: var(--sr-purple-soft); color: var(--sr-purple); height: 28px; min-width: 46px; border: 0; border-radius: 14px; padding: 0 8px; font-size: 12px; font-variant-numeric: tabular-nums; }
+  #skill-rating-options .sr-popup { position: absolute; z-index: 10; right: 0; top: calc(100% + 6px); display: flex; padding: 7px; gap: 2px; border: 1px solid var(--sr-line); border-radius: 8px; background: var(--sr-surface); box-shadow: 0 4px 12px light-dark(#26213714, #00000035); }
+  #skill-rating-options .sr-popup[hidden] { display: none; }
+  #skill-rating-options .sr-add { display: flex; align-items: center; gap: 6px; padding: 0; border: 0; background: transparent; color: var(--sr-purple); height: 32px; margin-top: 14px; }
+  #skill-rating-options .sr-add svg { width: 13px; height: 13px; }
+  #skill-rating-options .sr-selection { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--sr-line); }
+  #skill-rating-options .sr-selection-label { font-size: 13px; }
+  #skill-rating-options .sr-implement { padding: 9px 16px; border: 0; border-radius: 7px; background: var(--sr-purple); color: var(--sr-on-purple); }
+  #skill-rating-options .sr-implement:disabled { background: var(--sr-soft); color: var(--sr-muted); cursor: default; }
+  #skill-rating-options .sr-feedback { color: var(--sr-muted); font-size: 13px; margin: 12px 0 0; }
+  #skill-rating-options .sr-variant-squares .sr-dot { width: 7px; height: 7px; border-radius: 1px; }
+  #skill-rating-options .sr-variant-capsules .sr-dash { width: 11px; height: 17px; border-radius: 6px; }
+  #skill-rating-options .sr-variant-marker .sr-dot { width: 11px; height: 11px; }
+  #skill-rating-options .sr-variant-marker .sr-point[data-filled="true"] .sr-dot { background: var(--sr-track); }
+  #skill-rating-options .sr-variant-marker .sr-point[aria-pressed="true"] .sr-dot { background: var(--sr-purple); }
+  #skill-rating-options .sr-variant-connected .sr-rating-control { position: relative; }
+  #skill-rating-options .sr-variant-connected .sr-rating-control::before { content: ''; position: absolute; left: 16px; right: 16px; top: calc(50% - 1px); height: 2px; background: linear-gradient(to right, var(--sr-purple) var(--sr-progress), var(--sr-track) var(--sr-progress)); }
+  #skill-rating-options .sr-variant-connected .sr-point { position: relative; }
+  #skill-rating-options .sr-variant-connected .sr-dot { width: 9px; height: 9px; }
+  #skill-rating-options .sr-variant-rising .sr-point { display: flex; justify-content: center; align-items: flex-end; padding-bottom: 6px; }
+  #skill-rating-options .sr-variant-rising .sr-tick { width: 10px; height: calc(4px + var(--sr-step) * 3px); border-radius: 2px 2px 0 0; }
+  #skill-rating-options .sr-star { display: grid; place-items: center; color: var(--sr-track); }
+  #skill-rating-options .sr-star svg { width: 17px; height: 17px; stroke-width: 1.5; }
+  #skill-rating-options .sr-point[data-filled="true"] .sr-star { color: var(--sr-purple); }
+  #skill-rating-options .sr-point[data-filled="true"] .sr-star svg { fill: var(--sr-purple); }
+  #skill-rating-options .sr-variant-diamonds .sr-dot { width: 8px; height: 8px; border-radius: 1px; transform: rotate(45deg); }
+  #skill-rating-options .sr-labeled-point { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; }
+  #skill-rating-options .sr-variant-labeled .sr-point { height: 38px; }
+  #skill-rating-options .sr-variant-tiles .sr-numeral { border-radius: 4px; background: var(--sr-soft); }
+  #skill-rating-options .sr-variant-tiles .sr-point[aria-pressed="true"] .sr-numeral { background: var(--sr-purple); color: var(--sr-on-purple); }
+  #skill-rating-options .sr-variant-segmented .sr-rating-control { padding: 3px; border-radius: 7px; background: var(--sr-soft); }
+  #skill-rating-options .sr-variant-segmented .sr-numeral { width: 100%; height: 100%; border-radius: 4px; }
+  #skill-rating-options .sr-variant-segmented .sr-point[aria-pressed="true"] .sr-numeral { background: var(--sr-surface); color: var(--sr-purple); }
+  #skill-rating-options .sr-variant-filled .sr-numeral { border-radius: 5px; }
+  #skill-rating-options .sr-variant-filled .sr-point[data-filled="true"] .sr-numeral { background: var(--sr-purple-soft); color: var(--sr-purple); }
+  #skill-rating-options .sr-variant-filled .sr-point[aria-pressed="true"] .sr-numeral { background: var(--sr-purple); color: var(--sr-on-purple); }
+  #skill-rating-options .sr-variant-fractions .sr-numeral { font-size: 11px; width: 31px; border-radius: 4px; }
+  #skill-rating-options .sr-slider-wrap { display: flex; flex-direction: column; }
+  #skill-rating-options .sr-slider-labels { display: flex; justify-content: space-between; padding: 0 5px; color: var(--sr-muted); font-size: 11px; }
+  #skill-rating-options .sr-slider-labels span { display: flex; align-items: center; flex-direction: column; gap: 4px; }
+  #skill-rating-options .sr-slider-labels span::before { content: ''; width: 1px; height: 4px; background: var(--sr-track); }
+  #skill-rating-options .sr-variant-slimslider .sr-slider { appearance: none; background: transparent; }
+  #skill-rating-options .sr-variant-slimslider .sr-slider::-webkit-slider-runnable-track { height: 3px; border-radius: 2px; background: linear-gradient(to right, var(--sr-purple) var(--sr-progress), var(--sr-track) var(--sr-progress)); }
+  #skill-rating-options .sr-variant-slimslider .sr-slider::-moz-range-track { height: 3px; border-radius: 2px; background: linear-gradient(to right, var(--sr-purple) var(--sr-progress), var(--sr-track) var(--sr-progress)); }
+  #skill-rating-options .sr-variant-slimslider .sr-slider::-webkit-slider-thumb { appearance: none; width: 11px; height: 11px; margin-top: -4px; border-radius: 50%; background: var(--sr-purple); }
+  #skill-rating-options .sr-variant-slimslider .sr-slider::-moz-range-thumb { width: 11px; height: 11px; border: 0; border-radius: 50%; background: var(--sr-purple); }
+  #skill-rating-options .sr-variant-hybrid .sr-stepper { border: 0; gap: 6px; }
+  #skill-rating-options .sr-variant-hybrid .sr-slider { width: 108px; }
+  #skill-rating-options .sr-variant-bare .sr-stepper { border: 0; }
+  #skill-rating-options .sr-variant-bare .sr-step-value { color: var(--sr-purple); }
+  #skill-rating-options .sr-variant-round .sr-stepper { border: 0; gap: 8px; }
+  #skill-rating-options .sr-variant-round .sr-step-button { width: 30px; height: 30px; border-radius: 50%; background: var(--sr-soft); }
+  #skill-rating-options .sr-variant-belowmenu .sr-menu { width: 112px; padding: 0 8px; background: var(--sr-soft); border: 1px solid var(--sr-line); border-radius: 6px; }
+  #skill-rating-options .sr-variant-bigscore .sr-score-button { background: transparent; color: var(--sr-text); font-size: 20px; font-weight: 500; height: 40px; padding: 0 2px; border-radius: 4px; }
+  #skill-rating-options .sr-variant-ring .sr-score-button { background: radial-gradient(circle closest-side, var(--sr-surface) 86%, transparent 89%), conic-gradient(var(--sr-purple) var(--sr-ring), var(--sr-track) var(--sr-ring)); color: var(--sr-text); width: 40px; min-width: 40px; height: 40px; padding: 0; border-radius: 50%; font-size: 11px; }
+  @media (max-width: 620px) {
+    #skill-rating-options .sr-choices { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (pointer: coarse), (max-width: 420px) {
+    #skill-rating-options .sr-name { font-size: 16px; height: 44px; }
+    #skill-rating-options .sr-remove { width: 44px; height: 44px; }
+    #skill-rating-options .sr-point { width: 44px; height: 44px; }
+    #skill-rating-options .sr-stepper { height: 44px; }
+    #skill-rating-options .sr-step-button { width: 44px; height: 42px; }
+    #skill-rating-options .sr-slider { height: 44px; width: 208px; }
+    #skill-rating-options .sr-menu { height: 44px; width: 60px; font-size: 16px; }
+    #skill-rating-options .sr-number-wrap { height: 44px; }
+    #skill-rating-options .sr-direct { width: 44px; height: 44px; font-size: 16px; }
+    #skill-rating-options .sr-score-button { height: 44px; min-width: 48px; }
+    #skill-rating-options .sr-add, #skill-rating-options .sr-implement { min-height: 44px; }
+    #skill-rating-options .sr-demo { padding: 14px; }
+    #skill-rating-options .sr-rating-row { gap: 8px; }
+    #skill-rating-options .sr-variant-connected .sr-rating-control::before { left: 22px; right: 22px; }
+    #skill-rating-options .sr-variant-labeled .sr-point { height: 44px; }
+    #skill-rating-options .sr-variant-round .sr-step-button { width: 44px; height: 44px; }
+    #skill-rating-options .sr-variant-belowmenu .sr-menu { width: 124px; }
+    #skill-rating-options .sr-variant-bigscore .sr-score-button { height: 44px; }
+    #skill-rating-options .sr-variant-ring .sr-score-button { width: 44px; min-width: 44px; height: 44px; }
+  }
+</style>
+
+<script>
+(() => {
+  const root = document.getElementById('skill-rating-options');
+  const options = [
+    { name: 'Fine dots', type: 'dots' },
+    { name: 'Short strokes', type: 'dashes' },
+    { name: 'Vertical ticks', type: 'ticks' },
+    { name: 'Quiet numbers', type: 'numbers' },
+    { name: 'Small stepper', type: 'stepper' },
+    { name: 'Simple slider', type: 'slider' },
+    { name: 'Underlined scale', type: 'underline' },
+    { name: 'Inline menu', type: 'menu' },
+    { name: 'Editable score', type: 'direct' },
+    { name: 'Score popover', type: 'popover' },
+    { name: 'Tiny squares', type: 'dots', variant: 'squares' },
+    { name: 'Rounded capsules', type: 'dashes', variant: 'capsules' },
+    { name: 'Single marker', type: 'dots', variant: 'marker' },
+    { name: 'Connected dots', type: 'dots', variant: 'connected' },
+    { name: 'Rising bars', type: 'ticks', variant: 'rising' },
+    { name: 'Small stars', type: 'dots', variant: 'stars' },
+    { name: 'Diamond points', type: 'dots', variant: 'diamonds' },
+    { name: 'Labeled dots', type: 'dots', variant: 'labeled' },
+    { name: 'Number tiles', type: 'numbers', variant: 'tiles' },
+    { name: 'Segmented numbers', type: 'numbers', variant: 'segmented' },
+    { name: 'Filled number steps', type: 'numbers', variant: 'filled' },
+    { name: 'Fraction choices', type: 'numbers', variant: 'fractions' },
+    { name: 'Slider with ticks', type: 'slider', variant: 'tickslider' },
+    { name: 'Hairline slider', type: 'slider', variant: 'slimslider' },
+    { name: 'Slider with stepper', type: 'hybrid', variant: 'hybrid' },
+    { name: 'Borderless stepper', type: 'stepper', variant: 'bare' },
+    { name: 'Round stepper', type: 'stepper', variant: 'round' },
+    { name: 'Level dropdown', type: 'menu', variant: 'belowmenu' },
+    { name: 'Large score', type: 'popover', variant: 'bigscore' },
+    { name: 'Ring score', type: 'popover', variant: 'ring' }
+  ];
+  const samples = [
+    { name: 'Roadmapping', value: 5 },
+    { name: 'User Research', value: 4 },
+    { name: 'A/B Testing', value: 3 }
+  ];
+  const choices = root.querySelector('.sr-choices');
+  const selectionLabel = root.querySelector('.sr-selection-label');
+  const implement = root.querySelector('.sr-implement');
+  const feedback = root.querySelector('.sr-feedback');
+  let selected = null;
+  let rowId = 0;
+  const icon = name => `<i data-lucide="${name}" aria-hidden="true"></i>`;
+  const refreshIcons = () => {
+    if (globalThis.lucide) globalThis.lucide.createIcons({ attrs: { width: 16, height: 16 } });
+  };
+
+  function makeRow(option, sample, countChanged) {
+    const row = document.createElement('div');
+    row.className = 'sr-row';
+    if (option.variant) row.classList.add(`sr-variant-${option.variant}`);
+    row.dataset.value = String(sample.value);
+    const isInline = ['menu', 'direct', 'popover'].includes(option.type) && option.variant !== 'belowmenu';
+    if (isInline) row.classList.add('sr-inline');
+    row.innerHTML = `<div class="sr-name-row"><input class="sr-name" type="text" aria-label="Skill name" spellcheck="false"><button class="sr-remove" type="button">${icon('trash-2')}</button></div>`;
+    const nameInput = row.querySelector('.sr-name');
+    nameInput.value = sample.name;
+    const remove = row.querySelector('.sr-remove');
+    const ratingRow = document.createElement('div');
+    ratingRow.className = 'sr-rating-row';
+    const controls = document.createElement('div');
+    controls.className = 'sr-rating-control';
+    controls.setAttribute('role', 'group');
+    const output = document.createElement('output');
+    output.className = 'sr-value';
+    ratingRow.append(controls, output);
+    if (isInline) row.querySelector('.sr-name-row').insertBefore(ratingRow, remove);
+    else row.append(ratingRow);
+    let value = sample.value;
+    let points = [];
+    let minus, plus, stepValue, slider, menu, direct, popup, score;
+
+    function update() {
+      const name = nameInput.value.trim() || 'Untitled skill';
+      row.dataset.value = String(value);
+      row.style.setProperty('--sr-progress', `${(value - 1) * 25}%`);
+      row.style.setProperty('--sr-ring', `${value * 20}%`);
+      output.textContent = `${value}/5`;
+      output.setAttribute('aria-label', `${name}: ${value} out of 5`);
+      controls.setAttribute('aria-label', `${name} rating`);
+      remove.setAttribute('aria-label', `Remove ${name}`);
+      points.forEach((button, index) => {
+        button.setAttribute('aria-pressed', String(value === index + 1));
+        button.setAttribute('aria-label', `Set ${name} to ${index + 1} out of 5`);
+        button.dataset.filled = String(index < value);
+      });
+      if (minus) {
+        minus.disabled = value === 1;
+        plus.disabled = value === 5;
+        minus.setAttribute('aria-label', `Decrease ${name} rating`);
+        plus.setAttribute('aria-label', `Increase ${name} rating`);
+        if (stepValue) stepValue.textContent = `${value}/5`;
+      }
+      if (slider) {
+        slider.value = String(value);
+        slider.setAttribute('aria-label', `${name} rating`);
+        slider.setAttribute('aria-valuetext', `${value} out of 5`);
+      }
+      if (menu) { menu.value = String(value); menu.setAttribute('aria-label', `${name} rating out of 5`); }
+      if (direct) { direct.value = String(value); direct.setAttribute('aria-label', `${name} rating out of 5`); }
+      if (score) { score.textContent = `${value}/5`; score.setAttribute('aria-label', `${name}: ${value} out of 5. Change rating`); }
+    }
+    function setValue(next) { value = Math.max(1, Math.min(5, Math.round(Number(next) || 1))); update(); }
+    function makePoints(container, shape) {
+      for (let level = 1; level <= 5; level++) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'sr-point';
+        button.style.setProperty('--sr-step', String(level));
+        const className = { dots: 'sr-dot', dashes: 'sr-dash', ticks: 'sr-tick', numbers: 'sr-numeral', underline: 'sr-underlined' }[shape];
+        const pointLabel = option.variant === 'fractions' ? `${level}/5` : ['numbers', 'underline'].includes(shape) ? level : '';
+        button.innerHTML = `<span class="${className}" aria-hidden="true">${pointLabel}</span>`;
+        if (option.variant === 'stars') button.innerHTML = `<span class="sr-star">${icon('star')}</span>`;
+        if (option.variant === 'labeled') button.innerHTML = `<span class="sr-labeled-point" aria-hidden="true"><span class="sr-dot"></span><span>${level}</span></span>`;
+        button.addEventListener('click', () => {
+          setValue(level);
+          if (popup) { popup.hidden = true; score.setAttribute('aria-expanded', 'false'); score.focus(); }
+        });
+        points.push(button);
+        container.append(button);
+      }
+    }
+    if (['dots', 'dashes', 'ticks', 'numbers', 'underline'].includes(option.type)) makePoints(controls, option.type);
+    if (['stepper', 'hybrid'].includes(option.type)) {
+      controls.innerHTML = `<div class="sr-stepper"><button type="button" class="sr-step-button">${icon('minus')}</button><output class="sr-step-value"></output><button type="button" class="sr-step-button">${icon('plus')}</button></div>`;
+      [minus, plus] = controls.querySelectorAll('button');
+      stepValue = controls.querySelector('output');
+      minus.addEventListener('click', () => setValue(value - 1));
+      plus.addEventListener('click', () => setValue(value + 1));
+      output.hidden = true;
+    }
+    if (['slider', 'hybrid'].includes(option.type)) {
+      slider = document.createElement('input');
+      slider.type = 'range'; slider.min = '1'; slider.max = '5'; slider.step = '1'; slider.className = 'sr-slider';
+      slider.addEventListener('input', () => setValue(slider.value));
+      if (option.type === 'hybrid') {
+        stepValue.replaceWith(slider); stepValue = null; output.hidden = false;
+      } else if (option.variant === 'tickslider') {
+        const wrap = document.createElement('div');
+        wrap.className = 'sr-slider-wrap';
+        wrap.append(slider);
+        const labels = document.createElement('div');
+        labels.className = 'sr-slider-labels';
+        labels.setAttribute('aria-hidden', 'true');
+        labels.innerHTML = '<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>';
+        wrap.append(labels); controls.append(wrap);
+      } else controls.append(slider);
+    }
+    if (option.type === 'menu') {
+      menu = document.createElement('select');
+      menu.className = 'sr-menu';
+      for (let level = 1; level <= 5; level++) menu.add(new Option(`${option.variant === 'belowmenu' ? 'Level ' : ''}${level}/5`, String(level)));
+      menu.addEventListener('change', () => setValue(menu.value));
+      controls.append(menu); output.hidden = true;
+    }
+    if (option.type === 'direct') {
+      controls.innerHTML = '<div class="sr-number-wrap"><input class="sr-direct" type="number" min="1" max="5" step="1" inputmode="numeric"><span aria-hidden="true">/5</span></div>';
+      direct = controls.querySelector('input');
+      direct.addEventListener('input', () => {
+        const next = Number(direct.value);
+        if (Number.isInteger(next) && next >= 1 && next <= 5) { value = next; row.dataset.value = String(value); }
+      });
+      direct.addEventListener('change', () => setValue(direct.value));
+      direct.addEventListener('focus', () => direct.select());
+      output.hidden = true;
+    }
+    if (option.type === 'popover') {
+      controls.innerHTML = '<div class="sr-popup-wrap"><button type="button" class="sr-score-button" aria-expanded="false"></button><div class="sr-popup" hidden></div></div>';
+      popup = controls.querySelector('.sr-popup');
+      score = controls.querySelector('.sr-score-button');
+      popup.id = `sr-level-popover-${++rowId}`;
+      score.setAttribute('aria-controls', popup.id);
+      makePoints(popup, 'numbers');
+      score.addEventListener('click', () => {
+        const open = popup.hidden;
+        root.querySelectorAll('.sr-popup').forEach(el => { el.hidden = true; });
+        root.querySelectorAll('.sr-score-button').forEach(el => el.setAttribute('aria-expanded', 'false'));
+        popup.hidden = !open; score.setAttribute('aria-expanded', String(open));
+        if (open) points[value - 1].focus();
+      });
+      row.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !popup.hidden) { popup.hidden = true; score.setAttribute('aria-expanded', 'false'); score.focus(); }
+      });
+      row.addEventListener('focusout', event => {
+        if (!row.contains(event.relatedTarget)) { popup.hidden = true; score.setAttribute('aria-expanded', 'false'); }
+      });
+      output.hidden = true;
+    }
+    nameInput.addEventListener('input', update);
+    remove.addEventListener('click', () => {
+      const nextFocus = row.nextElementSibling?.querySelector('input') || row.previousElementSibling?.querySelector('input') || row.closest('.sr-demo').querySelector('.sr-add');
+      row.remove(); countChanged(); nextFocus.focus();
+    });
+    update();
+    return row;
+  }
+
+  options.forEach((option, index) => {
+    const number = String(index + 1).padStart(2, '0');
+    const card = document.createElement('section');
+    card.className = 'sr-option';
+    card.dataset.option = String(index + 1);
+    card.setAttribute('aria-label', `Option ${index + 1}: ${option.name}`);
+    card.innerHTML = `<label class="sr-option-header"><span class="sr-option-number">${number}</span><span class="sr-option-title">${option.name}</span><input class="sr-pick" type="radio" name="skill-rating-design" value="${index + 1}" aria-label="Choose option ${index + 1}: ${option.name}"></label><div class="sr-demo"><div class="sr-category"><span>Product</span><span class="sr-count">3 skills</span></div><div class="sr-rows"></div><button class="sr-add" type="button">${icon('plus')}<span>Add skill</span></button></div>`;
+    const rows = card.querySelector('.sr-rows');
+    const countChanged = () => { card.querySelector('.sr-count').textContent = `${rows.children.length} ${rows.children.length === 1 ? 'skill' : 'skills'}`; };
+    samples.forEach(sample => rows.append(makeRow(option, sample, countChanged)));
+    card.querySelector('.sr-add').addEventListener('click', () => {
+      const row = makeRow(option, { name: '', value: 3 }, countChanged);
+      rows.append(row); countChanged(); refreshIcons(); row.querySelector('.sr-name').focus();
+    });
+    card.querySelector('.sr-pick').addEventListener('change', () => {
+      selected = index;
+      root.querySelectorAll('.sr-option').forEach((el, i) => { el.dataset.chosen = String(i === selected); });
+      selectionLabel.textContent = `${number} · ${option.name}`;
+      implement.textContent = `Implement option ${index + 1}`;
+      implement.disabled = false;
+      feedback.hidden = true;
+    });
+    choices.append(card);
+  });
+  document.addEventListener('pointerdown', event => {
+    if (!root.contains(event.target) || !event.target.closest('.sr-popup-wrap')) {
+      root.querySelectorAll('.sr-popup').forEach(el => { el.hidden = true; });
+      root.querySelectorAll('.sr-score-button').forEach(el => el.setAttribute('aria-expanded', 'false'));
+    }
+  });
+  implement.addEventListener('click', async () => {
+    if (selected === null) return;
+    const option = options[selected];
+    const prompt = `Implement option ${selected + 1}, ${option.name}, from the ${options.length} skill-rating demo designs in the resume builder. Use the design in output/skill-rating-options.html, keep ratings numeric from 1 to 5, and preserve the minimal UI and no jump animations.`;
+    if (window.openai?.sendFollowUpMessage) {
+      implement.disabled = true;
+      try {
+        await window.openai.sendFollowUpMessage({ prompt, title: `Implement ${option.name}` });
+      } catch {
+        feedback.textContent = `Reply “Implement option ${selected + 1}” to apply ${option.name}.`;
+        feedback.hidden = false;
+      } finally { implement.disabled = false; }
+    } else {
+      feedback.textContent = `Reply “Implement option ${selected + 1}” to apply ${option.name}.`;
+      feedback.hidden = false;
+    }
+  });
+  refreshIcons();
+  const design = { spacing: 'Comfortable', corners: 12 };
+  if (globalThis.Tweak) {
+    const tweak = new Tweak({ container: root, onChange: () => {
+      root.style.setProperty('--sr-row-gap', design.spacing === 'Compact' ? '8px' : '14px');
+      root.querySelectorAll('.sr-option').forEach(el => { el.style.borderRadius = `${design.corners}px`; });
+    } });
+    tweak.addSelect(design, 'spacing', { label: 'Row spacing', options: ['Compact', 'Comfortable'] });
+    tweak.addSlider(design, 'corners', { label: 'Corner radius', min: 0, max: 16, step: 2, unit: 'px' });
+  }
+})();
+</script>

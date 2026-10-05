@@ -53,9 +53,8 @@ export function EditorPage() {
   const {
     status: exportStatus,
     error: exportError,
-    mode: exportMode,
     previewUrl,
-    exportToPdf,
+    downloadPreview,
     previewPdf,
     closeExport,
     isExporting,
@@ -138,12 +137,6 @@ export function EditorPage() {
     toggleSectionTypeVisibility(type)
   }
 
-  const handleExport = () => {
-    void prepareExport().then((latest) => {
-      if (latest?.id === resumeId) void exportToPdf(latest)
-    })
-  }
-
   const handlePreview = () => {
     void prepareExport().then((latest) => {
       if (latest?.id === resumeId) void previewPdf(latest)
@@ -172,9 +165,8 @@ export function EditorPage() {
             onZoomIn={zoomIn}
             onZoomOut={zoomOut}
             onResetZoom={resetZoom}
-            onExport={handleExport}
             onPreview={handlePreview}
-            previewLoading={isExporting && exportMode === 'preview'}
+            previewLoading={isExporting}
             exportDisabled={isExporting}
             onReset={resetResume}
             onStartTour={tour.start}
@@ -247,8 +239,8 @@ export function EditorPage() {
         onClose={closeExport}
         status={exportStatus}
         error={exportError}
-        onRetry={exportMode === 'preview' ? handlePreview : handleExport}
-        mode={exportMode}
+        onRetry={handlePreview}
+        onDownload={downloadPreview}
         previewUrl={previewUrl}
       />
     </>

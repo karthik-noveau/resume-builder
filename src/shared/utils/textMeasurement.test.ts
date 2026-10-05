@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { PDFDocument } from 'pdf-lib'
 import { FontEmbedder } from '@/features/export/services/font.embedder'
 import { loadTemplateFonts } from '@/tests/setup/templateFonts'
-import { estimateTextHeight } from '@/features/templates/engine/layout.utils'
+import { estimateStyledTextHeight, estimateTextHeight } from '@/features/templates/engine/layout.utils'
 import { measureTextWidth, wrapTextLines } from './textMeasurement'
 
 loadTemplateFonts()
@@ -36,6 +36,22 @@ describe('font-accurate resume measurement', () => {
       'paragraph',
       '',
       'last line',
+    ])
+  })
+
+  it('reserves the final CSS letter space in narrow section headings', () => {
+    const text = 'CORE SKILLS AND TECHNICAL EXPERTISE'
+    const measure = (value: string) => measureTextWidth(value, 11, 'Inter', 600, 0.08)!
+    expect(wrapTextLines(text, 142.348, measure, 11 * 0.08)).toEqual([
+      'CORE SKILLS AND', 'TECHNICAL', 'EXPERTISE',
+    ])
+    expect(estimateStyledTextHeight(text, 142.348, 11, 1.2, 0.08, 'Inter', 600)).toBeCloseTo(39.6)
+  })
+
+  it('wraps hyphenated skills at natural breaks before splitting letters', () => {
+    expect(wrapTextLines('Cross-functional Roadmapping and Prioritization', 78.27,
+      value => measureTextWidth(value, 10, 'SourceSerifPro')!)).toEqual([
+      'Cross-', 'functional', 'Roadmapping', 'and', 'Prioritization',
     ])
   })
 

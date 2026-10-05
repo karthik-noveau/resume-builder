@@ -9,6 +9,7 @@
 
 .scoreRow {
   display: flex;
+  min-height: 64px;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -69,7 +70,7 @@
 .estimate { margin-top: 3px; }
 .checks { margin-top: 8px; font-size: var(--text-sm); line-height: 1.4; color: rgb(var(--color-text-secondary)); }
 .state { margin-top: 6px; font-size: var(--text-sm); font-weight: 500; color: rgb(var(--color-primary)); }
-.caption { margin-top: 12px; }
+.caption { margin-top: 14px; min-height: 36px; }
 
 .toggle {
   display: flex;
@@ -100,6 +101,3 @@
   outline: 2px solid rgb(var(--color-primary));
   outline-offset: 2px;
 }
-
-.caption ul { padding-left: 18px; margin-top: 8px; }
-.caption li { margin-top: 4px; }

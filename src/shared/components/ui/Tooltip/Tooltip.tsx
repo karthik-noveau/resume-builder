@@ -12,7 +12,9 @@ interface TooltipProps {
 
 export function Tooltip({ children, content, position = 'top', className }: TooltipProps) {
   return (
-    <AntTooltip title={content} placement={position} className={className}>
+    <AntTooltip title={content} placement={position} className={className}
+      // These are text-only hints; overlapping controls must remain clickable.
+      styles={{ root: { pointerEvents: 'none' }, container: { pointerEvents: 'none' } }}>
       {children}
     </AntTooltip>
   )

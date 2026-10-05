@@ -20,7 +20,6 @@ test.describe('Complete Resume Journey', () => {
 
     await panel.getByRole('textbox', { name: /professional headline/i }).fill('Founding Father');
     await panel.getByRole('textbox', { name: /email/i }).fill('alex@treasury.gov');
-    await panel.locator('summary').filter({ hasText: 'More contact details' }).click();
     await panel.getByRole('textbox', { name: /location/i }).fill('New York, NY');
     await panel.getByRole('textbox', { name: /location/i }).blur();
     await expect(page.getByText('Saved', { exact: true })).toBeVisible();
@@ -58,14 +57,16 @@ test.describe('Complete Resume Journey', () => {
     await expect(panel.getByRole('textbox', { name: /full name/i })).toHaveValue('Alexander Hamilton');
 
 
-    // --- 7. Export Simulation ---
+    // --- 7. Preview, then export the reviewed document ---
+    await page.getByRole('button', { name: 'Preview & export' }).click();
+    const preview = page.getByRole('dialog', { name: 'Preview & export' });
+    await expect(preview.getByRole('button', { name: 'Export PDF' })).toBeEnabled();
     const downloadPromise = page.waitForEvent('download');
-    // The button's aria-label is "Export resume as PDF" — it overrides the
-    // visible "Export PDF" text for accessible-name matching.
-    await page.getByRole('button', { name: /export.*pdf/i }).click();
+    await preview.getByRole('button', { name: 'Export PDF' }).click();
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toContain('Alexander_Hamilton');
     expect(download.suggestedFilename()).toContain('.pdf');
+    await preview.getByRole('button', { name: 'Back to editor' }).click();
 
 
     // --- 8. Deletion Flow ---

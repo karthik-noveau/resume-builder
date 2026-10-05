@@ -10,6 +10,7 @@
   --color-primary: 122 69 209;
   --color-primary-hover: 104 54 188;
   --color-primary-active: 89 44 167;
+  --color-on-primary: 255 255 255;
   --color-background: 248 247 253;
   --color-surface: 255 255 255;
   --color-surface-elevated: 243 240 251;
@@ -139,6 +140,7 @@
   --color-primary: 173 136 242;
   --color-primary-hover: 189 155 248;
   --color-primary-active: 153 115 226;
+  --color-on-primary: 30 27 48;
   --color-background: 20 18 33;
   --color-surface: 30 27 48;
   --color-surface-elevated: 41 37 62;

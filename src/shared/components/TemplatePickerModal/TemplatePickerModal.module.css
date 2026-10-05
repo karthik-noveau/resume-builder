@@ -152,7 +152,7 @@
 }
 .optionActive .selectAction {
   background: rgb(var(--color-primary));
-  color: #fff;
+  color: rgb(var(--color-on-primary));
 }
 
 @media (max-width: 1023px), (max-height: 599px) {

@@ -78,15 +78,18 @@ describe('PDF preview recovery', () => {
   it.each(['document', 'page'] as const)('keeps a %s failure in the dialog and lets the user retry', async (failure) => {
     scenario.failure = failure
     const retry = vi.fn()
-    render(<PdfPreview url="blob:unavailable" onRetry={retry} />)
+    const onReadyChange = vi.fn()
+    render(<PdfPreview url="blob:unavailable" onRetry={retry} onReadyChange={onReadyChange} />)
     expect(await screen.findByRole('alert')).toHaveTextContent('The PDF preview couldn’t load')
+    expect(onReadyChange).not.toHaveBeenCalledWith(true)
     fireEvent.click(screen.getByRole('button', { name: 'Retry preview' }))
     expect(retry).toHaveBeenCalledOnce()
   })
 
   it('keeps one loading indicator until every fitted page has painted', async () => {
     scenario.paintAutomatically = false
-    render(<PdfPreview url="blob:resume" onRetry={vi.fn()} />)
+    const onReadyChange = vi.fn()
+    render(<PdfPreview url="blob:resume" onRetry={vi.fn()} onReadyChange={onReadyChange} />)
     await waitFor(() => expect(scenario.renderPage.size).toBe(2))
     expect(screen.getByRole('status', { name: 'Preparing preview…' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Zoom in' })).toBeDisabled()
@@ -95,7 +98,9 @@ describe('PDF preview recovery', () => {
 
     act(() => scenario.renderPage.get(1)!())
     expect(screen.getByRole('status')).toBeInTheDocument()
+    expect(onReadyChange).not.toHaveBeenCalledWith(true)
     act(() => scenario.renderPage.get(2)!())
+    expect(onReadyChange).toHaveBeenLastCalledWith(true)
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Zoom in' })).toBeEnabled()
   })

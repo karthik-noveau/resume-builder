@@ -1,7 +1,8 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useCallback, useState } from 'react'
+import { Download } from 'lucide-react'
 import { Modal } from '@/shared/components/ui/Modal/Modal'
+import { Button } from '@/shared/components/ui/Button/Button'
 import { PreviewFrame } from './PreviewFrame'
-import { ExportProgress } from './ExportProgress'
 import { ExportError } from './ExportError'
 import type { ExportStatus } from '@/shared/types/export.types'
 import styles from './ExportModal.module.css'
@@ -19,7 +20,7 @@ interface ExportModalProps {
   status: ExportStatus
   error: string | null
   onRetry: () => void
-  mode: 'download' | 'preview'
+  onDownload: () => void
   previewUrl: string | null
 }
 
@@ -29,51 +30,44 @@ export function ExportModal({
   status,
   error,
   onRetry,
-  mode,
+  onDownload,
   previewUrl,
 }: ExportModalProps) {
   const isFailed = status === 'failed'
-  const isCompleted = status === 'completed'
-  const isExporting = status !== 'idle' && !isFailed && !isCompleted
+  const [readyUrl, setReadyUrl] = useState<string | null>(null)
+  const handleReadyChange = useCallback((ready: boolean) => {
+    setReadyUrl(ready ? previewUrl : null)
+  }, [previewUrl])
+  const canDownload = status === 'completed' && previewUrl !== null && readyUrl === previewUrl
 
   // Keep a document-sized dialog throughout loading, rendering, and closing.
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={
-        isFailed
-          ? 'Couldn’t prepare your PDF'
-          : mode === 'preview'
-            ? 'PDF Preview'
-            : isCompleted
-              ? 'PDF ready'
-              : 'Preparing your PDF'
-      }
-      maxWidth={mode === 'preview' ? 'preview' : 'md'}
+      title="Preview & export"
+      maxWidth="preview"
     >
       <div className={styles.body}>
-        {mode === 'preview' ? (
-          <div className={styles.preview}>
-            {isFailed ? (
-              <PreviewFrame loading={false}>
-                <ExportError message={error || 'An unexpected error occurred'} onRetry={onRetry} onClose={onClose} />
-              </PreviewFrame>
-            ) : (
-              <Suspense fallback={<PreviewFrame />}>
-                <PdfPreview key={previewUrl ?? 'preparing'} url={previewUrl} onRetry={onRetry} />
-              </Suspense>
-            )}
-          </div>
-        ) : isExporting || isCompleted ? (
-          <ExportProgress status={status} />
-        ) : isFailed ? (
-          <ExportError
-            message={error || 'An unexpected error occurred'}
-            onRetry={onRetry}
-            onClose={onClose}
-          />
-        ) : null}
+        <div className={styles.preview}>
+          {isFailed ? (
+            <PreviewFrame loading={false}>
+              <ExportError message={error || 'An unexpected error occurred'} onRetry={onRetry} onClose={onClose} />
+            </PreviewFrame>
+          ) : (
+            <Suspense fallback={<PreviewFrame />}>
+              <PdfPreview key={previewUrl ?? 'preparing'} url={previewUrl} onRetry={onRetry}
+                onReadyChange={handleReadyChange} />
+            </Suspense>
+          )}
+        </div>
+        <div className={styles.footer}>
+          <Button variant="secondary" onClick={onClose}>Back to editor</Button>
+          <Button onClick={onDownload} disabled={!canDownload}>
+            <Download size={15} aria-hidden="true" />
+            Export PDF
+          </Button>
+        </div>
       </div>
     </Modal>
   )

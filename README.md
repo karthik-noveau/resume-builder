@@ -33,7 +33,7 @@ CI runs the tests, lint, build, and production dependency audit on pull requests
 
 Import a PDF, DOCX or TXT file (up to 10 MB), or paste text. Extraction runs locally; PDF import requires selectable text and supports up to 30 pages. Review the extracted contact details, jobs, education and other sections before creating a resume. Complex layouts may need correction; scanned PDFs need OCR before import.
 
-Guided setup requires the key fields in each section before advancing: name and email, a summary, work experience, education, and a skill category with at least one skill. Full Editor remains available at any point and preserves unfinished drafts without requiring completion. On mobile, Content, Design and Preview have separate views. Template thumbnails open a larger preview; only **Use template** creates a draft or applies a design.
+Guided setup requires the key fields in each section before advancing: name and email, a summary, work experience, education, and a skill category with at least one skill. Full Editor remains available at any point and preserves unfinished drafts without requiring completion. On mobile, Content, Design and Canvas have separate views. The Canvas editing switch toggles interactive editing and guides. **Preview & export** opens the generated PDF for review, then **Export PDF** downloads that same file. Template thumbnails open a larger preview; only **Use template** creates a draft or applies a design.
 
 Resume readiness shows completion guidance until career content has been added. Job descriptions and keywords are saved with each resume and included in backups, but are excluded from share links and PDF exports.
 

@@ -176,7 +176,7 @@ export class PdfGenerator {
           // Explicit breaks are part of the layout (notably stacked names).
           // Never pass them through to drawText: pdf-lib would apply its own
           // default line spacing inside a single call instead of this node's.
-          const lines = wrapTextLines(content, widthPt, widthOf)
+          const lines = wrapTextLines(content, widthPt, widthOf, tracking)
 
           // Applied once around the whole run and reset after, so it cannot
           // leak into the next node drawn on this page.

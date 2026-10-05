@@ -26,6 +26,7 @@ interface PdfPreviewProps {
   /** Blob URL of the generated PDF. */
   url: string | null
   onRetry: () => void
+  onReadyChange?: (ready: boolean) => void
 }
 
 /**
@@ -37,7 +38,7 @@ interface PdfPreviewProps {
  * this one, and different in every browser. pdf.js draws the pages to a canvas
  * so the surrounding UI is ours.
  */
-export function PdfPreview({ url, onRetry }: PdfPreviewProps) {
+export function PdfPreview({ url, onRetry, onReadyChange }: PdfPreviewProps) {
   const [pageCount, setPageCount] = useState(0)
   const [zoomIndex, setZoomIndex] = useState(DEFAULT_ZOOM_INDEX)
   const [failed, setFailed] = useState<string | null>(null)
@@ -48,6 +49,10 @@ export function PdfPreview({ url, onRetry }: PdfPreviewProps) {
   const renderedPages = useRef(new Set<number>())
   const pendingLoad = useRef({ sequence: 0 })
   const frameRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    onReadyChange?.(ready && !failed)
+  }, [ready, failed, onReadyChange])
 
   useEffect(() => {
     const el = frameRef.current

@@ -175,5 +175,5 @@ it('shows completion guidance for an empty draft without a numeric readiness sco
   render(<AtsEvaluation resume={createEmptyResume('meridian')} />)
   expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   expect(screen.getByText('Getting started')).toBeVisible()
-  expect(screen.getByText('Add your name.')).toBeVisible()
+  expect(screen.getByText('Add contact details and career content to start your review.')).toBeVisible()
 })

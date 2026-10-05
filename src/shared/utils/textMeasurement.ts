@@ -37,28 +37,38 @@ export function measureTextWidth(
 export function wrapTextLines(
   text: string,
   width: number,
-  measure: (text: string) => number
+  measure: (text: string) => number,
+  trailingSpacing = 0,
 ): string[] {
   const lines: string[] = []
-  const available = Math.max(1, width)
+  // CSS includes letter spacing after the final character in a line box.
+  // Reserve it when wrapping so a tightly fitted heading does not gain an
+  // unmeasured extra line in the browser. PDF export uses the same allowance.
+  const available = Math.max(1, width - Math.max(0, trailingSpacing))
   for (const paragraph of text.split(/\r\n|\r|\n/)) {
     let line = ''
     for (const word of paragraph.trim().split(/\s+/)) {
-      const candidate = line ? `${line} ${word}` : word
-      if (line && measure(candidate) > available) {
-        lines.push(line)
-        line = ''
-      }
-      if (measure(word) > available) {
-        for (const character of word) {
-          if (line && measure(line + character) > available) {
-            lines.push(line)
-            line = ''
-          }
-          line += character
+      // Browsers prefer a hyphen or URL slash before breaking an oversized
+      // word between arbitrary letters. Keep those opportunities in exports
+      // and height calculations, especially for skills in narrow sidebars.
+      const parts = word.split(/(?<=[\u002d\u002f\u2010])/u)
+      for (const [index, part] of parts.entries()) {
+        const separator = line && index === 0 ? ' ' : ''
+        if (line && measure(line + separator + part) > available) {
+          lines.push(line)
+          line = ''
         }
-      } else {
-        line = line ? `${line} ${word}` : word
+        if (measure(part) > available) {
+          for (const character of part) {
+            if (line && measure(line + character) > available) {
+              lines.push(line)
+              line = ''
+            }
+            line += character
+          }
+        } else {
+          line += `${line && index === 0 ? ' ' : ''}${part}`
+        }
       }
     }
     lines.push(line)

@@ -106,16 +106,7 @@ export function AtsEvaluation({
       ) : (
         <div className={styles.caption}>
           {report ? (
-            <>
-              <p>Add your details to start a useful review.</p>
-              <ul>
-                {!resume.personalInfo.fullName.trim() && <li>Add your name.</li>}
-                {!resume.personalInfo.email.trim() && <li>Add a contact email.</li>}
-                {!hasCareerContent && (
-                  <li>Add a summary, role, project, or education and skills.</li>
-                )}
-              </ul>
-            </>
+            <p>Add contact details and career content to start your review.</p>
           ) : (
             <p>Choose an available template to evaluate this resume.</p>
           )}

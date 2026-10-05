@@ -302,6 +302,13 @@
   }
 }
 
+.optionalSections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
 .optionalGroup {
   min-width: 0;
   overflow: hidden;
@@ -315,11 +322,8 @@
   min-width: 0;
 }
 
-.optionalDetails:not(:last-child) {
-  border-bottom: 1px solid rgb(var(--color-divider));
-}
-
-.optionalSummary {
+.optionalSummary,
+.contactHeader {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -329,6 +333,14 @@
   font-size: var(--text-base);
   font-weight: 600;
   line-height: 1.5;
+}
+
+.contactHeader {
+  margin: 0;
+  border-bottom: 1px solid rgb(var(--color-divider) / 70%);
+}
+
+.optionalSummary {
   list-style: none;
   cursor: pointer;
   transition:

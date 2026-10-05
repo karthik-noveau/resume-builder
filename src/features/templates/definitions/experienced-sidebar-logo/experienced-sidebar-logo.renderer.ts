@@ -277,7 +277,7 @@ function renderMainSection(b: LayoutBuilder, sectionType: SectionType, resume: R
   switch (sectionType) {
     case 'summary': {
       if (!resume.summary.visible || !resume.summary.content) return
-      const h = estimateTextHeight(resume.summary.content, w, fp.scale.body, 1.5)
+      const h = estimateTextHeight(resume.summary.content, w, fp.scale.body, 1.5, fp.bodyFamily)
       const entries: EntryResult[] = [{
         nodes: [t(b, 'text', 0, 0, w, h, { ...bodyStyleFor, lineHeight: 1.5, color: colors.textSecondary }, resume.summary.content, { kind: 'summary' })],
         height: h,

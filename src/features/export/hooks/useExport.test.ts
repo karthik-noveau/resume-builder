@@ -80,8 +80,13 @@ describe('useExport', () => {
     expect(result.current.status).toBe('completed')
     expect(result.current.mode).toBe('preview')
     expect(result.current.previewUrl).toBe('blob:preview')
+    expect(exportService.downloadPdf).not.toHaveBeenCalled()
 
     act(() => result.current.downloadPreview())
+    expect(exportService.generatePdf).toHaveBeenCalledOnce()
+    expect(vi.mocked(exportService.downloadPdf).mock.calls[0][0]).toBe(
+      vi.mocked(exportService.createPreviewUrl).mock.calls[0][0]
+    )
     expect(exportService.downloadPdf).toHaveBeenCalledWith(
       expect.objectContaining({
         fileName: 'John.pdf',
@@ -92,6 +97,8 @@ describe('useExport', () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:preview')
     expect(result.current.status).toBe('idle')
     expect(result.current.previewUrl).toBeNull()
+    act(() => result.current.downloadPreview())
+    expect(exportService.downloadPdf).toHaveBeenCalledOnce()
   })
 })
 

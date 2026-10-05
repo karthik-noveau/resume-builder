@@ -15,6 +15,7 @@ vi.mock('pdf-lib', async (importOriginal) => {
         addPage: vi.fn().mockReturnValue({
           drawRectangle: vi.fn(),
           drawText: vi.fn(),
+          pushOperators: vi.fn(),
           drawLine: vi.fn(),
           drawImage: vi.fn(),
           doc: {
@@ -112,6 +113,18 @@ describe('PdfGenerator', () => {
     const bytes = await generator.generate(mockLayoutTree)
     expect(bytes).toBeDefined()
     expect(bytes).toBeInstanceOf(Uint8Array)
+  })
+
+  it('uses the browser trailing-letter-space allowance when wrapping exports', async () => {
+    const tree = structuredClone(mockLayoutTree)
+    const node = tree.pages[0].nodes[0]
+    node.content = 'AAA BBB'
+    node.widthPt = 50
+    node.styles.letterSpacing = 0.1
+    await generator.generate(tree)
+    const doc = await PDFDocument.create()
+    const page = doc.addPage()
+    expect(vi.mocked(page.drawText).mock.calls.map(([text]) => text)).toEqual(['AAA', 'BBB'])
   })
 
   it('exports the same margin-adjusted text coordinates used by the canvas', async () => {

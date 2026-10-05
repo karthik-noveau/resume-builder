@@ -155,24 +155,14 @@ export function PersonalInfoForm({
         error={errors.email?.message}
         onSaved={onSaved}
       />
-      <div className={styles.optionalGroup} role="group" aria-label="Additional personal details">
-        <details
-          className={styles.optionalDetails}
-          open={
-            Object.keys(errors).some((key) =>
-              ['phone', 'location', 'website', 'linkedin', 'github', 'portfolio'].includes(key)
-            ) || undefined
-          }
-        >
-          <summary className={styles.optionalSummary}>
+      <div className={styles.optionalSections} role="group" aria-label="Additional personal details">
+        <section className={styles.optionalGroup} aria-label="More contact details">
+          <h3 className={styles.contactHeader}>
             <span className={styles.optionalIcon} aria-hidden="true">
               <ContactRound size={17} />
             </span>
             <span className={styles.optionalTitle}>More contact details</span>
-            <span className={styles.optionalToggle} aria-hidden="true">
-              <ChevronDown size={14} className={styles.optionalChevron} />
-            </span>
-          </summary>
+          </h3>
           <div className={`${styles.optionalFields} ${styles.contactFields}`}>
             <ControlledInput
               control={control}
@@ -222,9 +212,12 @@ export function PersonalInfoForm({
               onSaved={onSaved}
             />
           </div>
-        </details>
+        </section>
         {templateSupportsPhoto && (
-          <details className={styles.optionalDetails} data-personal-info-field="profileImage">
+          <details
+            className={`${styles.optionalGroup} ${styles.optionalDetails}`}
+            data-personal-info-field="profileImage"
+          >
             <summary className={styles.optionalSummary}>
               <span
                 className={styles.optionalAvatar}

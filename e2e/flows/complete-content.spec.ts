@@ -15,7 +15,6 @@ test.describe('Exhaustive Content Flow', () => {
 
     await panel.getByRole('textbox', { name: /professional headline/i }).fill('Full Stack Tester');
     await panel.getByRole('textbox', { name: /email/i }).fill('test@example.com');
-    await panel.locator('summary').filter({ hasText: 'More contact details' }).click();
     await panel.getByRole('textbox', { name: /location/i }).fill('Remote');
     await panel.getByRole('textbox', { name: /location/i }).blur();
     await expect(page.getByText('Saved', { exact: true })).toBeVisible();

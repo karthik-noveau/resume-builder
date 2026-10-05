@@ -8,7 +8,8 @@ export default tseslint.config(
   // spec/ holds the specification and the static UI prototype, never
   // application source — linting the prototype's vanilla JS as app code only
   // produces no-undef noise for browser globals.
-  { ignores: ['dist', 'coverage', 'e2e', 'node_modules', 'spec'] },
+  // Browser reports are generated output and may be recreated during a test run.
+  { ignores: ['dist', 'coverage', 'test-results', 'playwright-report', 'e2e', 'node_modules', 'spec'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommendedTypeChecked],
     files: ['**/*.{ts,tsx}'],

@@ -12,7 +12,7 @@ async function createPopulatedEditor(page: Page, template?: string) {
   await expect(page).toHaveURL(/\/editor\/[^/]+$/)
 }
 
-test('canvas selects exact fields, keeps the page still, and offers a clean preview', async ({ page }, testInfo) => {
+test('canvas selects exact fields, keeps the page still, and toggles canvas editing', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 1000 })
   await createPopulatedEditor(page)
   const canvas = page.getByLabel('Resume canvas', { exact: true })
@@ -29,7 +29,7 @@ test('canvas selects exact fields, keeps the page still, and offers a clean prev
   await expect(company).toHaveText('Canvas Example Labs')
 
   const toolbar = page.getByRole('toolbar', { name: 'Canvas editing controls' })
-  await expect(toolbar.getByRole('button')).toHaveCount(1)
+  await expect(toolbar.getByRole('switch', { name: 'Canvas editing' })).toHaveCount(1)
   await expect(page.getByRole('note', { name: 'Canvas editing tip' })).toBeVisible()
   const toolbarBox = (await toolbar.boundingBox())!
   const labelBox = (await toolbar.getByText('Company', { exact: true }).boundingBox())!
@@ -46,14 +46,18 @@ test('canvas selects exact fields, keeps the page still, and offers a clean prev
   await page.mouse.move(0, 0)
   await page.screenshot({ path: testInfo.outputPath('canvas-inspector.png') })
 
-  const preview = page.getByRole('button', { name: 'Clean preview', exact: true })
-  await preview.click()
-  await expect(preview).toHaveAttribute('aria-pressed', 'true')
+  const editing = page.getByRole('switch', { name: 'Canvas editing', exact: true })
+  await editing.click()
+  await expect(editing).toHaveAttribute('aria-checked', 'false')
   await expect(canvas.locator('[data-canvas-selected]')).toHaveCount(0)
   await expect(canvas.getByRole('button')).toHaveCount(0)
   await expect(page.locator('[data-canvas-element-label]')).toHaveCount(0)
   await expect(canvas.getByText('Canvas Example Labs', { exact: true })).toBeVisible()
-  await preview.click()
+  await expect(toolbar.getByText('View only', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Preview & export' })).toHaveText('Preview & export')
+  await page.screenshot({ path: testInfo.outputPath('canvas-view-only.png') })
+  await editing.click()
+  await expect(editing).toHaveAttribute('aria-checked', 'true')
   await expect(canvas.locator('[data-canvas-selected]')).toHaveCount(1)
 
   await company.dblclick()
@@ -68,21 +72,25 @@ test('canvas selects exact fields, keeps the page still, and offers a clean prev
   await expect(canvas.getByRole('button', { name: 'Edit company', exact: true }).nth(1)).toHaveText('Inline Example Labs')
 })
 
-test('mobile canvas opens the clicked entry in Content and supports a quiet preview', async ({ page }) => {
+test('mobile canvas opens the clicked entry in Content and supports view-only mode', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await createPopulatedEditor(page)
   const views = page.getByRole('navigation', { name: 'Editor views' })
-  await views.getByRole('button', { name: 'Preview', exact: true }).click()
+  await views.getByRole('button', { name: 'Canvas', exact: true }).click()
   const canvas = page.getByLabel('Resume canvas', { exact: true })
   await canvas.getByRole('button', { name: 'Edit company', exact: true }).nth(1).click()
   await expect(views.getByRole('button', { name: 'Content', exact: true })).toHaveAttribute('aria-pressed', 'true')
   const company = page.getByLabel('Properties panel').getByRole('textbox', { name: 'Company', exact: true }).nth(1)
   await expect(company).toBeFocused()
   await expect(company).toBeInViewport()
-  await views.getByRole('button', { name: 'Preview', exact: true }).click()
-  await page.getByRole('button', { name: 'Clean preview', exact: true }).click()
+  await views.getByRole('button', { name: 'Canvas', exact: true }).click()
+  await page.getByRole('switch', { name: 'Canvas editing', exact: true }).click()
   await expect(canvas.getByRole('button')).toHaveCount(0)
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  await page.screenshot({ path: testInfo.outputPath('canvas-view-only-mobile.png') })
+  await page.setViewportSize({ width: 320, height: 740 })
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  await expect(page.getByRole('button', { name: 'Preview & export' })).toBeInViewport()
 })
 
 test('canvas divider controls change the line, persist, and reset without shifting content', async ({ page }, testInfo) => {
@@ -172,7 +180,7 @@ test('mobile divider selection opens its Design controls directly', async ({ pag
   await page.setViewportSize({ width: 390, height: 844 })
   await createPopulatedEditor(page, 'Clarity')
   const views = page.getByRole('navigation', { name: 'Editor views' })
-  await views.getByRole('button', { name: 'Preview', exact: true }).click()
+  await views.getByRole('button', { name: 'Canvas', exact: true }).click()
   const line = page.getByLabel('Resume canvas', { exact: true }).getByRole('button', { name: 'Edit divider line' }).first()
   expect((await line.boundingBox())!.height).toBeGreaterThanOrEqual(13.9)
   await line.click()
@@ -181,7 +189,7 @@ test('mobile divider selection opens its Design controls directly', async ({ pag
   await expect(thickness).toBeInViewport()
   await thickness.fill('2')
   await thickness.press('Enter')
-  await views.getByRole('button', { name: 'Preview', exact: true }).click()
+  await views.getByRole('button', { name: 'Canvas', exact: true }).click()
   await line.click()
   await expect(thickness).toHaveValue('2')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)

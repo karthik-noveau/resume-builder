@@ -39,26 +39,58 @@ test.describe('Resume Lifecycle', () => {
     await expect(panel.getByRole('textbox', { name: /full name/i })).toHaveValue('Jane Doe');
   });
 
-  test('Flow 3: Export PDF', async ({ page }) => {
-    await createResumeInFullEditor(page);
+  for (const width of [1440, 390]) {
+    test(`Flow 3: Preview then export PDF (${width}px)`, async ({ page }, testInfo) => {
+      await page.setViewportSize({ width, height: width === 1440 ? 1000 : 844 });
+      await createResumeInFullEditor(page);
 
-    const panel = page.getByLabel('Properties panel');
-    await panel.getByRole('textbox', { name: /full name/i }).fill('Exporter');
-    await panel.getByRole('textbox', { name: /full name/i }).blur();
-    await panel.getByRole('textbox', { name: /email/i }).fill('exporter@example.com');
-    await panel.getByRole('textbox', { name: /email/i }).blur();
-    await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+      const panel = page.getByLabel('Properties panel');
+      await panel.getByRole('textbox', { name: /email/i }).fill('exporter@example.com');
+      await panel.getByRole('textbox', { name: /email/i }).blur();
+      // Opening preview must commit the focused field, even before autosave.
+      await panel.getByRole('textbox', { name: /full name/i }).fill('Exporter');
 
-    // Trigger export
-    const downloadPromise = page.waitForEvent('download');
-    // The button's aria-label is "Export resume as PDF" — it overrides the
-    // visible "Export PDF" text for accessible-name matching.
-    await page.getByRole('button', { name: /export.*pdf/i }).click();
-    const download = await downloadPromise;
+      const downloads: string[] = [];
+      page.on('download', download => downloads.push(download.suggestedFilename()));
+      const openPreview = page.getByRole('button', { name: 'Preview & export', exact: true });
+      await expect(openPreview).toHaveCount(1);
+      await expect(page.getByRole('button', { name: 'Export PDF', exact: true })).toHaveCount(0);
+      if (width === 390) {
+        await page.getByRole('button', { name: 'Undo', exact: true }).hover();
+        await expect(page.getByRole('tooltip', { name: 'Undo (⌘Z)' })).toBeVisible();
+      }
+      await openPreview.click();
+      const preview = page.getByRole('dialog', { name: 'Preview & export', exact: true });
+      const exportPdf = preview.getByRole('button', { name: 'Export PDF', exact: true });
+      await expect(preview.locator('.react-pdf__Page canvas').first()).toBeVisible();
+      await expect(exportPdf).toBeEnabled();
+      await expect(exportPdf).toBeInViewport();
+      expect(downloads).toEqual([]);
+      await page.screenshot({ path: testInfo.outputPath('preview-and-export.png') });
 
-    expect(download.suggestedFilename()).toContain('Exporter');
-    expect(download.suggestedFilename()).toContain('.pdf');
-  });
+      if (width === 390) {
+        await page.setViewportSize({ width: 320, height: 740 });
+        await expect(exportPdf).toBeInViewport();
+        await expect(preview.getByRole('button', { name: 'Back to editor' })).toBeInViewport();
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      }
+
+      const downloadPromise = page.waitForEvent('download');
+      await exportPdf.click();
+      const download = await downloadPromise;
+
+      expect(download.suggestedFilename()).toContain('Exporter');
+      expect(download.suggestedFilename()).toContain('.pdf');
+      await preview.getByRole('button', { name: 'Back to editor' }).click();
+      await expect(preview).not.toBeVisible();
+      await panel.getByRole('textbox', { name: /full name/i }).fill('Updated Exporter');
+      await openPreview.click();
+      await expect(exportPdf).toBeEnabled();
+      const updatedDownload = page.waitForEvent('download');
+      await exportPdf.click();
+      expect((await updatedDownload).suggestedFilename()).toContain('Updated_Exporter');
+    });
+  }
 
   test('Flow 4: Undo/Redo', async ({ page }) => {
     await createResumeInFullEditor(page);

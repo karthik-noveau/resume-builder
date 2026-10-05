@@ -96,9 +96,9 @@ describe('profile inspector focus', () => {
     expect(screen.getByRole('textbox', { name: 'Full name' })).toHaveFocus()
   })
 
-  it('opens the mobile content view and focuses a field selected in preview', async () => {
+  it('opens the mobile content view and focuses a field selected on the canvas', async () => {
     render(<Editor mobile />)
-    await userEvent.click(screen.getByRole('button', { name: 'Preview' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Canvas' }))
     fireEvent.click(screen.getByRole('button', { name: 'Edit fullName' }))
     await waitFor(() => expect(useEditorStore.getState().personalInfoOpenRequest).toBe(1))
     expect(screen.getByRole('textbox', { name: 'Full name' })).toHaveFocus()

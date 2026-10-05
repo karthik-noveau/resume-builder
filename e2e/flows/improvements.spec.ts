@@ -103,7 +103,7 @@ test('text file import reviews multiple entries and saves corrected values', asy
   ).toBeVisible()
 })
 
-test('mobile uses readable content and labeled design and preview views', async ({ page }) => {
+test('mobile uses readable content and labeled design and canvas views', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await createResumeInFullEditor(page)
   const views = page.getByRole('navigation', { name: 'Editor views' })
@@ -112,7 +112,7 @@ test('mobile uses readable content and labeled design and preview views', async 
   await name.fill('Mobile Example')
   await views.getByRole('button', { name: 'Design', exact: true }).click()
   await expect(page.getByRole('button', { name: /Global design/ })).toBeVisible()
-  await views.getByRole('button', { name: 'Preview', exact: true }).click()
+  await views.getByRole('button', { name: 'Canvas', exact: true }).click()
   await expect(page.getByRole('button', { name: 'Edit fullName' })).toBeVisible()
   await page.getByRole('button', { name: 'Edit fullName' }).click()
   await expect(name).toHaveValue('Mobile Example')

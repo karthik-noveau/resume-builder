@@ -28,7 +28,6 @@ interface ToolbarProps {
   onZoomIn: () => void
   onZoomOut: () => void
   onResetZoom: () => void
-  onExport: () => void
   onPreview: () => void
   previewLoading?: boolean
   exportDisabled?: boolean
@@ -50,7 +49,6 @@ export function Toolbar({
   onZoomIn,
   onZoomOut,
   onResetZoom,
-  onExport,
   onPreview,
   previewLoading,
   exportDisabled,
@@ -123,7 +121,6 @@ export function Toolbar({
         />
         <ShareButton resumeId={resumeId} />
         <ExportButton
-          onExport={onExport}
           onPreview={onPreview}
           previewLoading={previewLoading}
           disabled={exportDisabled}

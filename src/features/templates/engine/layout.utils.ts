@@ -155,7 +155,7 @@ export function estimateStyledTextHeight(
 ): number {
   if (!text || containerWidthPt <= 0) return fontSize * lineHeight
   if (measureTextWidth('M', fontSize, family, weight) !== undefined) {
-    return wrapTextLines(text, containerWidthPt, value => measureTextWidth(value, fontSize, family, weight, letterSpacing)!)
+    return wrapTextLines(text, containerWidthPt, value => measureTextWidth(value, fontSize, family, weight, letterSpacing)!, letterSpacing * fontSize)
       .length * fontSize * lineHeight
   }
   const charsPerLine = Math.max(1, containerWidthPt / avgGlyphWidth(text, fontSize, letterSpacing))

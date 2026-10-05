@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { Eye, MousePointer2 } from 'lucide-react'
+import { FileText, MousePointer2 } from 'lucide-react'
 import type { LayoutTree } from '@/shared/types/layout.types'
 import type { SectionType } from '@/shared/types/resume.types'
 import { CanvasPage } from './CanvasPage'
@@ -165,17 +165,19 @@ export function Canvas({
     <div className={styles.viewport}>
       <div className={styles.canvasToolbar} role="toolbar" aria-label="Canvas editing controls">
         <div className={styles.canvasContext}>
-          {inspecting ? <MousePointer2 size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}
-          <span>{inspecting ? selectedNode?.styleLabel ?? elementLabel ?? 'Click content to edit' : 'Resume preview'}</span>
+          {inspecting ? <MousePointer2 size={15} aria-hidden="true" /> : <FileText size={15} aria-hidden="true" />}
+          <span>{inspecting ? selectedNode?.styleLabel ?? elementLabel ?? 'Click content to edit' : 'View only'}</span>
         </div>
         <button
           type="button"
-          className={styles.previewToggle}
-          aria-label="Clean preview"
-          aria-pressed={!inspecting}
+          className={styles.editingToggle}
+          role="switch"
+          aria-label="Canvas editing"
+          aria-checked={inspecting}
           onClick={() => setInspecting((value) => !value)}
         >
-          <Eye size={15} aria-hidden="true" /> Clean preview
+          Canvas editing
+          <span className={styles.editingSwitch} aria-hidden="true" />
         </button>
       </div>
       <div

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { FileText, Palette, Eye, List } from 'lucide-react'
+import { FileText, Palette, MousePointer2, List } from 'lucide-react'
 import { Drawer } from '@/shared/components/ui/Drawer/Drawer'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import { useEditorStore } from '@/shared/stores/editor.store'
@@ -120,7 +120,7 @@ export function EditorLayout({
             [
               { id: 'content', label: 'Content', Icon: FileText },
               { id: 'design', label: 'Design', Icon: Palette },
-              { id: 'preview', label: 'Preview', Icon: Eye },
+              { id: 'preview', label: 'Canvas', Icon: MousePointer2 },
             ] as const
           ).map(({ id, label, Icon }) => (
             <button

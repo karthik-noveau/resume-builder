@@ -206,16 +206,23 @@ export function buildEducationEntry(b: LayoutBuilder, entry: EducationSection, w
   iy += heading.height + 4
 
   const gradeText = entry.grade ? `GPA: ${entry.grade}` : ''
-  const inlineGrade = !!gradeText && w >= 250
+  const gradeStyle = smallStyle(colors, fp)
+  const gradeLineH = gradeStyle.fontSize * gradeStyle.lineHeight
+  const inlineGradeH = gradeText
+    ? estimateTextHeight(gradeText, 74, gradeStyle.fontSize, gradeStyle.lineHeight, fp.bodyFamily)
+    : 0
+  // Keep short grades beside the institution. Longer qualifications need their
+  // own measured row so they cannot run into the next entry or section.
+  const inlineGrade = !!gradeText && w >= 250 && inlineGradeH <= gradeLineH
   const institutionW = inlineGrade ? w - 88 : w
   const instH = estimateTextHeight(entry.institution, institutionW, fp.scale.body, fp.lineHeight.body, fp.bodyFamily)
   nodes.push(tn(b, 'text', 0, iy, institutionW, instH, { ...bodyStyle(colors, fp, forceBlack), color: colors.textSecondary }, entry.institution, { kind: 'entry-field', sectionType: 'education', entryId: entry.id, field: 'institution' }))
-  if (inlineGrade) nodes.push(tn(b, 'text', w - 74, iy + (fp.scale.body - fp.scale.small) * fp.lineHeight.body * 0.75, 74, fp.scale.small * fp.lineHeight.body,
-    { ...smallStyle(colors, fp), textAlign: 'right' }, gradeText))
+  if (inlineGrade) nodes.push(tn(b, 'text', w - 74, iy + (fp.scale.body - fp.scale.small) * fp.lineHeight.body * 0.75, 74, inlineGradeH,
+    { ...gradeStyle, textAlign: 'right' }, gradeText))
   iy += instH
   if (gradeText && !inlineGrade) {
-    const gradeH = fp.scale.small * fp.lineHeight.body
-    nodes.push(tn(b, 'text', 0, iy + 3, w, gradeH, smallStyle(colors, fp), gradeText))
+    const gradeH = estimateTextHeight(gradeText, w, gradeStyle.fontSize, gradeStyle.lineHeight, fp.bodyFamily)
+    nodes.push(tn(b, 'text', 0, iy + 3, w, gradeH, gradeStyle, gradeText))
     iy += gradeH + 3
   }
 

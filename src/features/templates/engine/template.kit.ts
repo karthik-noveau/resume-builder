@@ -449,16 +449,16 @@ function renderHeaderBlock(
       const leftW = w - rightW - 24
       b.currentPage.nodes.push(text(x, b.y, leftW, nameH, nameStyle('left'), displayName, nameRef))
       if (info.headline) {
-        b.currentPage.nodes.push(text(x, b.y + nameH + 2, leftW, headlineH, headlineStyle('left'), info.headline, headlineRef))
+        b.currentPage.nodes.push(text(x, b.y + nameH + 6, leftW, headlineH, headlineStyle('left'), info.headline, headlineRef))
       }
       let contactY = 0
       contacts.forEach((item) => {
-        const h = estimateTextHeight(item.content, rightW, fp.scale.small, 1.55)
+        const h = estimateTextHeight(item.content, rightW, fp.scale.small, 1.55, fp.bodyFamily)
         b.currentPage.nodes.push(text(x + leftW + 24, b.y + contactY, rightW, h,
           contactStyle('right'), item.content, { kind: 'personal-info', field: item.field }))
         contactY += h + 1
       })
-      const leftH = nameH + (info.headline ? headlineH + 2 : 0)
+      const leftH = nameH + (info.headline ? headlineH + 6 : 0)
       b.advanceY(Math.max(leftH, contactY) + 12)
       b.currentPage.nodes.push(b.node('divider', x, b.y, w, 0.7, { color: c.divider }))
       break
@@ -511,9 +511,9 @@ function renderHeaderBlock(
       const textW = w - tile - 18
       b.currentPage.nodes.push(text(textX, b.y, textW, nameH, nameStyle('left'), displayName, nameRef))
       if (info.headline) {
-        b.currentPage.nodes.push(text(textX, b.y + nameH + 1, textW, headlineH, headlineStyle('left'), info.headline, headlineRef))
+        b.currentPage.nodes.push(text(textX, b.y + nameH + 6, textW, headlineH, headlineStyle('left'), info.headline, headlineRef))
       }
-      b.advanceY(Math.max(tile, nameH + (info.headline ? headlineH + 1 : 0)) + 14)
+      b.advanceY(Math.max(tile, nameH + (info.headline ? headlineH + 6 : 0)) + 14)
       if (contacts.length) {
         b.advanceY(pushContactLine(x, b.y, w, 'left'))
       }
@@ -574,18 +574,19 @@ function buildSectionHeader(
    * reports a single line's height lets the first entry render on top of it.
    */
   const tracking = spec.uppercaseSectionTitles ? 0.08 : 0
+  const titleWeight = spec.sectionHeader === 'editorial-rule' && fp.headingFamily !== 'IBMPlexSans' ? 700 : 600
   const measure = (widthPt: number) =>
     Math.max(
       size * fp.lineHeight.heading,
-      estimateStyledTextHeight(shown, widthPt, size, fp.lineHeight.heading, tracking, fp.headingFamily, 600),
-      estimateWrappedTextHeight(shown, widthPt, size, fp.lineHeight.heading, fp.headingFamily, 600)
+      estimateStyledTextHeight(shown, widthPt, size, fp.lineHeight.heading, tracking, fp.headingFamily, titleWeight),
+      estimateWrappedTextHeight(shown, widthPt, size, fp.lineHeight.heading, fp.headingFamily, titleWeight)
     )
   const titleH = measure(w)
 
   const titleStyle: Partial<LayoutStyles> = {
     fontFamily: fp.headingFamily,
     fontSize: size,
-    fontWeight: 600,
+    fontWeight: titleWeight,
     color: c.sectionTitle,
     lineHeight: fp.lineHeight.heading,
     textAlign: 'left',
@@ -620,7 +621,7 @@ function buildSectionHeader(
       return { nodes, height: h + 20 }
     }
     case 'editorial-rule': {
-      nodes.push(t(0, 0, w, titleH, { ...titleStyle, fontWeight: fp.headingFamily === 'IBMPlexSans' ? 600 : 700 }, shown))
+      nodes.push(t(0, 0, w, titleH, titleStyle, shown))
       nodes.push(b.node('rect', 0, titleH + 5, w, 0.7, { backgroundColor: c.sectionBorder }))
       return { nodes, height: titleH + 14 }
     }
@@ -855,7 +856,7 @@ function renderSection(
       // Each custom section is its own titled block, so they never merge.
       for (const cs of resume.customSections.filter((s) => s.visible && s.items.length > 0)) {
         const text = cs.items.map((i) => i.title).join(', ')
-        const h = estimateTextHeight(text, w, fp.scale.body, 1.5)
+        const h = estimateTextHeight(text, w, fp.scale.body, 1.5, fp.bodyFamily)
         place([{ nodes: [b.node('text', 0, 0, w, h, { ...bodyFor, lineHeight: 1.5 }, { content: text })], height: h }],
           0, cs.title, cs.id)
       }
@@ -981,7 +982,7 @@ function renderPanelContact(
   const i = resume.personalInfo
   const rows = contactItems(i, ['phone', 'email', 'location', 'website', 'linkedin'])
   for (const row of rows) {
-    const h = estimateTextHeight(row.content, w, fp.scale.small, 1.45)
+    const h = estimateTextHeight(row.content, w, fp.scale.small, 1.45, fp.bodyFamily)
     b.currentPage.nodes.push(b.node('text', x, b.y, w, h, {
       fontFamily: fp.bodyFamily,
       fontSize: fp.scale.small,
@@ -1076,7 +1077,7 @@ function renderTwoColumn(
     }, { content: name, editRef: { kind: 'personal-info', field: 'fullName' } }))
     b.advanceY(nameH + 2)
     if (resume.personalInfo.headline) {
-      const hlH = estimateWrappedTextHeight(resume.personalInfo.headline, colW, fp.scale.headline * 0.9, fp.lineHeight.body)
+      const hlH = estimateWrappedTextHeight(resume.personalInfo.headline, colW, fp.scale.headline * 0.9, fp.lineHeight.body, fp.bodyFamily, 500)
       b.currentPage.nodes.push(b.node('text', colX, b.y, colW, hlH, {
         fontFamily: fp.bodyFamily,
         fontSize: fp.scale.headline * 0.9,

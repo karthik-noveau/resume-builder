@@ -251,7 +251,7 @@ function renderSection(
   switch (sectionType) {
     case 'summary': {
       if (!resume.summary.visible || !resume.summary.content) return
-      const h = estimateTextHeight(resume.summary.content, w, fp.scale.body, fp.lineHeight.body)
+      const h = estimateTextHeight(resume.summary.content, w, fp.scale.body, fp.lineHeight.body, fp.bodyFamily)
       const entries: EntryResult[] = [{
         nodes: [t(b, 'text', 0, 0, w, h, { ...bodyStyleFor, color: colors.textSecondary }, resume.summary.content, { kind: 'summary' })],
         height: h,
@@ -298,7 +298,7 @@ function renderSection(
     case 'custom': {
       for (const cs of resume.customSections.filter((s) => s.visible && s.items.length > 0)) {
         const text = cs.items.map((i) => i.title).join(', ')
-        const h = estimateTextHeight(text, w, fp.scale.body, 1.5)
+        const h = estimateTextHeight(text, w, fp.scale.body, 1.5, fp.bodyFamily)
         const entries: EntryResult[] = [{
           nodes: [t(b, 'text', 0, 0, w, h, { ...bodyStyleFor, lineHeight: 1.5 }, text)],
           height: h,

@@ -1,15 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import { createSampleResume } from '@/features/resume/utils/resume.factory'
-import { useThemeStore } from '@/shared/stores/theme.store'
+import { AVAILABLE_FONT_PRESETS, useThemeStore } from '@/shared/stores/theme.store'
 import { loadTemplateFonts } from '@/tests/setup/templateFonts'
 import { getTemplateById, templateRenderer } from '../registry/template.registry'
 import { LayoutBuilder } from './layout.builder'
 import {
   buildCertEntry,
+  buildEducationEntry,
   buildExperienceEntry,
   buildProjectEntry,
   buildRatedSkillGroup,
 } from './section.renderers'
+import { estimateStyledTextHeight } from './layout.utils'
 
 loadTemplateFonts()
 const theme = useThemeStore.getState().getActiveTheme()
@@ -25,6 +27,61 @@ const builder = new LayoutBuilder({
 })
 
 describe('shared resume spacing and alignment', () => {
+  it.each(AVAILABLE_FONT_PRESETS)('measures long education grades with the $name preset', (preset) => {
+    for (const width of [160, 350]) {
+      const entry = { ...resume.education[0], grade: 'First Class Honours, 3.85 / 4.0' }
+      const result = buildEducationEntry(builder, entry, width, theme.colors, preset, false)
+      const grade = result.nodes.find(node => node.content?.startsWith('GPA:'))!
+      const institution = result.nodes.find(node => node.content === entry.institution)!
+      expect(grade.xPt).toBe(0)
+      expect(grade.widthPt).toBe(width)
+      expect(grade.yPt).toBeGreaterThanOrEqual(institution.yPt + institution.heightPt + 3)
+      expect(grade.heightPt).toBeGreaterThanOrEqual(estimateStyledTextHeight(
+        grade.content!, grade.widthPt, grade.styles.fontSize, grade.styles.lineHeight,
+        0, grade.styles.fontFamily, grade.styles.fontWeight,
+      ))
+      expect(result.height).toBeCloseTo(grade.yPt + grade.heightPt)
+    }
+  })
+
+  it('measures bold continuation headings before placing the next entry', () => {
+    const sample = createSampleResume('byline')
+    sample.sectionTitles = { experience: 'Professional Experience and Leadership' }
+    sample.experience = Array.from({ length: 6 }, (_, index) => ({ ...sample.experience[0], id: `experience-${index}` }))
+    const tree = templateRenderer.render(sample, getTemplateById('byline')!, theme, fp)
+    const headings = tree.pages.flatMap(page => page.nodes.flatMap(section => section.children))
+      .filter(node => node.type === 'text' && node.content?.includes('(continued)'))
+    expect(headings.length).toBeGreaterThan(0)
+    for (const heading of headings) {
+      expect(heading.heightPt).toBeGreaterThanOrEqual(estimateStyledTextHeight(
+        heading.content!, heading.widthPt, heading.styles.fontSize, heading.styles.lineHeight,
+        heading.styles.letterSpacing, heading.styles.fontFamily, heading.styles.fontWeight,
+      ))
+    }
+  })
+
+  it('measures sidebar contact links with the selected font', () => {
+    const sample = createSampleResume('studio', { pageSize: 'LETTER' })
+    const executive = AVAILABLE_FONT_PRESETS.find(preset => preset.id === 'executive')!
+    const tree = templateRenderer.render(sample, getTemplateById('studio')!, theme, executive)
+    const link = tree.pages.flatMap(page => page.nodes).find(node =>
+      node.editRef?.kind === 'personal-info' && node.editRef.field === 'linkedin')!
+    expect(link.styles.fontFamily).toBe('SourceSerifPro')
+    expect(link.heightPt).toBeGreaterThanOrEqual(estimateStyledTextHeight(
+      link.content!, link.widthPt, link.styles.fontSize, link.styles.lineHeight,
+      link.styles.letterSpacing, link.styles.fontFamily, link.styles.fontWeight,
+    ))
+  })
+
+  it.each(['ledger', 'graphite', 'harbor', 'studio'])('%s separates name and headline with the modern font', (id) => {
+    const modern = AVAILABLE_FONT_PRESETS.find(preset => preset.id === 'modern')!
+    const tree = templateRenderer.render(createSampleResume(id), getTemplateById(id)!, theme, modern)
+    const nodes = tree.pages[0].nodes
+    const name = nodes.find(node => node.editRef?.kind === 'personal-info' && node.editRef.field === 'fullName')!
+    const headline = nodes.find(node => node.editRef?.kind === 'personal-info' && node.editRef.field === 'headline')!
+    expect(headline.yPt - name.yPt - name.heightPt).toBeGreaterThanOrEqual(6 - 0.01)
+  })
+
   it('leaves a real gutter between certification titles and dates', () => {
     const { nodes } = buildCertEntry(
       builder,

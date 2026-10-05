@@ -184,7 +184,7 @@
 .cardSelected:hover .selectAction {
   background: rgb(var(--color-primary));
   border-color: rgb(var(--color-primary));
-  color: #fff;
+  color: rgb(var(--color-on-primary));
 }
 
 .previewWrap:focus-visible,
@@ -194,7 +194,7 @@
 }
 
 .selectAction:focus-visible {
-  outline-color: #fff;
+  outline-color: rgb(var(--color-on-primary));
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -207,7 +207,7 @@
   .card:hover .selectAction:not(:disabled) {
     background: rgb(var(--color-primary));
     border-color: rgb(var(--color-primary));
-    color: #fff;
+    color: rgb(var(--color-on-primary));
     box-shadow: 0 4px 12px rgb(var(--color-primary) / 24%);
   }
 }
