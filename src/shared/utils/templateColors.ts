@@ -65,6 +65,12 @@ const base = (
 })
 
 const CONFIG: Record<string, TemplateColorConfiguration> = {
+  karthik: {
+    defaults: base('#255c7c', '#202c36', '#414c56', '#b8c6d0', '#f1f5f8', '#255c7c', '#ffffff', '#e2e8f0', '#63717b', {
+      sectionTitle: '#293644',
+    }),
+    fields: ['sectionTitle', 'sectionDescription', 'accent', 'primaryText', 'mutedText', 'divider'],
+  },
   aster: {
     defaults: base('#edc541', '#24241f', '#5f5e52', '#9e9d90', '#faf7ee', '#eee6d5', '#24241f', '#5f5e52', '#5f5e52', { sectionTitle: '#24241f', sectionBorder: '#9e9d90' }),
     fields: [...WITH_SECTION_BORDER, 'sectionBackground', 'panelBackground', 'panelText', 'panelSecondaryText'],

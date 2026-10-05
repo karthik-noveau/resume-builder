@@ -14,12 +14,12 @@ const flatten = (nodes: LayoutNode[]): LayoutNode[] =>
   nodes.flatMap((node) => [node, ...flatten(node.children)])
 
 describe('expanded template collection', () => {
-  it('offers exactly twenty Simple and twenty genuinely Ultra Modern designs', () => {
+  it('offers twenty-one Simple and twenty Ultra Modern designs', () => {
     const simple = ALL_TEMPLATES.filter((template) => template.designStyle === 'Simple')
     const modern = ALL_TEMPLATES.filter((template) => template.designStyle === 'Ultra Modern')
-    expect(simple).toHaveLength(20)
+    expect(simple).toHaveLength(21)
     expect(modern).toHaveLength(20)
-    expect(new Set([...simple, ...modern].map((template) => template.id)).size).toBe(40)
+    expect(new Set([...simple, ...modern].map((template) => template.id)).size).toBe(41)
     for (const template of modern) {
       expect(registeredSpecs().get(template.id)!.editorial, template.id).toBeDefined()
       expect(template.exportRules.includeProfileImage, template.id).toBe(true)
@@ -32,8 +32,8 @@ describe('expanded template collection', () => {
     ).toBe(5)
   })
 
-  it('balances the forty designs across both experience levels', () => {
-    expect(ALL_TEMPLATES.filter((template) => template.category === 'Fresher')).toHaveLength(20)
+  it('includes the graduate reference alongside both experience levels', () => {
+    expect(ALL_TEMPLATES.filter((template) => template.category === 'Fresher')).toHaveLength(21)
     expect(ALL_TEMPLATES.filter((template) => template.category === 'Experienced')).toHaveLength(20)
   })
 

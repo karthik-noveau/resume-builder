@@ -7,7 +7,7 @@ import { useTemplateStore } from '@/shared/stores/template.store'
 import { TemplatePickerModal } from './TemplatePickerModal'
 
 // These tests exercise picker state; full preview and modal layout are checked
-// in the browser so forty resume canvases need not be mounted in every test.
+// in the browser so forty-one resume canvases need not be mounted in every test.
 vi.mock('@/shared/components/ui/Modal/Modal', () => ({
   Modal: ({
     isOpen,
@@ -46,12 +46,12 @@ describe('template picker filters', () => {
     }
   }
 
-  it('shows all forty templates with the same gallery filter controls', () => {
+  it('shows all forty-one templates with the same gallery filter controls', () => {
     setup()
     expect(
       within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
-    ).toHaveLength(40)
-    expect(screen.getByRole('status')).toHaveTextContent('40 of 40 templates')
+    ).toHaveLength(41)
+    expect(screen.getByRole('status')).toHaveTextContent('41 of 41 templates')
     const layoutFilters = within(screen.getByRole('group', { name: 'Filter by column layout' }))
     for (const name of ['All Templates', 'One Column', 'Two Column']) {
       expect(layoutFilters.getByRole('button', { name })).toBeInTheDocument()
@@ -77,8 +77,8 @@ describe('template picker filters', () => {
     await user.type(search, 'Simple')
     expect(
       within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
-    ).toHaveLength(20)
-    expect(screen.getByRole('status')).toHaveTextContent('20 of 40 templates')
+    ).toHaveLength(21)
+    expect(screen.getByRole('status')).toHaveTextContent('21 of 41 templates')
     expect(screen.queryByRole('button', { name: 'Use Horizon template' })).not.toBeInTheDocument()
     await user.clear(search)
     await user.type(search, 'Ultra Modern')
@@ -102,7 +102,7 @@ describe('template picker filters', () => {
     await user.click(screen.getByRole('button', { name: 'All Templates' }))
     expect(
       within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
-    ).toHaveLength(40)
+    ).toHaveLength(41)
     expect(screen.getByRole('searchbox')).toHaveValue('')
     expect(screen.getByRole('button', { name: 'All Templates' })).toHaveAttribute(
       'aria-pressed',
@@ -168,7 +168,7 @@ describe('template picker filters', () => {
     await user.click(screen.getByRole('button', { name: 'Clear all filters' }))
     expect(
       within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
-    ).toHaveLength(40)
+    ).toHaveLength(41)
     expect(screen.getByRole('searchbox')).toHaveValue('')
   })
 
@@ -180,7 +180,7 @@ describe('template picker filters', () => {
     expect(screen.getByRole('searchbox')).toHaveValue('')
     expect(
       within(screen.getByRole('group', { name: 'Templates' })).getAllByRole('button', { name: /^(Use|Current) .+ template$/ })
-    ).toHaveLength(40)
+    ).toHaveLength(41)
   })
 
   it('does not change a template when browsing and closing', async () => {

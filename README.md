@@ -1,6 +1,6 @@
 # Resume Studio
 
-A local-first resume workspace built with React, TypeScript, Vite, and IndexedDB. It includes 40 templates, guided and visual editors, PDF preview/export, a rules-based ATS review, and editable backups.
+A local-first resume workspace built with React, TypeScript, Vite, and IndexedDB. It includes 41 templates, guided and visual editors, PDF preview/export, a rules-based ATS review, and editable backups.
 
 ## Development
 

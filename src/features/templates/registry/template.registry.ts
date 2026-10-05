@@ -40,6 +40,7 @@ import { bylineDefinition } from '../definitions/byline/byline.definition'
 import { pinnacleDefinition } from '../definitions/pinnacle/pinnacle.definition'
 import { coveDefinition } from '../definitions/cove/cove.definition'
 import { dossierDefinition } from '../definitions/dossier/dossier.definition'
+import { karthikDefinition } from '../definitions/karthik/karthik.definition'
 
 // Import renderers (side-effects: calls registerRenderer)
 import '../definitions/fresher-sidebar-photo/fresher-sidebar-photo.renderer'
@@ -83,11 +84,12 @@ import '../definitions/byline/byline.renderer'
 import '../definitions/pinnacle/pinnacle.renderer'
 import '../definitions/cove/cove.renderer'
 import '../definitions/dossier/dossier.renderer'
+import '../definitions/karthik/karthik.renderer'
 
 import type { TemplateDefinition } from '@/shared/types/template.types'
 
 /**
- * Forty templates: twenty Simple designs followed by twenty Ultra Modern
+ * Forty-one templates: twenty-one Simple designs followed by twenty Ultra Modern
  * designs. Visual collections are independent of experience level and column
  * layout; the catalog also balances fresher and experienced use cases.
  */
@@ -112,6 +114,7 @@ export const ALL_TEMPLATES: TemplateDefinition[] = [
   crestDefinition,
   vellumDefinition,
   axisDefinition,
+  karthikDefinition,
   asterDefinition,
   lincolnDefinition,
   horizonDefinition,

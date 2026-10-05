@@ -96,8 +96,8 @@ describe('template catalog layout', () => {
     expect(new Set(names).size).toBe(names.length)
   })
 
-  it('ships exactly forty production templates', () => {
-    expect(ALL_TEMPLATES).toHaveLength(40)
+  it('ships forty-one production templates', () => {
+    expect(ALL_TEMPLATES).toHaveLength(41)
   })
 
   it('keeps retired templates resolvable for existing resumes', () => {

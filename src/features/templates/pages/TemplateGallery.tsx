@@ -55,7 +55,7 @@ export function TemplateGallery() {
     <div className={styles.root}>
       <Seo
         title="Resume Templates"
-        description="Browse 40 resume templates in one- and two-column layouts. Preview any template and start editing straight away — free and without an account."
+        description={`Browse ${availableTemplates.length} resume templates in one- and two-column layouts. Preview any template and start editing straight away — free and without an account.`}
         path="/templates"
       />
       <div className={styles.header}>

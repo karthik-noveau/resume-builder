@@ -49,7 +49,7 @@ test('template previews and style filters never create drafts until Use template
 }) => {
   await page.goto('/templates')
   await selectAntOption(page, 'Style', 'Simple')
-  await expect(page.getByRole('status')).toHaveText('20 of 40 templates')
+  await expect(page.getByRole('status')).toHaveText('21 of 41 templates')
   await page.getByRole('button', { name: 'Preview Meridian template' }).click()
   const preview = page.getByRole('dialog', { name: 'Meridian preview' })
   await expect(preview).toBeVisible()

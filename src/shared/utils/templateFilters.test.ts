@@ -4,13 +4,13 @@ import { DEFAULT_TEMPLATE_FILTERS, filterTemplates, hasTemplateFilters } from '.
 
 describe('template collection filters', () => {
   it.each(['Simple', 'Ultra Modern'] as const)(
-    'finds all twenty %s designs by search',
+    'finds every %s design by search',
     (designStyle) => {
       const searched = filterTemplates(ALL_TEMPLATES, {
         ...DEFAULT_TEMPLATE_FILTERS,
         search: `  ${designStyle.toLowerCase()}  `,
       })
-      expect(searched).toHaveLength(20)
+      expect(searched).toHaveLength(designStyle === 'Simple' ? 21 : 20)
       expect(searched.every((template) => template.designStyle === designStyle)).toBe(true)
       expect(hasTemplateFilters({ ...DEFAULT_TEMPLATE_FILTERS, search: designStyle })).toBe(true)
     }
@@ -37,12 +37,12 @@ describe('template collection filters', () => {
       category: 'Fresher',
       designStyle: 'Simple',
     }
-    expect(filterTemplates(ALL_TEMPLATES, previousFilters)).toHaveLength(40)
+    expect(filterTemplates(ALL_TEMPLATES, previousFilters)).toHaveLength(41)
     expect(hasTemplateFilters(previousFilters)).toBe(false)
   })
 
   it('resets all facets to the full catalog', () => {
     expect(hasTemplateFilters(DEFAULT_TEMPLATE_FILTERS)).toBe(false)
-    expect(filterTemplates(ALL_TEMPLATES, DEFAULT_TEMPLATE_FILTERS)).toHaveLength(40)
+    expect(filterTemplates(ALL_TEMPLATES, DEFAULT_TEMPLATE_FILTERS)).toHaveLength(41)
   })
 })
