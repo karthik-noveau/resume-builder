@@ -43,7 +43,7 @@ Editable resumes and uploaded photos stay in IndexedDB in the current browser. T
 
 Settings → **Download backup** exports resume content, design settings, and referenced photos to a JSON file. Restore validates the file and adds fresh copies in one database transaction, without replacing existing resumes or workspace preferences. Backups are limited to 20 MB and 200 resumes. They contain personal information and should be stored privately. A PDF is a finished document, not an editable backup.
 
-Saving is debounced, flushed on navigation, and warns before a tab closes with pending changes. A failed write stays visibly unsaved and can be retried. Avoid editing the same resume in multiple tabs at once; there is no cross-tab merge system.
+Saving is debounced, flushed on navigation, and warns before a tab closes with pending changes. The save shortcut commits the focused field. A temporary recovery copy in the same tab protects unfinished edits during reload and is removed after a successful save. A failed write stays visibly unsaved and can be retried. Avoid editing the same resume in multiple tabs at once; there is no cross-tab merge system.
 
 ## Product boundaries
 

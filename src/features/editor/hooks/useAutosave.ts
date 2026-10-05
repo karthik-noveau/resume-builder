@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useResumeStore } from '@/shared/stores/resume.store'
+import { checkpointResumeDraft } from '@/shared/services/resumeDraft.service'
 
 const DEBOUNCE_MS = 1000
 
@@ -38,8 +39,14 @@ export function useAutosave() {
    */
   useEffect(() => {
     const flush = () => {
-      const { isDirty: dirty, saveActiveResume: save } = useResumeStore.getState()
-      if (dirty) void save()
+      // Forms and inline canvas fields commit on blur. A keyboard reload or
+      // tab close can otherwise bypass blur and leave the store looking clean.
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+      const { activeResume: resume, isDirty: dirty, saveActiveResume: save } = useResumeStore.getState()
+      if (dirty && resume) {
+        checkpointResumeDraft(resume)
+        void save()
+      }
     }
 
     const onVisibilityChange = () => {
@@ -49,8 +56,8 @@ export function useAutosave() {
     document.addEventListener('visibilitychange', onVisibilityChange)
     window.addEventListener('pagehide', flush)
     const beforeUnload = (event: BeforeUnloadEvent) => {
-      if (!useResumeStore.getState().isDirty) return
       flush()
+      if (!useResumeStore.getState().isDirty) return
       event.preventDefault()
       event.returnValue = ''
     }

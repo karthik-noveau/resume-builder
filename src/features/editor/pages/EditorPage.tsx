@@ -89,7 +89,16 @@ export function EditorPage() {
     onUndo: handleUndo,
     onRedo: handleRedo,
     onSave: () => {
-      void saveActiveResume()
+      const focusedField = document.activeElement
+      void prepareExport().then(() => {
+        // Save the current form/canvas draft, just as preview does. Restore
+        // focus when the field survives the commit so typing can continue.
+        if (focusedField instanceof HTMLElement && focusedField.isConnected
+          && document.activeElement === document.body) {
+          focusedField.focus({ preventScroll: true })
+        }
+        return saveActiveResume()
+      })
     },
     onEscape: () => {
       clearSelection()

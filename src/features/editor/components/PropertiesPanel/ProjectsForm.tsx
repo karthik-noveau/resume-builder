@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { StringListField } from '@/shared/components/ui/StringListField/StringListField'
@@ -6,19 +5,22 @@ import { ControlledInput, ControlledTextarea } from './ControlledFields'
 import { projectSectionSchema, type ProjectSectionInput } from '@/shared/schemas/projects.schema'
 import type { ProjectSection } from '@/shared/types/resume.types'
 import { useResumeStore } from '@/shared/stores/resume.store'
+import { useResumeFormSync } from '../../hooks/useResumeFormSync'
 import styles from './ProjectsForm.module.css'
 
 export function ProjectsForm({ section }: { section: ProjectSection }) {
   const updateSection = useResumeStore((s) => s.updateSection)
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<ProjectSectionInput>({
+  const form = useForm<ProjectSectionInput>({
     resolver: zodResolver(projectSectionSchema),
     defaultValues: section,
   })
 
-  useEffect(() => { reset(section) }, [section.id, reset, section])
-
-  const save = handleSubmit((data) => { updateSection('projects', section.id, data) })
-  const onSaved = () => { void save() }
+  const { control, formState: { errors } } = form
+  const commit = useResumeFormSync<ProjectSectionInput>(form, section, (data) => { updateSection('projects', section.id, data) })
+  const onSaved = () => {
+    void commit(form.getValues())
+    void form.trigger()
+  }
 
   return (
     <form className={styles.form} onSubmit={(e) => e.preventDefault()}>

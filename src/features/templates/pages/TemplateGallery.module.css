@@ -177,7 +177,9 @@
   color: rgb(var(--color-primary));
   font-size: 12px;
   font-weight: 600;
-  transition: background-color var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast), box-shadow var(--duration-fast);
+  /* Foreground and fill must switch together: interpolating both passes
+     through low-contrast colours, especially in the dark theme. */
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
 }
 .card:focus-within .selectAction:not(:disabled),
 .cardSelected .selectAction,

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useResumeStore } from './resume.store'
 import { useEditorStore } from './editor.store'
 import { createSampleResume } from '@/features/resume/utils/resume.factory'
+import { checkpointResumeDraft, recoverResumeDraft } from '@/shared/services/resumeDraft.service'
 
 // Mock the service layer — store tests verify state logic, not storage
 vi.mock('@/shared/services/resume.service', () => ({
@@ -18,6 +19,7 @@ vi.mock('@/shared/services/resume.service', () => ({
 import { resumeService } from '@/shared/services/resume.service'
 
 function resetStores() {
+  sessionStorage.clear()
   useResumeStore.setState({
     activeResume: null,
     resumeList: [],
@@ -55,6 +57,29 @@ describe('resumeStore', () => {
   })
 
   describe('loadResume', () => {
+    it('recovers a newer tab draft and schedules it to be saved normally', async () => {
+      const saved = createSampleResume('meridian')
+      saved.updatedAt = '2026-01-01T00:00:00.000Z'
+      const draft = { ...saved, updatedAt: '2026-01-01T00:00:01.000Z', title: 'Recovered work' }
+      checkpointResumeDraft(draft)
+      vi.mocked(resumeService.getResume).mockResolvedValueOnce(saved)
+      await useResumeStore.getState().loadResume(saved.id)
+      expect(useResumeStore.getState().activeResume?.title).toBe('Recovered work')
+      expect(useResumeStore.getState().isDirty).toBe(true)
+      await useResumeStore.getState().saveActiveResume()
+      expect(useResumeStore.getState().isDirty).toBe(false)
+      expect(recoverResumeDraft(saved)).toBeUndefined()
+    })
+
+    it('does not resurrect a deleted resume from a recovery draft', async () => {
+      const draft = createSampleResume('meridian')
+      checkpointResumeDraft(draft)
+      vi.mocked(resumeService.getResume).mockResolvedValueOnce(undefined)
+      await useResumeStore.getState().loadResume(draft.id)
+      expect(useResumeStore.getState().activeResume).toBeNull()
+      expect(recoverResumeDraft(draft)).toBeUndefined()
+    })
+
     it('loads a resume and clears undo history', async () => {
       const resume = createSampleResume('meridian')
       vi.mocked(resumeService.getResume).mockResolvedValueOnce(resume)
@@ -207,7 +232,7 @@ describe('resumeStore', () => {
   // ─── Save ───────────────────────────────────────────────────────────────────
   describe('saveActiveResume', () => {
     it('keeps newer edits dirty when an older autosave finishes', async () => {
-      loadResume()
+      const saved = loadResume()
       useResumeStore.setState({ isDirty: true })
       let finishWrite!: () => void
       vi.mocked(resumeService.updateResume).mockImplementationOnce(
@@ -218,9 +243,13 @@ describe('resumeStore', () => {
       )
       const save = useResumeStore.getState().saveActiveResume()
       useResumeStore.getState().updateSummary('Newer summary')
+      checkpointResumeDraft(useResumeStore.getState().activeResume!)
       finishWrite()
       await save
       expect(useResumeStore.getState().isDirty).toBe(true)
+      expect(recoverResumeDraft(saved)?.summary.content).toBe('Newer summary')
+      await useResumeStore.getState().saveActiveResume()
+      expect(recoverResumeDraft(saved)).toBeUndefined()
     })
 
     it('waits for an older autosave before flushing the latest draft', async () => {

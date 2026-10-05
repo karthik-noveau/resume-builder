@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -7,6 +7,7 @@ import { Button } from '@/shared/components/ui/Button/Button'
 import { ControlledInput } from './ControlledFields'
 import type { CustomSection } from '@/shared/types/resume.types'
 import { useResumeStore } from '@/shared/stores/resume.store'
+import { useResumeFormSync } from '../../hooks/useResumeFormSync'
 import styles from './CustomSectionForm.module.css'
 
 const schema = z.object({ title: z.string().min(1, 'Title is required') })
@@ -14,14 +15,18 @@ type FormData = z.infer<typeof schema>
 
 export function CustomSectionForm({ section }: { section: CustomSection }) {
   const updateSection = useResumeStore((s) => s.updateSection)
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+  const source = useMemo(() => ({ title: section.title }), [section.title])
+  const form = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { title: section.title },
+    defaultValues: source,
   })
 
-  useEffect(() => { reset({ title: section.title }) }, [section.id, reset, section.title])
-
-  const save = handleSubmit((data) => { updateSection('custom', section.id, data) })
+  const { control, formState: { errors } } = form
+  const commit = useResumeFormSync(form, source, (data) => { updateSection('custom', section.id, data) })
+  const save = () => {
+    void commit(form.getValues())
+    void form.trigger()
+  }
 
   const addItem = () => {
     updateSection('custom', section.id, {

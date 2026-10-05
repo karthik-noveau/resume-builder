@@ -16,7 +16,7 @@ export function useUndoRedo() {
       undoStack: restUndo,
       redoStack: [activeResume, ...s.redoStack],
     }))
-    useResumeStore.setState({ activeResume: snapshot, isDirty: true })
+    useResumeStore.setState({ activeResume: { ...snapshot, updatedAt: new Date().toISOString() }, isDirty: true })
   }, [])
 
   const handleRedo = useCallback(() => {
@@ -29,7 +29,7 @@ export function useUndoRedo() {
       redoStack: restRedo,
       undoStack: [activeResume, ...s.undoStack],
     }))
-    useResumeStore.setState({ activeResume: snapshot, isDirty: true })
+    useResumeStore.setState({ activeResume: { ...snapshot, updatedAt: new Date().toISOString() }, isDirty: true })
   }, [])
 
   return { handleUndo, handleRedo, canUndo, canRedo }

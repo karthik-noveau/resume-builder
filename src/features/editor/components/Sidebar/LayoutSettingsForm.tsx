@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Select } from '@/shared/components/ui/Select/Select'
@@ -5,17 +6,32 @@ import { ControlledInput } from '../PropertiesPanel/ControlledFields'
 import { resumeSettingsSchema, type ResumeSettingsInput } from '@/shared/schemas/settings.schema'
 import { useResumeStore } from '@/shared/stores/resume.store'
 import type { ResumeSettings } from '@/shared/types/resume.types'
+import { useResumeFormSync } from '../../hooks/useResumeFormSync'
 import styles from './LayoutSettingsForm.module.css'
 
 export function LayoutSettingsForm({ settings }: { settings: ResumeSettings }) {
   const updateSettings = useResumeStore((s) => s.updateSettings)
+  const source = useMemo(() => ({
+    ...settings,
+    typographyScale: settings.typographyScale ?? 'standard',
+    lineHeightDensity: settings.lineHeightDensity ?? 'balanced',
+    spacingDensity: settings.spacingDensity ?? 'balanced',
+  }), [settings])
 
-  const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<ResumeSettingsInput>({
+  const form = useForm<ResumeSettingsInput>({
     resolver: zodResolver(resumeSettingsSchema),
-    defaultValues: settings,
+    defaultValues: source,
   })
 
-  const save = handleSubmit((data) => { updateSettings(data) })
+  const { control, setValue, watch, formState: { errors } } = form
+  const commit = useResumeFormSync<ResumeSettingsInput>(form, source, (data) => { updateSettings(data) })
+  const save = () => {
+    // Layout values must stay structurally valid, but commit valid changes
+    // before asynchronous validation so reload can checkpoint them.
+    const result = resumeSettingsSchema.safeParse(form.getValues())
+    if (result.success) void commit(result.data)
+    void form.trigger()
+  }
   const onSaved = () => { void save() }
   const margins = watch('margins')
 

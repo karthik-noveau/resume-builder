@@ -16,6 +16,7 @@ import { isEmptyStyle } from '@/shared/types/style.types'
 import type { DeepPartial } from '@/shared/types/utils.types'
 import type { ParsedResumeData } from '@/features/resume/utils/resumeParser'
 import { resumeService } from '@/shared/services/resume.service'
+import { clearResumeDraft, recoverResumeDraft } from '@/shared/services/resumeDraft.service'
 import { logger } from '@/shared/services/logger'
 import { useEditorStore } from './editor.store'
 import {
@@ -221,13 +222,15 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       const resume = await resumeService.getResume(id)
       if (version !== loadVersion) return
       if (!resume) {
+        clearResumeDraft(id)
         set({ isLoading: false, error: `Resume ${id} not found` })
         return
       }
       useEditorStore.getState().clearHistory()
       useEditorStore.getState().clearSelection()
       useEditorStore.getState().clearStyleTarget()
-      set({ activeResume: resume, isLoading: false, isDirty: false })
+      const recoveredDraft = recoverResumeDraft(resume)
+      set({ activeResume: recoveredDraft ?? resume, isLoading: false, isDirty: !!recoveredDraft })
       logger.info('Resume loaded', { id })
     } catch (err) {
       if (version !== loadVersion) return
@@ -822,6 +825,8 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
     pendingSave = (async () => {
       try {
         await resumeService.updateResume(activeResume.id, activeResume)
+        // An earlier in-flight write must not discard a newer recovery draft.
+        if (get().activeResume === activeResume) clearResumeDraft(activeResume.id)
         set((state) => ({
           isSaving: false,
           // Only this snapshot was saved; edits made during the write remain dirty.

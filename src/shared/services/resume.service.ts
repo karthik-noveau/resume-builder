@@ -80,6 +80,9 @@ class ResumeServiceImpl {
   }
 
   async updateResume(id: string, patch: DeepPartial<Resume>): Promise<Resume> {
+    // Keep the edit's timestamp: a slow write must not make an older snapshot
+    // appear newer than a recovery draft created while that write was pending.
+    const updatedAt = patch.updatedAt ?? new Date().toISOString()
     const existing = await storageService.getResume(id)
     if (!existing) {
       throw new StorageError(`Cannot update: resume ${id} not found`)
@@ -91,7 +94,7 @@ class ResumeServiceImpl {
       ...patch,
       id: existing.id,
       schemaVersion: 1 as const,
-      updatedAt: new Date().toISOString(),
+      updatedAt,
     } as Resume
 
     await storageService.saveResume(updated)

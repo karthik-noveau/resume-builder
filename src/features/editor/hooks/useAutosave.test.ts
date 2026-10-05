@@ -7,6 +7,7 @@ import { createSampleResume } from '@/features/resume/utils/resume.factory'
 const originalSave = useResumeStore.getState().saveActiveResume
 beforeEach(() => {
   vi.useFakeTimers()
+  sessionStorage.clear()
   useResumeStore.setState({
     activeResume: createSampleResume('meridian'),
     isDirty: false,
@@ -16,7 +17,8 @@ beforeEach(() => {
   })
 })
 afterEach(() => {
-  useResumeStore.setState({ isDirty: false, saveActiveResume: originalSave })
+  act(() => useResumeStore.setState({ isDirty: false, saveActiveResume: originalSave }))
+  sessionStorage.clear()
   vi.useRealTimers()
 })
 
@@ -59,4 +61,18 @@ it('warns before closing a tab with unsaved changes', () => {
   const event = new Event('beforeunload', { cancelable: true })
   window.dispatchEvent(event)
   expect(event.defaultPrevented).toBe(true)
+})
+
+it('commits a focused field before checking whether navigation has unsaved changes', () => {
+  renderHook(() => useAutosave())
+  const input = document.createElement('input')
+  document.body.append(input)
+  input.focus()
+  input.addEventListener('blur', () => useResumeStore.getState().updateSummary('Unfinished typing'))
+  const event = new Event('beforeunload', { cancelable: true })
+  act(() => { window.dispatchEvent(event) })
+  expect(useResumeStore.getState().activeResume?.summary.content).toBe('Unfinished typing')
+  expect(useResumeStore.getState().saveActiveResume).toHaveBeenCalledOnce()
+  expect(event.defaultPrevented).toBe(true)
+  input.remove()
 })
