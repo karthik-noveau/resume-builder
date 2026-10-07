@@ -182,3 +182,71 @@
   background-color: rgb(var(--color-error) / 5%);
   color: rgb(var(--color-error));
 }
+
+@media (max-width: 639px) {
+  .card {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr) 44px;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgb(var(--color-text-primary) / 3%);
+  }
+
+  .thumbnail {
+    height: 120px;
+    padding: 8px;
+    border: 0;
+    border-radius: 12px;
+    background-color: rgb(var(--color-text-primary) / 3%);
+    background-image: none;
+  }
+
+  .previewShadow {
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgb(30 26 52 / 12%);
+  }
+
+  .info {
+    min-width: 0;
+    padding: 0;
+  }
+
+  .title {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .metadata {
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+    font-size: 12px;
+  }
+
+  .metadata time {
+    font-size: 11px;
+  }
+
+  .menuWrap {
+    position: relative;
+    top: auto;
+    right: auto;
+    align-self: start;
+  }
+
+  .menuButton {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .titleInput {
+    min-height: 44px;
+    margin: 0;
+    font-size: 16px;
+  }
+}

@@ -1,4 +1,5 @@
 .filters {
+  --filter-height: 48px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -8,13 +9,42 @@
 }
 
 .group {
-  display: flex;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: center;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid rgb(var(--color-divider));
-  border-radius: var(--radius-medium);
-  background-color: rgb(var(--color-background));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgb(var(--color-divider) / 80%);
+  border-radius: var(--radius-pill);
+  background-color: rgb(var(--color-surface) / 65%);
+}
+
+.selectionPill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  /* Three equal tracks, with 8px of padding and two 4px gaps. */
+  width: calc((100% - 16px) / 3);
+  border-radius: var(--radius-pill);
+  background-color: rgb(var(--color-primary));
+  box-shadow: 0 2px 6px rgb(var(--color-primary) / 18%);
+  pointer-events: none;
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 150ms ease;
+}
+
+.group[data-active-layout='single-column'] .selectionPill {
+  transform: translateX(calc(100% + 4px));
+}
+
+.group[data-active-layout='two-column'] .selectionPill {
+  transform: translateX(calc(200% + 8px));
+}
+
+.group[data-active-layout='none'] .selectionPill {
+  opacity: 0;
 }
 
 .mobileLabel {
@@ -22,49 +52,61 @@
 }
 
 .filterButton {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 32px;
-  padding: 0 12px;
+  gap: 8px;
+  min-height: calc(var(--filter-height) - 10px);
+  padding: 0 14px;
   border: 0;
-  border-radius: var(--radius-small);
+  border-radius: var(--radius-pill);
   background: transparent;
   color: rgb(var(--color-text-secondary));
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
   transition: background-color var(--duration-fast), color var(--duration-fast);
 }
 
 .filterButton:hover {
-  background-color: rgb(var(--color-surface) / 60%);
+  background-color: rgb(var(--color-surface-elevated));
   color: rgb(var(--color-text-primary));
 }
 
 .filterButton:focus-visible {
-  outline: none;
-  box-shadow: var(--shadow-focus-ring);
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 2px;
 }
 
 .active,
 .active:hover {
-  background-color: rgb(var(--color-surface));
-  color: rgb(var(--color-primary));
-  box-shadow: 0 1px 3px rgb(var(--color-text-primary) / 10%);
-  font-weight: 600;
+  background-color: transparent;
+  color: rgb(var(--color-on-primary));
 }
 
 .styleFilter {
-  flex: 0 0 158px;
+  flex: 0 0 176px;
   min-width: 0;
 }
 
 .styleSelect:global(.ant-select) {
-  height: 40px;
-  border-radius: var(--radius-medium);
+  height: var(--filter-height);
+  padding-inline: 16px;
+  border-radius: var(--radius-pill);
+  border-color: rgb(var(--color-divider) / 80%);
+  background-color: rgb(var(--color-surface) / 80%);
   font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.styleActive .styleSelect:global(.ant-select) {
+  border-color: rgb(var(--color-primary) / 45%);
+  background-color: rgb(var(--color-primary) / 5%);
+}
+
+.styleActive .styleSelect :global(.ant-select-prefix) {
+  color: rgb(var(--color-primary));
 }
 
 .styleSelect :global(.ant-select-prefix) {
@@ -74,15 +116,56 @@
   color: rgb(var(--color-text-muted));
 }
 
+.styleSelect:global(.ant-select-open) :global(.ant-select-content-has-value) {
+  opacity: 1;
+}
+
+.styleDropdown:global(.ant-select-dropdown) {
+  padding: 6px;
+  border: 1px solid rgb(var(--color-divider) / 80%);
+  border-radius: 20px;
+  background: rgb(var(--color-surface));
+  box-shadow: 0 16px 40px -12px rgb(30 26 52 / 22%), 0 4px 12px rgb(30 26 52 / 5%);
+}
+
+.styleDropdown :global(.ant-select-item-option) {
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  color: rgb(var(--color-text-secondary));
+  font-size: var(--text-base);
+  transition: none;
+}
+
+.styleDropdown :global(.ant-select-item-option-active:not(.ant-select-item-option-disabled)) {
+  background: rgb(var(--color-surface-elevated));
+  color: rgb(var(--color-text-primary));
+}
+
+.styleDropdown:global(.ant-select-dropdown) :global(.ant-select-item-option-selected:not(.ant-select-item-option-disabled)),
+.styleDropdown:global(.ant-select-dropdown) :global(.ant-select-item-option-selected.ant-select-item-option-active:not(.ant-select-item-option-disabled)) {
+  background: rgb(var(--color-primary) / 9%);
+  color: rgb(var(--color-primary-hover));
+  font-weight: 600;
+}
+
+.styleDropdown :global(.ant-select-item-option-state) {
+  color: inherit;
+}
+
 .searchWrap {
   position: relative;
   flex: 1 1 180px;
   min-width: 0;
+  max-width: 280px;
+  margin-inline-start: auto;
 }
 
 .searchIcon {
   position: absolute;
-  left: 12px;
+  left: 16px;
   top: 50%;
   transform: translateY(-50%);
   color: rgb(var(--color-text-muted));
@@ -91,11 +174,11 @@
 
 .searchInput {
   width: 100%;
-  height: 40px;
-  padding: 0 12px 0 36px;
-  background-color: rgb(var(--color-surface));
-  border: 1px solid rgb(var(--color-divider));
-  border-radius: var(--radius-medium);
+  height: var(--filter-height);
+  padding: 0 16px 0 42px;
+  background-color: rgb(var(--color-surface) / 80%);
+  border: 1px solid rgb(var(--color-divider) / 80%);
+  border-radius: var(--radius-pill);
   font-size: var(--text-sm);
   color: rgb(var(--color-text-primary));
   transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
@@ -120,25 +203,61 @@
 }
 
 @media (max-width: 1023px), (pointer: coarse) {
-  .filterButton {
-    min-height: 44px;
+  .filters {
+    --filter-height: 54px;
   }
 
   .searchInput,
   .styleSelect:global(.ant-select) {
-    height: 44px;
     font-size: 16px;
+  }
+
+  .styleDropdown :global(.ant-select-item-option) {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .group {
+    width: 100%;
   }
 }
 
 @media (max-width: 639px) {
-  .group {
+  .filters {
+    --filter-height: 44px;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .group {
+    grid-column: 1 / -1;
+    padding: 0;
+    gap: 0;
+    border-radius: 16px;
+    background: rgb(var(--color-surface));
+  }
+
+  .selectionPill {
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    width: calc((100% - 18px) / 3);
+    border-radius: 12px;
+    box-shadow: none;
+  }
+
+  .group[data-active-layout='single-column'] .selectionPill {
+    transform: translateX(calc(100% + 6px));
+  }
+
+  .group[data-active-layout='two-column'] .selectionPill {
+    transform: translateX(calc(200% + 12px));
   }
 
   .filterButton {
+    min-height: 44px;
     min-width: 0;
     padding: 0 4px;
     touch-action: manipulation;
@@ -155,10 +274,42 @@
   }
 
   .styleFilter {
-    flex-basis: 144px;
+    flex: 1 1 148px;
+  }
+
+  .styleSelect:global(.ant-select) {
+    padding-inline: 12px;
+    border-radius: 14px;
+    background-color: rgb(var(--color-surface));
+    font-size: 13px;
+  }
+
+  .styleSelect :global(.ant-select-prefix) {
+    margin-inline-end: 6px;
   }
 
   .searchWrap {
-    flex-basis: 120px;
+    flex-basis: 128px;
+    max-width: none;
+    margin-inline-start: 0;
+  }
+
+  .searchInput {
+    border-radius: 14px;
+    background-color: rgb(var(--color-surface));
+  }
+}
+
+@media (max-width: 359px) {
+  .styleSelect :global(.ant-select-prefix) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .selectionPill,
+  .filterButton,
+  .searchInput {
+    transition: none;
   }
 }

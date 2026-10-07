@@ -47,7 +47,7 @@ describe('ResumeCard', () => {
       await user.click(screen.getByRole('button', { name: 'Actions for My Developer Resume' }))
       await user.click(screen.getByRole('menuitem', { name: 'Share' }))
       expect(await screen.findByRole('textbox', { name: 'Share link' })).toHaveValue(link)
-      expect(createShareLink).toHaveBeenCalledWith(mockResume)
+      expect(createShareLink).toHaveBeenCalledWith(mockResume, window.location.origin, 'view')
       expect(useResumeStore.getState().activeResume).toBe(activeResume)
       await user.click(screen.getByRole('button', { name: 'Copy link' }))
       expect(copy).toHaveBeenCalledWith(link)

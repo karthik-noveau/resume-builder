@@ -9,6 +9,8 @@ import {
   Sun,
   Moon,
   Menu,
+  ChevronRight,
+  ArrowUpRight,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useThemeStore } from '@/shared/stores/theme.store'
@@ -35,7 +37,7 @@ export function AppShell() {
   }, [pathname, hash])
 
   return (
-    <div className={styles.root}>
+    <div className={clsx(styles.root, pathname === '/' && styles.home)}>
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
@@ -46,7 +48,7 @@ export function AppShell() {
               <BrandLogo />
             </NavLink>
             <nav className={styles.desktopNav} aria-label="Main">
-              {NAV_ITEMS.map(({ to, label, Icon, end }) => (
+              {NAV_ITEMS.map(({ to, label, end }) => (
                 <NavLink
                   key={to}
                   to={to}
@@ -55,7 +57,6 @@ export function AppShell() {
                     clsx(styles.navLink, isActive && styles.navLinkActive)
                   }
                 >
-                  <Icon size={15} aria-hidden="true" />
                   {label}
                 </NavLink>
               ))}
@@ -63,6 +64,9 @@ export function AppShell() {
           </div>
 
           <div className={styles.rightGroup}>
+            <NavLink to="/templates?create=true" className={styles.startLink}>
+              Let’s get started <span aria-hidden="true">↗</span>
+            </NavLink>
             <Button
               type="text"
               shape="circle"
@@ -86,6 +90,8 @@ export function AppShell() {
               className={styles.mobileMenuButton}
               onClick={() => setMobileNavOpen(true)}
               aria-label="Open menu"
+              aria-expanded={mobileNavOpen}
+              aria-haspopup="dialog"
               icon={<Menu size={18} aria-hidden="true" />}
             />
           </div>
@@ -96,8 +102,14 @@ export function AppShell() {
         isOpen={mobileNavOpen}
         onClose={() => setMobileNavOpen(false)}
         position="left"
-        title="Menu"
-        width="260px"
+        title={
+          <>
+            <span aria-hidden="true"><BrandLogo /></span>
+            <span className={styles.menuTitle}>Menu</span>
+          </>
+        }
+        width="320px"
+        rootClassName={styles.mobileMenu}
       >
         <nav className={styles.mobileNav} aria-label="Main">
           {NAV_ITEMS.map(({ to, label, Icon, end }) => (
@@ -110,11 +122,33 @@ export function AppShell() {
                 clsx(styles.mobileNavLink, isActive && styles.mobileNavLinkActive)
               }
             >
-              <Icon size={16} aria-hidden="true" />
-              {label}
+              <span className={styles.mobileNavIcon}><Icon size={19} aria-hidden="true" /></span>
+              <span>{label}</span>
+              <ChevronRight className={styles.mobileNavArrow} size={17} aria-hidden="true" />
             </NavLink>
           ))}
         </nav>
+        <div className={styles.mobileMenuFooter}>
+          <button
+            type="button"
+            className={styles.mobileThemeToggle}
+            role="switch"
+            aria-label="Dark mode"
+            aria-checked={isDark}
+            onClick={() => switchTheme(isDark ? 'light' : 'dark')}
+          >
+            <Moon size={18} aria-hidden="true" />
+            <span>Dark mode</span>
+            <span className={styles.mobileThemeSwitch} aria-hidden="true" />
+          </button>
+          <NavLink
+            to="/templates?create=true"
+            className={styles.mobileCreateLink}
+            onClick={() => setMobileNavOpen(false)}
+          >
+            Create a resume <ArrowUpRight size={19} aria-hidden="true" />
+          </NavLink>
+        </div>
       </Drawer>
 
       <div id="main-content" tabIndex={-1} className={styles.content}>

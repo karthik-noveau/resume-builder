@@ -60,7 +60,7 @@ export function EditorLayout({
 
   return (
     <div className={styles.root} inert={tourOpen}>
-      {/* Toolbar — 64px */}
+      {/* A full-width toolbar keeps editing controls attached to the workspace. */}
       <header className={styles.header}>{toolbar}</header>
 
       <div className={styles.body}>

@@ -1,7 +1,6 @@
 .page {
-  max-width: 80rem;
-  margin: 0 auto;
-  padding: 40px 24px 48px;
+  composes: container from '../../../shared/styles/pageContainer.module.css';
+  padding-block: 40px 48px;
 }
 
 .pageHeader {

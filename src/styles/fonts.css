@@ -94,3 +94,15 @@
   font-weight: 600;
   font-display: swap;
 }
+
+@font-face { font-family: 'NotoSans'; src: url('/fonts/NotoSans-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+
+@font-face { font-family: 'NotoSans'; src: url('/fonts/NotoSans-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+
+@font-face { font-family: 'NotoSansTamil'; src: url('/fonts/NotoSansTamil-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+
+@font-face { font-family: 'NotoSansTamil'; src: url('/fonts/NotoSansTamil-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+
+@font-face { font-family: 'NotoSansDevanagari'; src: url('/fonts/NotoSansDevanagari-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+
+@font-face { font-family: 'NotoSansDevanagari'; src: url('/fonts/NotoSansDevanagari-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }

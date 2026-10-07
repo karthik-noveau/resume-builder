@@ -1,8 +1,7 @@
-import fontkit, { type Font } from '@pdf-lib/fontkit'
 import { fontRegistry } from '@/shared/services/font.registry'
 import type { FontFamily, FontWeight } from '@/shared/types/font.types'
+import { fontRuns, runWidth } from './fontRuns'
 
-const fonts = new Map<string, Font>()
 const widths = new Map<string, number>()
 
 /** Measure the bundled typeface, using the same glyph advances as PDF export.
@@ -16,16 +15,10 @@ export function measureTextWidth(
 ): number | undefined {
   if (!fontRegistry.hasFont(family, weight)) return undefined
   const key = `${family}-${weight}`
-  let font = fonts.get(key)
-  if (!font) {
-    font = fontkit.create(new Uint8Array(fontRegistry.getFont(family, weight)))
-    fonts.set(key, font)
-  }
   const runKey = `${key}:${text}`
   let width = widths.get(runKey)
   if (width === undefined) {
-    width =
-      font.layout(text).glyphs.reduce((sum, glyph) => sum + glyph.advanceWidth, 0) / font.unitsPerEm
+    width = (fontRuns(text, family, weight) ?? []).reduce((sum, run) => sum + runWidth(run), 0)
     if (widths.size >= 5000) widths.clear()
     widths.set(runKey, width)
   }
@@ -59,7 +52,7 @@ export function wrapTextLines(
           line = ''
         }
         if (measure(part) > available) {
-          for (const character of part) {
+          for (const { segment: character } of new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(part)) {
             if (line && measure(line + character) > available) {
               lines.push(line)
               line = ''

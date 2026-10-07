@@ -1,80 +1,251 @@
+.modal {
+  composes: surface from '../../../../shared/styles/dialogSurface.module.css';
+}
 .root {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  min-height: 0;
+  gap: 20px;
 }
 
 .description {
   font-size: var(--text-base);
   color: rgb(var(--color-text-secondary));
+  line-height: 1.65;
 }
 
 .footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  flex-shrink: 0;
   gap: 12px;
-  padding-top: 8px;
+  padding-top: 16px;
   border-top: 1px solid rgb(var(--color-divider));
+}
+.backLabelCompact {
+  display: none;
 }
 .scrollArea {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   gap: 16px;
   overflow: auto;
-  max-height: 65dvh;
-  padding: 2px;
+  padding: 3px;
+  overscroll-behavior: contain;
 }
-.fileInput,
+.sourceField,
 .reviewField {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   font-size: var(--text-base);
+  color: rgb(var(--color-text-secondary));
+  min-width: 0;
 }
 .fileInput {
+  position: relative;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
   padding: 16px;
-  border: 1px dashed rgb(var(--color-divider));
-  border-radius: 10px;
+  border: 1px dashed rgb(var(--color-primary) / 35%);
+  border-radius: 20px;
+  background: rgb(var(--color-primary) / 4%);
+  cursor: pointer;
 }
-.fileInput span {
+.fileInput:hover,
+.fileInput[data-ready='true'] {
+  border-color: rgb(var(--color-primary) / 65%);
+}
+.fileInput:has(input:focus-visible) {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 2px;
+}
+.fileInput[data-busy='true'] {
+  opacity: 0.65;
+  cursor: wait;
+}
+.fileInput input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: inherit;
+}
+.fileIcon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgb(var(--color-primary) / 12%);
+  border-radius: 15px;
+  background: rgb(var(--color-surface));
+  color: rgb(var(--color-primary));
+}
+.fileMeta {
+  min-width: 0;
+}
+.fileMeta strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgb(var(--color-text-primary));
+}
+.fileMeta > span {
+  display: block;
+  margin-top: 5px;
   color: rgb(var(--color-text-secondary));
   font-size: var(--text-sm);
+  line-height: 1.5;
+}
+.browseButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: var(--radius-pill);
+  background: rgb(var(--color-surface));
+  color: rgb(var(--color-primary));
+  font-size: 12px;
+  font-weight: 600;
+}
+.fileStatus {
+  margin-top: -6px;
+  font-size: 12px;
+  color: rgb(var(--color-text-secondary));
+}
+.fileStatus:empty {
+  display: none;
+}
+.sourceField {
+  font-weight: 600;
+}
+.localNote {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: rgb(var(--color-text-secondary));
+}
+.localNote svg {
+  flex-shrink: 0;
 }
 .reviewSection {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  min-width: 0;
   border: 1px solid rgb(var(--color-divider));
-  border-radius: 10px;
+  border-radius: 18px;
   padding: 16px;
+  background: rgb(var(--color-surface-elevated) / 45%);
+}
+.reviewField:has(textarea),
+.reviewSection > button {
+  grid-column: 1 / -1;
 }
 .reviewSection legend {
   padding: 0 6px;
   font-weight: 600;
 }
+.sourceField textarea,
 .reviewField input,
 .reviewField textarea {
   width: 100%;
   min-height: 44px;
   padding: 10px 12px;
   border: 1px solid rgb(var(--color-divider));
-  border-radius: 8px;
+  border-radius: 12px;
   color: rgb(var(--color-text-primary));
   background: rgb(var(--color-surface));
   font: inherit;
 }
+.sourceField textarea,
 .reviewField textarea {
   resize: vertical;
 }
+.sourceField textarea {
+  min-height: 150px;
+  max-height: 240px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+.sourceField textarea:focus-visible,
+.reviewField input:focus-visible,
+.reviewField textarea:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 2px;
+}
+.sourceField textarea::placeholder {
+  color: rgb(var(--color-text-muted));
+}
 .error {
-  color: rgb(var(--color-error));
+  color: color-mix(in srgb, rgb(var(--color-error)) 80%, rgb(var(--color-text-primary)));
+  background: rgb(var(--color-error) / 5%);
+  border: 1px solid rgb(var(--color-error) / 20%);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 13px;
 }
 @media (max-width: 640px) {
+  .sourceField textarea,
   .reviewField input,
   .reviewField textarea {
     font-size: 16px;
   }
   .footer {
     flex-wrap: wrap;
+  }
+}
+@media (max-width: 479px) {
+  .fileInput {
+    grid-template-columns: 38px minmax(0, 1fr) 36px;
+    gap: 10px;
+    padding: 14px 12px;
+  }
+  .fileIcon {
+    width: 38px;
+    height: 42px;
+    border-radius: 12px;
+  }
+  .fileMeta strong {
+    font-size: 13px;
+  }
+  .fileMeta > span {
+    font-size: 11px;
+  }
+  .browseButton {
+    padding: 0;
+    width: 36px;
+    height: 36px;
+  }
+  .browseButton span {
+    display: none;
+  }
+  .reviewSection {
+    grid-template-columns: 1fr;
+  }
+  .footer > button:global(.ant-btn) {
+    flex: 0 1 auto;
+    min-width: 0;
+    padding-inline: 12px;
+    white-space: nowrap;
+    height: auto;
+    font-size: 12px;
+  }
+  .backLabel {
+    display: none;
+  }
+  .backLabelCompact {
+    display: inline;
   }
 }

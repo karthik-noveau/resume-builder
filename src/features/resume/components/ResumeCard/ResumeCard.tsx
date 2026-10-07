@@ -11,6 +11,7 @@ import styles from './ResumeCard.module.css'
 
 interface ResumeCardProps {
   resume: Resume
+  previewWidth?: number
   onDuplicate: (id: string) => void
   onDelete: (id: string) => void
   onRename: (id: string, title: string) => Promise<void> | void
@@ -24,7 +25,7 @@ function formatDate(iso: string): string {
   })
 }
 
-export function ResumeCard({ resume, onDuplicate, onDelete, onRename }: ResumeCardProps) {
+export function ResumeCard({ resume, previewWidth = 140, onDuplicate, onDelete, onRename }: ResumeCardProps) {
   const navigate = useNavigate()
   const [isRenaming, setIsRenaming] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
@@ -89,7 +90,7 @@ export function ResumeCard({ resume, onDuplicate, onDelete, onRename }: ResumeCa
     <article className={styles.card} aria-label={resume.title}>
       {/* Thumbnail */}
       <div className={styles.thumbnail}>
-        <ResumePreview layoutTree={layoutTree} widthPx={140} className={styles.previewShadow} />
+        <ResumePreview layoutTree={layoutTree} widthPx={previewWidth} className={styles.previewShadow} />
       </div>
 
       {/* Info */}

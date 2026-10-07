@@ -73,50 +73,77 @@
 .zoomControls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .fitButton:global(.ant-btn) {
-  height: 36px;
-  padding-inline: 14px;
-  border-radius: 8px;
+  height: 42px;
+  gap: 6px;
+  padding-inline: 12px;
+  border-color: rgb(var(--color-divider) / 80%);
+  border-radius: var(--radius-pill);
+  background: rgb(var(--color-surface));
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .fitButton:global(.ant-btn)[aria-pressed='true'] {
-  color: rgb(var(--color-primary));
-  background: rgb(var(--color-primary) / 4%);
+  color: rgb(var(--color-primary-hover));
+  border-color: rgb(var(--color-primary) / 30%);
+  background: rgb(var(--color-primary) / 6%);
 }
 
 .zoomButtons {
   display: flex;
-  overflow: hidden;
-  border: 1px solid rgb(var(--color-divider));
-  border-radius: 8px;
-  background: rgb(var(--color-surface));
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgb(var(--color-divider) / 80%);
+  border-radius: var(--radius-pill);
+  background: rgb(var(--color-surface-elevated) / 70%);
 }
 
 .zoomButton:global(.ant-btn) {
-  width: 36px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
   padding: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: 50%;
+  background: rgb(var(--color-surface));
+  color: rgb(var(--color-text-secondary));
+  box-shadow: 0 1px 4px rgb(30 26 52 / 6%);
+  transition: box-shadow var(--duration-fast);
+}
+
+.zoomButton:global(.ant-btn):not(:disabled):hover {
+  color: rgb(var(--color-on-primary));
+  background: rgb(var(--color-primary));
+}
+
+.zoomButton:global(.ant-btn):not(:disabled):active {
+  color: rgb(var(--color-on-primary));
+  background: rgb(var(--color-primary-active));
+}
+
+.zoomButton:global(.ant-btn):disabled {
+  color: rgb(var(--color-text-muted));
+  background: transparent;
   box-shadow: none;
+  opacity: 0.45;
 }
 
 .zoomButton:global(.ant-btn):focus-visible {
-  outline-offset: -3px;
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 1px;
 }
 
 .zoomValue {
   display: grid;
   place-items: center;
   min-width: 52px;
-  border-inline: 1px solid rgb(var(--color-divider));
-  font-size: var(--text-sm);
-  font-weight: 500;
+  font-size: var(--text-base);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: rgb(var(--color-text-primary));
   white-space: nowrap;
@@ -228,7 +255,11 @@
 
   .zoomButton:global(.ant-btn) {
     width: 44px;
-    height: 42px;
+    height: 44px;
+  }
+
+  .fitButton:global(.ant-btn) {
+    height: 54px;
   }
 }
 

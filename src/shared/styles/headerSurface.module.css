@@ -1,0 +1,7 @@
+.surface {
+  border: 1px solid rgb(var(--color-divider) / 75%);
+  border-radius: var(--radius-pill);
+  background: rgb(var(--color-surface) / 92%);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgb(30 26 52 / 5%);
+}

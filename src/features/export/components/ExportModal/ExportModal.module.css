@@ -15,11 +15,16 @@
 
 .footer {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: var(--space-3);
   flex-shrink: 0;
   padding-top: var(--space-4);
   border-top: 1px solid rgb(var(--color-divider));
+}
+
+.footer :global(.ant-btn) {
+  height: 40px;
 }
 
 @media (max-width: 479px) {

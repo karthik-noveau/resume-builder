@@ -19,15 +19,23 @@
 /* Top bar */
 .header {
   height: calc(64px + env(safe-area-inset-top));
-  flex-shrink: 0;
+  width: 100%;
   border-bottom: 1px solid rgb(var(--color-divider));
-  background-color: rgb(var(--color-surface));
+  background: rgb(var(--color-surface));
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: env(safe-area-inset-top) 16px 0;
+  padding: env(safe-area-inset-top) 24px 0;
   gap: var(--space-4);
   z-index: 20;
+}
+@media (max-width: 639px) {
+  .header {
+    height: calc(60px + env(safe-area-inset-top));
+    padding-inline: 16px;
+    gap: 8px;
+  }
 }
 
 .headerLeft {
@@ -78,7 +86,7 @@
 
 .backLink {
   padding: var(--space-1-5);
-  border-radius: var(--radius-small);
+  border-radius: var(--radius-pill);
   color: rgb(var(--color-text-muted));
   transition: color var(--duration-fast), background-color var(--duration-fast);
   flex-shrink: 0;
@@ -118,7 +126,7 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-1-5) var(--space-3);
-  border-radius: var(--radius-large);
+  border-radius: var(--radius-pill);
   font-size: var(--text-base);
   font-weight: 600;
   border: 1px solid rgb(var(--color-divider));
@@ -468,6 +476,16 @@
   padding: 0 24px 24px;
 }
 
+.stepCardBody :global(input.ant-input) {
+  min-height: 40px;
+}
+
+@media (max-width: 1023px), (pointer: coarse) {
+  .stepCardBody :global(input.ant-input) {
+    min-height: 44px;
+  }
+}
+
 @media (min-width: 640px) {
   .stepCardBody {
     padding: 0 32px 32px;
@@ -756,3 +774,6 @@
 }
 
 .stepActionsBar { flex-wrap: wrap; }
+
+.experienceChoice { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding: 12px; border: 1px solid rgb(var(--color-border)); border-radius: 8px; font-size: 14px; }
+.experienceChoice input { width: 18px; height: 18px; flex-shrink: 0; }

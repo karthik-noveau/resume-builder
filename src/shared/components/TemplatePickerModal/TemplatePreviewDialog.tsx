@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight, Maximize2, Minus, Plus } from 'lucide-react'
 import { Modal } from '@/shared/components/ui/Modal/Modal'
 import { Button } from '@/shared/components/ui/Button/Button'
 import { ResumePreview } from '@/shared/components/ResumePreview/ResumePreview'
@@ -94,6 +94,7 @@ export function TemplatePreviewDialog({
           aria-pressed={zoomMode === 'width'}
           onClick={() => setZoomMode('width')}
         >
+          <Maximize2 size={15} aria-hidden="true" />
           Fit width
         </Button>
         <div className={styles.zoomButtons} role="group" aria-label="Preview zoom">

@@ -3,7 +3,7 @@ import { resumeSchema } from '@/shared/schemas/resume.schema'
 import { appSettingsSchema } from '@/shared/schemas/settings.schema'
 import type { Resume, AppSettings } from '@/shared/types/resume.types'
 import type { ImageAsset } from '@/shared/types/storage.types'
-import { StorageError, ValidationError } from '@/shared/types/storage.types'
+import { ResumeConflictError, StorageError, ValidationError } from '@/shared/types/storage.types'
 import { logger } from './logger'
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -27,6 +27,28 @@ class StorageServiceImpl {
       logger.error('Failed to save resume', err, { id: resume.id })
       throw new StorageError(`Failed to save resume ${resume.id}`, err)
     }
+  }
+
+  /** Compare and write in one IndexedDB transaction, including the recovery snapshot. */
+  async commitResume(resume: Resume, expectedRevision: number): Promise<Resume> {
+    return db.transaction('rw', db.resumes, db.versions, async () => {
+      const previous = await db.resumes.get(resume.id)
+      if (!previous || (previous.revision ?? 0) !== expectedRevision)
+        throw new ResumeConflictError()
+      const saved = { ...resume, revision: expectedRevision + 1 }
+      await db.versions.put({
+        id: crypto.randomUUID(),
+        resumeId: resume.id,
+        savedAt: previous.updatedAt,
+        resume: previous,
+      })
+      const versions = await db.versions.where('resumeId').equals(resume.id).sortBy('savedAt')
+      await db.versions.bulkDelete(
+        versions.slice(0, Math.max(0, versions.length - 30)).map((v) => v.id)
+      )
+      await db.resumes.put(saved)
+      return saved
+    })
   }
 
   async getResume(id: string): Promise<Resume | undefined> {
@@ -79,15 +101,48 @@ class StorageServiceImpl {
 
   async deleteResume(id: string): Promise<void> {
     try {
-      await db.transaction('rw', db.resumes, db.images, async () => {
+      await db.transaction('rw', db.resumes, db.trash, async () => {
+        const resume = await db.resumes.get(id)
+        if (!resume) return
+        await db.trash.put({ id, resume, deletedAt: new Date().toISOString() })
         await db.resumes.delete(id)
-        await db.images.where('resumeId').equals(id).delete()
       })
       logger.debug('Resume deleted', { id })
     } catch (err) {
       logger.error('Failed to delete resume', err, { id })
       throw new StorageError(`Failed to delete resume ${id}`, err)
     }
+  }
+
+  async getVersions(resumeId: string) {
+    return (await db.versions.where('resumeId').equals(resumeId).sortBy('savedAt')).reverse()
+  }
+
+  async getTrash() {
+    return db.trash.orderBy('deletedAt').reverse().toArray()
+  }
+
+  async restoreTrashedResume(id: string): Promise<void> {
+    await db.transaction('rw', db.resumes, db.trash, async () => {
+      const entry = await db.trash.get(id)
+      if (!entry) throw new StorageError('This resume is no longer in Trash.')
+      if (await db.resumes.get(id)) throw new ResumeConflictError()
+      await db.resumes.add({
+        ...entry.resume,
+        revision: (entry.resume.revision ?? 0) + 1,
+        updatedAt: new Date().toISOString(),
+      })
+      await db.trash.delete(id)
+    })
+  }
+
+  async permanentlyDeleteResume(id: string): Promise<void> {
+    await db.transaction('rw', db.trash, db.images, db.versions, async () => {
+      if (!(await db.trash.get(id))) throw new StorageError('This resume is no longer in Trash.')
+      await db.trash.delete(id)
+      await db.images.where('resumeId').equals(id).delete()
+      await db.versions.where('resumeId').equals(id).delete()
+    })
   }
 
   // ─── Images ────────────────────────────────────────────────────────────────

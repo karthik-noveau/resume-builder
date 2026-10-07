@@ -2,22 +2,19 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  background-color: rgb(var(--color-background));
-  background-image: var(--gradient-page);
 }
 
 .header {
-  background-color: rgb(var(--color-surface) / 80%);
   border-bottom: 1px solid rgb(var(--color-divider));
   padding: 40px 0 24px;
 }
 
-.headerInner,
+.headerInner {
+  composes: container from '../../../shared/styles/pageContainer.module.css';
+}
+
 .mainInner {
-  /* Keep the gutter inside the same capped width as the app header and Settings. */
-  max-width: 80rem;
-  margin: 0 auto;
-  padding-inline: 24px;
+  composes: container from '../../../shared/styles/pageContainer.module.css';
 }
 
 .headerInner {
@@ -56,9 +53,6 @@
   font-weight: 800;
   color: rgb(var(--color-text-primary));
   letter-spacing: -0.025em;
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 .subheading {
@@ -106,10 +100,11 @@
   flex-direction: column;
   width: 100%;
   text-align: left;
-  cursor: pointer;
+  padding: 8px;
   background-color: rgb(var(--color-surface));
-  border: 1px solid rgb(var(--color-divider));
-  border-radius: 18px;
+  border: 1px solid rgb(var(--color-divider) / 85%);
+  border-radius: 26px;
+  box-shadow: 0 3px 12px rgb(30 26 52 / 3%);
   overflow: hidden;
   transition:
     box-shadow var(--duration-normal),
@@ -117,8 +112,8 @@
 }
 
 .card:focus-within {
-  border-color: rgb(var(--color-primary) / 50%);
-  box-shadow: 0 12px 28px rgb(var(--color-primary) / 20%);
+  border-color: rgb(var(--color-primary) / 60%);
+  box-shadow: 0 12px 30px -10px rgb(var(--color-primary) / 18%);
 }
 
 .card:disabled {
@@ -144,15 +139,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
-  border-bottom: 1px solid rgb(var(--color-divider));
-  background-image: var(--gradient-panel);
+  padding: 16px 12px;
+  border-radius: 18px;
+  background-image: linear-gradient(145deg, rgb(var(--color-surface-elevated)), rgb(var(--color-background)));
 }
 
 .previewThumb {
-  border-radius: var(--radius-small);
-  border: 1px solid rgb(var(--color-divider));
-  box-shadow: 0 12px 32px rgb(15 23 42 / 12%);
+  flex-shrink: 0;
+  border-radius: 4px;
+  border: 1px solid rgb(var(--color-divider) / 65%);
+  box-shadow: 0 16px 28px -10px rgb(30 26 52 / 22%), 0 3px 8px rgb(30 26 52 / 5%);
 }
 
 .cardInfo {
@@ -160,21 +156,21 @@
   flex-direction: column;
   flex: 1;
   width: 100%;
-  padding: 14px 16px;
+  padding: 14px 10px 10px;
 }
 
 .selectAction {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 8px;
-  min-height: 36px;
-  padding: 8px 12px;
-  margin-top: 16px;
-  border: 1px solid rgb(var(--color-primary) / 22%);
-  border-radius: 8px;
-  background: rgb(var(--color-primary) / 4%);
-  color: rgb(var(--color-primary));
+  min-height: 44px;
+  padding: 5px 6px 5px 16px;
+  margin-top: 12px;
+  border: 1px solid rgb(var(--color-divider) / 85%);
+  border-radius: var(--radius-pill);
+  background: rgb(var(--color-surface-elevated) / 70%);
+  color: rgb(var(--color-text-primary));
   font-size: 12px;
   font-weight: 600;
   /* Foreground and fill must switch together: interpolating both passes
@@ -187,6 +183,21 @@
   background: rgb(var(--color-primary));
   border-color: rgb(var(--color-primary));
   color: rgb(var(--color-on-primary));
+}
+
+.actionArrow {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  background: rgb(var(--color-text-primary) / 6%);
+}
+
+.card:focus-within .actionArrow,
+.cardSelected .actionArrow {
+  background: rgb(var(--color-on-primary) / 16%);
 }
 
 .previewWrap:focus-visible,
@@ -202,15 +213,18 @@
 @media (hover: hover) and (pointer: fine) {
   .card:hover {
     z-index: 1;
-    border-color: rgb(var(--color-primary) / 50%);
-    box-shadow: 0 12px 28px rgb(var(--color-primary) / 20%);
+    border-color: rgb(var(--color-primary) / 60%);
+    box-shadow: 0 12px 30px -10px rgb(var(--color-primary) / 18%);
   }
 
   .card:hover .selectAction:not(:disabled) {
     background: rgb(var(--color-primary));
     border-color: rgb(var(--color-primary));
     color: rgb(var(--color-on-primary));
-    box-shadow: 0 4px 12px rgb(var(--color-primary) / 24%);
+  }
+
+  .card:hover .actionArrow {
+    background: rgb(var(--color-on-primary) / 16%);
   }
 }
 
@@ -223,21 +237,85 @@
 
 .cardTitle {
   font-family: var(--font-heading, var(--font-sans));
-  font-size: var(--text-md);
+  font-size: var(--text-lg);
   font-weight: 700;
   color: rgb(var(--color-text-primary));
 }
 
-.cardDescription {
-  flex: 1;
-  margin-top: 6px;
-  font-size: var(--text-sm);
-  line-height: 1.5;
-  color: rgb(var(--color-text-secondary));
-}
+@media (max-width: 639px) {
+  .header {
+    padding: 24px 0 0;
+    border-bottom: 0;
+  }
 
-.collectionSummary {
-  margin-top: 8px;
-  font-size: var(--text-sm);
-  color: rgb(var(--color-text-muted));
+  .heading {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .subheading {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .main {
+    padding-top: 20px;
+  }
+
+  .categories {
+    margin-bottom: 16px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .card {
+    padding: 6px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgb(var(--color-text-primary) / 3%);
+  }
+
+  .previewWrap {
+    padding: 12px 6px;
+    border-radius: 14px;
+    background-color: rgb(var(--color-text-primary) / 3%);
+    background-image: none;
+  }
+
+  .previewThumb {
+    border-radius: 2px;
+    box-shadow: 0 6px 12px -4px rgb(30 26 52 / 18%);
+  }
+
+  .cardInfo {
+    min-width: 0;
+    padding: 10px 4px 4px;
+  }
+
+  .cardTitle {
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .selectAction {
+    gap: 4px;
+    margin-top: 8px;
+    padding: 5px 4px 5px 10px;
+    border-radius: 12px;
+    background: transparent;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .actionArrow {
+    width: 24px;
+    height: 24px;
+  }
 }

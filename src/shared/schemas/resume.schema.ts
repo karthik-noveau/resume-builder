@@ -117,6 +117,8 @@ const elementStyleSchema = z.object({
 
 export const resumeSchema = z.object({
   id: z.string().min(1),
+  revision: z.number().int().min(0).optional(),
+  noWorkExperience: z.boolean().optional(),
   schemaVersion: z.literal(1),
   title: z.string(),
   createdAt: z.string().min(1),

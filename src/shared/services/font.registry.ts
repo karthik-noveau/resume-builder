@@ -4,6 +4,8 @@ import { logger } from './logger'
 export type { FontFamily, FontWeight }
 
 type FontKey = `${FontFamily}-${FontWeight}`
+export const FALLBACK_FAMILIES = ['NotoSans', 'NotoSansTamil', 'NotoSansDevanagari'] as const
+export type FallbackFamily = (typeof FALLBACK_FAMILIES)[number]
 
 const FONT_FILES: Partial<Record<FontKey, string>> = {
   'Inter-400': '/fonts/Inter-Regular.woff',
@@ -41,8 +43,24 @@ function resolveFontKey(family: FontFamily, weight: FontWeight): FontKey {
 class FontRegistryImpl {
   private fonts = new Map<FontKey, ArrayBuffer>()
   private initialized = false
+  private fallbackFonts = new Map<string, ArrayBuffer>()
+
+  getFallbackFont(family: FallbackFamily, weight: FontWeight): ArrayBuffer | undefined {
+    return this.fallbackFonts.get(`${family}-${weight >= 600 ? 'Bold' : 'Regular'}`)
+  }
 
   async initialize(): Promise<void> {
+    const fallbacksReady = Promise.allSettled(
+      FALLBACK_FAMILIES.flatMap((family) =>
+        ['Regular', 'Bold'].map(async (cut) => {
+          const response = await fetch(`/fonts/${family}-${cut}.ttf`, {
+            signal: AbortSignal.timeout(8000),
+          })
+          if (!response.ok) throw new Error(`Could not load ${family}`)
+          this.fallbackFonts.set(`${family}-${cut}`, await response.arrayBuffer())
+        })
+      )
+    )
     const results = await Promise.allSettled(
       (Object.entries(FONT_FILES) as [FontKey, string][]).map(async ([key, path]) => {
         const controller = new AbortController()
@@ -69,6 +87,7 @@ class FontRegistryImpl {
       logger.info('FontRegistry: all fonts loaded', { count: loaded })
     }
 
+    await fallbacksReady
     this.initialized = true
   }
 

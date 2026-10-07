@@ -1,5 +1,5 @@
 .home {
-  --home-bg: rgb(var(--color-background));
+  --home-bg: var(--page-background);
   --home-surface: rgb(var(--color-surface));
   --home-ink: rgb(var(--color-text-primary));
   --home-muted: rgb(var(--color-text-secondary));
@@ -10,15 +10,27 @@
   --home-panel: rgb(var(--color-surface-elevated));
   --home-preview: rgb(var(--color-canvas));
   --home-emphasis: rgb(var(--color-primary));
-  --home-button-bg: var(--gradient-brand);
-  --home-button-ink: #ffffff;
-  --home-button-hover: var(--gradient-brand-hover);
+  --home-button-bg: var(--home-ink);
+  --home-button-ink: var(--home-bg);
+  --home-button-hover: rgb(var(--color-primary-hover));
   --home-shadow: rgb(var(--color-primary) / 14%);
   --home-violet: rgb(var(--color-primary));
-  --home-display: 'Inter', sans-serif;
-  background: var(--home-bg);
+  --home-display: 'Manrope', 'Inter', sans-serif;
+  --home-radius-panel: 48px;
+  --home-radius-card: 28px;
+  --home-radius-pill: 999px;
   color: var(--home-ink);
   font-size: 16px;
+}
+.home h1,
+.home h2 {
+  text-wrap: balance;
+}
+@media (max-width: 620px) {
+  .home {
+    --home-radius-panel: 32px;
+    --home-radius-card: 24px;
+  }
 }
 .home section[id] {
   scroll-margin-top: 92px;

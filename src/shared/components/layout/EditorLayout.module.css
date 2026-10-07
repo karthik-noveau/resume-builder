@@ -10,13 +10,13 @@
 
 .header {
   height: calc(64px + env(safe-area-inset-top));
+  width: 100%;
   padding-top: env(safe-area-inset-top);
+  border-bottom: 1px solid rgb(var(--color-divider));
+  background: rgb(var(--color-surface));
   flex-shrink: 0;
   position: sticky;
   top: 0;
-  border-bottom: 1px solid rgb(var(--color-divider));
-  background-color: rgb(var(--color-surface) / 85%);
-  backdrop-filter: blur(12px);
   z-index: 10;
 }
 

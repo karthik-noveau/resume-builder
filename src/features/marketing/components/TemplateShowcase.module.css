@@ -1,73 +1,87 @@
 .section {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 88px 32px;
+  composes: container from '../../../shared/styles/pageContainer.module.css';
+  padding-block: 56px 72px;
 }
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   gap: 30px;
+}
+.headerCopy {
+  min-width: 0;
+  max-width: 690px;
 }
 .eyebrow {
   color: var(--home-accent);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 1.6px;
+  letter-spacing: 1.3px;
 }
 .heading {
   font-family: var(--home-display);
-  font-size: clamp(30px, 3.1vw, 42px);
-  font-weight: 800;
-  letter-spacing: -1.8px;
-  margin-top: 14px;
-  line-height: 1.15;
-  max-width: 650px;
+  font-size: clamp(36px, 3.6vw, 50px);
+  font-weight: 600;
+  letter-spacing: -2.3px;
+  margin-top: 12px;
+  line-height: 1.12;
 }
 .heading em {
   font-style: normal;
   color: var(--home-accent);
 }
 .subtext {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--home-muted);
-  line-height: 1.8;
-  margin-top: 15px;
-  max-width: 600px;
+  line-height: 1.65;
+  margin-top: 12px;
 }
 .allLink {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 14px;
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
-  padding: 12px 16px;
-  border: 1px solid var(--home-line);
-  border-radius: 10px;
-  background: var(--home-surface);
-  transition: border-color 150ms;
+  min-height: 48px;
+  padding: 7px 8px 7px 20px;
+  border: 1px solid var(--home-accent);
+  border-radius: var(--home-radius-pill);
+  background: var(--home-accent);
+  color: rgb(var(--color-on-primary));
+  box-shadow: 0 4px 12px rgb(var(--color-primary) / 12%);
 }
 .allLink:hover {
-  border-color: var(--home-accent);
+  border-color: rgb(var(--color-primary-hover));
+  background: rgb(var(--color-primary-hover));
+}
+.linkArrow {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgb(var(--color-on-primary) / 15%);
 }
 .collectionBar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  margin: 29px 0 22px;
+  margin: 28px 0 24px;
 }
 .filters {
   display: flex;
   gap: 4px;
   background: var(--home-soft);
-  border-radius: 10px;
-  padding: 4px;
+  border: 1px solid var(--home-line);
+  border-radius: var(--home-radius-pill);
+  padding: 5px;
 }
 .filters button {
-  border-radius: 5px;
-  min-height: 35px;
+  border-radius: var(--home-radius-pill);
+  min-height: 40px;
   padding: 8px 18px;
   color: var(--home-muted);
   font-size: 12px;
@@ -80,8 +94,8 @@
   color: var(--home-ink);
 }
 .filters button[aria-pressed='true'] {
-  background: var(--gradient-brand);
-  color: #ffffff;
+  background: var(--home-accent);
+  color: rgb(var(--color-on-primary));
 }
 .collectionNote {
   color: var(--home-muted);
@@ -94,33 +108,31 @@
 }
 .card {
   min-width: 0;
-  border: 1px solid var(--home-line);
-  border-radius: 14px;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
   overflow: hidden;
-  background: var(--home-surface);
-  transition:
-    border-color 150ms,
-    box-shadow 150ms;
+  background: transparent;
+  transition: transform 180ms;
 }
 .card:hover {
-  border-color: var(--home-violet);
-  box-shadow: 0 12px 30px var(--home-shadow);
+  transform: translateY(-5px);
 }
 .previewStage {
   position: relative;
-  height: 330px;
+  height: 350px;
   overflow: hidden;
   background: rgb(var(--color-tint));
-  border-bottom: 1px solid var(--home-line);
+  border-radius: 24px;
 }
 .previewStage[data-tone='1'] {
-  background: rgb(var(--color-tint-blue));
+  background: color-mix(in srgb, #e7baa4 25%, var(--home-surface));
 }
 .previewStage[data-tone='2'] {
-  background: rgb(var(--color-tint-blue));
+  background: color-mix(in srgb, #9bc7b5 25%, var(--home-surface));
 }
 .previewStage[data-tone='3'] {
-  background: rgb(var(--color-tint));
+  background: rgb(var(--color-tint-blue));
 }
 .index {
   position: absolute;
@@ -134,8 +146,8 @@
   position: absolute;
   right: 13px;
   top: 12px;
-  padding: 3px 7px;
-  border-radius: 4px;
+  padding: 5px 9px;
+  border-radius: var(--home-radius-pill);
   background: var(--home-surface);
   color: var(--home-ink);
   font-size: 8px;
@@ -159,9 +171,9 @@
   gap: 20px;
   transform: translateX(-50%);
   padding: 11px 16px;
-  background: var(--gradient-brand);
+  background: #201c2a;
   color: #fff;
-  border-radius: 5px;
+  border-radius: var(--home-radius-pill);
   font-size: 11px;
   font-weight: 500;
   white-space: nowrap;
@@ -177,11 +189,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 19px 17px;
+  padding: 20px 4px;
 }
 .cardFooter h3 {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 500;
   letter-spacing: -0.2px;
 }
 .cardFooter p {
@@ -195,6 +207,10 @@
 .cardFooter > svg {
   flex-shrink: 0;
   color: var(--home-ink);
+  box-sizing: content-box;
+  padding: 9px;
+  border-radius: 50%;
+  background: var(--home-soft);
 }
 .caption {
   font-size: 12px;
@@ -213,12 +229,12 @@
     height: 284px;
   }
   .cardFooter {
-    padding: 15px 12px;
+    padding: 16px 4px;
   }
 }
 @media (max-width: 850px) {
   .section {
-    padding-block: 56px;
+    padding-block: 44px 56px;
   }
   .header {
     flex-direction: column;
@@ -241,11 +257,11 @@
 }
 @media (max-width: 480px) {
   .section {
-    padding: 47px 20px;
+    padding-block: 36px 48px;
   }
   .heading {
-    font-size: 31px;
-    letter-spacing: -1.1px;
+    font-size: 34px;
+    letter-spacing: -1.4px;
   }
   .subtext {
     font-size: 13px;
@@ -255,7 +271,7 @@
     letter-spacing: 1.3px;
   }
   .allLink {
-    font-size: 11px;
+    font-size: 12px;
   }
   .filters {
     width: 100%;
@@ -290,12 +306,12 @@
     padding: 2px 5px;
   }
   .cardFooter {
-    padding: 13px 11px;
+    padding: 14px 3px;
     align-items: flex-start;
     gap: 5px;
   }
   .cardFooter h3 {
-    font-size: 13px;
+    font-size: 15px;
   }
   .cardFooter p {
     font-size: 9px;
@@ -303,6 +319,7 @@
   }
   .cardFooter svg {
     width: 15px;
+    padding: 5px;
   }
   .caption {
     font-size: 11px;
@@ -312,5 +329,10 @@
     font-size: 9px;
     padding: 8px 10px;
     gap: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card:hover {
+    transform: none;
   }
 }

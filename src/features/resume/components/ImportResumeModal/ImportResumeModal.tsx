@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { ArrowRight, Check, FileText, LockKeyhole, Upload } from 'lucide-react'
 import { Modal } from '@/shared/components/ui/Modal/Modal'
 import { Button } from '@/shared/components/ui/Button/Button'
-import { Textarea } from '@/shared/components/ui/Textarea/Textarea'
 import {
   parseResumeText,
   type ParsedResumeData,
@@ -79,6 +79,8 @@ export function ImportResumeModal({
   return (
     <Modal
       isOpen={isOpen}
+      centered
+      className={styles.modal}
       onClose={() => {
         if (!isLoading) onClose()
       }}
@@ -95,13 +97,27 @@ export function ImportResumeModal({
           {!parsed ? (
             <>
               <p className={styles.description}>
-                Choose a PDF, Word document or text file, or paste your resume below. Files are read
-                on your device. You’ll review the extracted details before saving.
+                Upload a file or paste your text. Review the details before saving.
               </p>
-              <label className={styles.fileInput}>
-                Resume file <span>PDF, DOCX or TXT · up to 10 MB</span>
+              <label className={styles.fileInput} data-ready={!!fileName} data-busy={!!busy}>
+                <span className={styles.fileIcon}>
+                  {fileName ? (
+                    <Check size={23} aria-hidden="true" />
+                  ) : (
+                    <FileText size={23} aria-hidden="true" />
+                  )}
+                </span>
+                <span className={styles.fileMeta}>
+                  <strong title={fileName || undefined}>{fileName || 'Choose a file'}</strong>
+                  <span>PDF, DOCX or TXT · up to 10 MB</span>
+                </span>
+                <span className={styles.browseButton} aria-hidden="true">
+                  <Upload size={15} />
+                  <span>{fileName ? 'Change' : 'Browse'}</span>
+                </span>
                 <input
                   type="file"
+                  aria-label="Resume file"
                   accept=".pdf,.docx,.txt"
                   disabled={busy}
                   onChange={(event) => {
@@ -111,22 +127,27 @@ export function ImportResumeModal({
                   }}
                 />
               </label>
-              <p role="status">
+              <p role="status" className={styles.fileStatus}>
                 {reading
                   ? 'Reading your file…'
                   : fileName
-                    ? `Loaded ${fileName}. Check the text below.`
+                    ? 'File ready. Check the extracted text below.'
                     : ''}
               </p>
-              <Textarea
-                label="Resume text"
-                value={rawText}
-                onChange={(e) => setRawText(e.target.value)}
-                placeholder="Paste your resume text here…"
-                rows={12}
-                maxLength={MAX_IMPORT_TEXT}
-                disabled={busy}
-              />
+              <label className={styles.sourceField}>
+                Resume text
+                <textarea
+                  value={rawText}
+                  onChange={(e) => setRawText(e.target.value)}
+                  placeholder="Paste your contact details, experience, education and skills…"
+                  rows={6}
+                  maxLength={MAX_IMPORT_TEXT}
+                  disabled={busy}
+                />
+              </label>
+              <p className={styles.localNote}>
+                <LockKeyhole size={14} aria-hidden="true" /> Your file is read on this device.
+              </p>
             </>
           ) : (
             <>
@@ -329,10 +350,20 @@ export function ImportResumeModal({
         <div className={styles.footer}>
           <Button
             variant="ghost"
+            aria-label={parsed ? 'Back to source text' : 'Cancel'}
             onClick={parsed ? () => setParsed(null) : onClose}
             disabled={busy}
           >
-            {parsed ? 'Back to source text' : 'Cancel'}
+            {parsed ? (
+              <>
+                <span className={styles.backLabel}>Back to source text</span>
+                <span className={styles.backLabelCompact} aria-hidden="true">
+                  Back
+                </span>
+              </>
+            ) : (
+              'Cancel'
+            )}
           </Button>
           <Button
             variant="primary"
@@ -343,6 +374,7 @@ export function ImportResumeModal({
             disabled={busy || !rawText.trim()}
           >
             {parsed ? 'Create resume' : 'Review details'}
+            <ArrowRight size={15} aria-hidden="true" />
           </Button>
         </div>
       </div>

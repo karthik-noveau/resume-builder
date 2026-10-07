@@ -28,6 +28,8 @@ export interface SelectProps {
   id?: string
   disabled?: boolean
   className?: string
+  popupClassName?: string
+  selectedIcon?: ReactNode
   onChange?: (event: SelectChangeEvent) => void
   onBlur?: (event: FocusEvent<HTMLElement>) => void
 }

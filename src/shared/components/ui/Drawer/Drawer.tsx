@@ -14,6 +14,7 @@ export function Drawer({
   width = '320px',
   flush = false,
   onAfterOpen,
+  rootClassName,
 }: DrawerProps) {
   const [panel, setPanel] = useState<HTMLDivElement | null>(null)
   useSwipeToClose(panel, isOpen, onClose)
@@ -33,7 +34,7 @@ export function Drawer({
       keyboard
       maskClosable
       destroyOnHidden
-      rootClassName={clsx(styles.root, flush && styles.editorDrawer)}
+      rootClassName={clsx(styles.root, flush && styles.editorDrawer, rootClassName)}
       classNames={{ body: flush ? styles.flushBody : undefined }}
     >
       {children}

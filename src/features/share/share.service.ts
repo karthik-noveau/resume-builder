@@ -28,7 +28,7 @@ const shareSchema = z.object({
     })
     .optional(),
 })
-type SharedResume = z.infer<typeof shareSchema>
+export type SharedResume = z.infer<typeof shareSchema>
 
 function toBase64(bytes: Uint8Array) {
   let binary = ''
@@ -81,7 +81,7 @@ function validatePayload(value: unknown): SharedResume {
   return payload
 }
 
-function imageData(image: NonNullable<SharedResume['image']>) {
+export function imageData(image: NonNullable<SharedResume['image']>) {
   const bytes = fromBase64(image.base64)
   const png = bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71
   const jpeg = bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255
@@ -96,7 +96,8 @@ function imageData(image: NonNullable<SharedResume['image']>) {
 /** The fragment carries the complete snapshot; it is not part of the server request. */
 export async function createShareLink(
   resume: Resume,
-  origin = window.location.origin
+  origin = window.location.origin,
+  mode: 'view' | 'edit' = 'edit'
 ): Promise<string> {
   if (typeof CompressionStream === 'undefined')
     throw new Error('Use a current browser to create a share link.')
@@ -133,7 +134,7 @@ export async function createShareLink(
   )
   const token = toBase64(compressed).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
   if (token.length > MAX_SHARE_TOKEN_LENGTH) throw new Error(TOO_LARGE)
-  return `${new URL('/share', origin).href}#resume=v1.${token}`
+  return `${new URL(mode === 'view' ? '/share?mode=view' : '/share', origin).href}#resume=v1.${token}`
 }
 
 export async function decodeShareLink(hash: string): Promise<SharedResume> {

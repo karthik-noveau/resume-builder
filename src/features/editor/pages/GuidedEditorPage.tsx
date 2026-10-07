@@ -422,7 +422,19 @@ export function GuidedEditorPage() {
                   )}
                   {currentStep.id === 'summary' && <SummaryForm section={activeResume.summary} />}
                   {currentStep.id === 'experience' && (
-                    <SectionProperties resume={activeResume} sectionType="experience" />
+                    <>
+                      {activeResume.experience.length === 0 && (
+                        <label className={styles.experienceChoice}>
+                          <input type="checkbox" checked={!!activeResume.noWorkExperience}
+                            onChange={event => {
+                              updateResume({ noWorkExperience: event.target.checked })
+                              clearValidation()
+                            }} />
+                          I don’t have work experience yet
+                        </label>
+                      )}
+                      <SectionProperties resume={activeResume} sectionType="experience" />
+                    </>
                   )}
                   {currentStep.id === 'education' && (
                     <SectionProperties resume={activeResume} sectionType="education" />

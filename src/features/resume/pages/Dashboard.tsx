@@ -1,6 +1,7 @@
+import { RecoveryDialog } from '../components/RecoveryDialog'
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
-import { Plus, FileText, Search, Upload, ArrowUpDown, HardDrive, AlertCircle } from 'lucide-react'
+import { useNavigate } from 'react-router'
+import { Plus, FileText, Search, Upload, ArrowUpDown, AlertCircle, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageLayout } from '@/shared/components/layout/PageLayout'
 import { Seo } from '@/shared/components/Seo/Seo'
@@ -13,6 +14,7 @@ import { ResumeCard } from '../components/ResumeCard/ResumeCard'
 import { ImportResumeModal } from '../components/ImportResumeModal/ImportResumeModal'
 import { DeleteResumeDialog } from '../components/DeleteResumeDialog/DeleteResumeDialog'
 import { useResumeStore } from '@/shared/stores/resume.store'
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import { type ParsedResumeData } from '../utils/resumeParser'
 import type { Resume } from '@/shared/types/resume.types'
 import styles from './Dashboard.module.css'
@@ -69,6 +71,7 @@ function DashboardSkeleton() {
 
 export function Dashboard() {
   const navigate = useNavigate()
+  const isMobile = useMediaQuery('(max-width: 639px)')
   const resumeList = useResumeStore((s) => s.resumeList)
   const isLoading = useResumeStore((s) => s.isLoading)
   const error = useResumeStore((s) => s.error)
@@ -84,6 +87,7 @@ export function Dashboard() {
   const [importing, setImporting] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [trashOpen, setTrashOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<SortBy>('updated')
 
@@ -139,7 +143,7 @@ export function Dashboard() {
     setDeleting(true)
     try {
       await deleteResume(deleteTarget.id)
-      toast.success('Resume deleted')
+      toast.success('Resume moved to Trash')
       setDeleteTarget(null)
     } catch {
       toast.error('Failed to delete resume')
@@ -164,30 +168,24 @@ export function Dashboard() {
             </p>
           </div>
           <div className={styles.headerActions}>
+            <Button variant="secondary" onClick={() => setTrashOpen(true)} aria-label="Trash" title="Trash">
+              <Trash2 size={16} aria-hidden="true" className={styles.mobileLabel} />
+              <span className={styles.desktopLabel}>Trash</span>
+            </Button>
             <Button
               variant="secondary"
               onClick={() => setShowImport(true)}
               aria-label="Import an existing resume"
             >
               <Upload size={16} aria-hidden="true" />
-              Import Resume
+              <span className={styles.desktopLabel}>Import Resume</span>
+              <span className={styles.mobileLabel}>Import</span>
             </Button>
             <Button variant="primary" onClick={goToTemplatePicker} aria-label="Create a new resume">
               <Plus size={16} aria-hidden="true" />
               New Resume
             </Button>
           </div>
-        </div>
-
-        <div className={styles.storageBar}>
-          <span>
-            <HardDrive size={16} aria-hidden="true" />
-            <strong>Saved on this device</strong>
-            <span className={styles.storageDetail}>Keep a backup to take your work anywhere.</span>
-          </span>
-          <Link to="/settings#backups">
-            Manage backups <span aria-hidden="true">↗</span>
-          </Link>
         </div>
 
         {error && (
@@ -216,7 +214,7 @@ export function Dashboard() {
               <Search className={styles.searchIcon} size={16} aria-hidden="true" />
               <input
                 type="text"
-                placeholder="Search resumes…"
+                placeholder={isMobile ? 'Search…' : 'Search resumes…'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label="Search resumes"
@@ -269,6 +267,7 @@ export function Dashboard() {
               <ResumeCard
                 key={resume.id}
                 resume={resume}
+                previewWidth={isMobile ? 68 : 140}
                 onDuplicate={(id) => {
                   void handleDuplicate(id)
                 }}
@@ -282,6 +281,7 @@ export function Dashboard() {
         )}
       </div>
 
+      {trashOpen && <RecoveryDialog onClose={() => setTrashOpen(false)} />}
       <TemplatePickerModal
         isOpen={showTemplatePicker}
         onClose={() => setShowTemplatePicker(false)}

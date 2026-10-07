@@ -7,7 +7,6 @@ import { useTemplateStore } from '@/shared/stores/template.store'
 import { useResumeStore } from '@/shared/stores/resume.store'
 import { Button } from '@/shared/components/ui/Button/Button'
 import { EmptyState } from '@/shared/components/ui/EmptyState/EmptyState'
-import { BrandMark } from '@/shared/components/BrandMark/BrandMark'
 import { Seo } from '@/shared/components/Seo/Seo'
 import { ResumePreview } from '@/shared/components/ResumePreview/ResumePreview'
 import { getTemplatePreviewTree } from '@/shared/utils/templatePreview'
@@ -15,10 +14,14 @@ import { TemplateFilters } from '@/shared/components/TemplateFilters/TemplateFil
 import { DEFAULT_TEMPLATE_FILTERS, filterTemplates } from '@/shared/utils/templateFilters'
 import { TemplatePreviewDialog } from '@/shared/components/TemplatePickerModal/TemplatePreviewDialog'
 import type { TemplateDefinition } from '@/shared/types/template.types'
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import styles from './TemplateGallery.module.css'
 
 export function TemplateGallery() {
   const navigate = useNavigate()
+  const isMobile = useMediaQuery('(max-width: 639px)')
+  const isNarrow = useMediaQuery('(max-width: 359px)')
+  const previewWidth = isMobile ? (isNarrow ? 96 : 116) : 200
   const [searchParams] = useSearchParams()
   const isCreateMode = searchParams.get('create') === 'true'
 
@@ -74,24 +77,12 @@ export function TemplateGallery() {
               </button>
             )}
             <h1 className={styles.heading}>
-              {isCreateMode && <BrandMark size="md" />}
-              {isCreateMode ? 'Choose Your Template' : 'Templates'}
+              {isCreateMode ? 'Choose a template' : 'Templates'}
             </h1>
             <p className={styles.subheading} role="status" aria-live="polite">
               {isCreateMode
-                ? `Choose from ${availableTemplates.length} polished, professional layouts. You can switch anytime without losing your content.`
+                ? 'You can change it later.'
                 : `${filteredTemplates.length} of ${availableTemplates.length} templates`}
-            </p>
-            <p className={styles.collectionSummary}>
-              {availableTemplates.filter((template) => template.designStyle === 'Simple').length}{' '}
-              Simple
-              {' · '}
-              {
-                availableTemplates.filter((template) => template.designStyle === 'Ultra Modern')
-                  .length
-              }{' '}
-              Ultra Modern
-              {' — find your signature style.'}
             </p>
           </div>
         </div>
@@ -127,20 +118,18 @@ export function TemplateGallery() {
                 >
                   <ResumePreview
                     layoutTree={getTemplatePreviewTree(tpl.id)}
-                    widthPx={224}
+                    widthPx={previewWidth}
                     className={styles.previewThumb}
                   />
                 </button>
 
                 <span className={styles.cardInfo}>
                   <span className={styles.cardTitle}>{tpl.name}</span>
-                  <span id={`template-${tpl.id}-description`} className={styles.cardDescription}>
-                    {tpl.description}
-                  </span>
                   <button
                     type="button"
                     className={styles.selectAction}
                     disabled={openingId !== null}
+                    aria-busy={openingId === tpl.id}
                     aria-label={`Use ${tpl.name} template`}
                     onClick={() => void handleSelect(tpl.id)}
                   >
@@ -148,7 +137,10 @@ export function TemplateGallery() {
                       'Creating…'
                     ) : (
                       <>
-                        Use template <ArrowRight size={15} aria-hidden="true" />
+                        Use template
+                        <span className={styles.actionArrow} aria-hidden="true">
+                          <ArrowRight size={15} />
+                        </span>
                       </>
                     )}
                   </button>

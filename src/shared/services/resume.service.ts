@@ -1,6 +1,7 @@
 import type { Resume } from '@/shared/types/resume.types'
 import type { DeepPartial } from '@/shared/types/utils.types'
-import { StorageError } from '@/shared/types/storage.types'
+import { ResumeConflictError, StorageError } from '@/shared/types/storage.types'
+import { getBuiltinImageUrl } from '@/shared/utils/profileAvatar'
 import { storageService } from './storage.service'
 import { createEmptyResume, createResumeFromParsed } from '@/features/resume/utils/resume.factory'
 import type { ParsedResumeData } from '@/features/resume/utils/resumeParser'
@@ -42,10 +43,15 @@ class ResumeServiceImpl {
       throw new StorageError(`Cannot duplicate: resume ${id} not found`)
     }
 
+    return this.copyDraft(original)
+  }
+
+  async copyDraft(original: Resume): Promise<Resume> {
     const ts = new Date().toISOString()
     const duplicate: Resume = {
       ...structuredClone(original),
       id: crypto.randomUUID(),
+      revision: 0,
       title: `${original.title} (Copy)`,
       createdAt: ts,
       updatedAt: ts,
@@ -57,7 +63,7 @@ class ResumeServiceImpl {
     // shared the original's asset would silently lose its photo the moment the
     // original was deleted.
     const sourceImageId = original.personalInfo?.profileImage
-    if (sourceImageId) {
+    if (sourceImageId && !getBuiltinImageUrl(sourceImageId)) {
       const asset = await storageService.getImage(sourceImageId)
       if (asset) {
         const copy = {
@@ -75,7 +81,7 @@ class ResumeServiceImpl {
     }
 
     await storageService.saveResume(duplicate)
-    logger.info('Resume duplicated', { originalId: id, newId: duplicate.id })
+    logger.info('Resume duplicated', { originalId: original.id, newId: duplicate.id })
     return duplicate
   }
 
@@ -85,7 +91,7 @@ class ResumeServiceImpl {
     const updatedAt = patch.updatedAt ?? new Date().toISOString()
     const existing = await storageService.getResume(id)
     if (!existing) {
-      throw new StorageError(`Cannot update: resume ${id} not found`)
+      throw new ResumeConflictError()
     }
 
     // Cast is safe: existing is a validated Resume; patch only adds/changes values.
@@ -97,8 +103,7 @@ class ResumeServiceImpl {
       updatedAt,
     } as Resume
 
-    await storageService.saveResume(updated)
-    return updated
+    return storageService.commitResume(updated, patch.revision ?? existing.revision ?? 0)
   }
 
   async deleteResume(id: string): Promise<void> {

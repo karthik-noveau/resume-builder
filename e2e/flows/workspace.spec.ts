@@ -33,6 +33,7 @@ test('sharing includes the focused draft and opens an independent copy in a fres
   await page.getByRole('textbox', { name: 'Full name', exact: true }).fill('Shared Snapshot')
   await page.getByRole('button', { name: 'Share resume', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: 'Share resume', exact: true })
+  await dialog.getByRole('radio', { name: 'Editable copy', exact: true }).check()
   await expect(dialog.getByRole('textbox', { name: 'Share link' })).toHaveValue(/\/share#/)
   const link = await dialog.getByRole('textbox', { name: 'Share link' }).inputValue()
   await dialog.getByRole('button', { name: 'Close dialog' }).click()

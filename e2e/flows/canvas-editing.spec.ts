@@ -12,7 +12,7 @@ async function createPopulatedEditor(page: Page, template?: string) {
   await expect(page).toHaveURL(/\/editor\/[^/]+$/)
 }
 
-test('canvas selects exact fields, keeps the page still, and toggles canvas editing', async ({ page }, testInfo) => {
+test('canvas selects exact fields, keeps the page still, and edits inline', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 1000 })
   await createPopulatedEditor(page)
   const canvas = page.getByLabel('Resume canvas', { exact: true })
@@ -28,12 +28,9 @@ test('canvas selects exact fields, keeps the page still, and toggles canvas edit
   await panel.getByRole('textbox', { name: 'Company', exact: true }).nth(1).blur()
   await expect(company).toHaveText('Canvas Example Labs')
 
-  const toolbar = page.getByRole('toolbar', { name: 'Canvas editing controls' })
-  await expect(toolbar.getByRole('switch', { name: 'Canvas editing' })).toHaveCount(1)
-  await expect(page.getByRole('note', { name: 'Canvas editing tip' })).toBeVisible()
-  const toolbarBox = (await toolbar.boundingBox())!
-  const labelBox = (await toolbar.getByText('Company', { exact: true }).boundingBox())!
-  expect(labelBox.x).toBeGreaterThan(toolbarBox.x + toolbarBox.width / 2)
+  await expect(page.getByRole('toolbar', { name: 'Canvas editing controls' })).toHaveCount(0)
+  const headerBox = (await page.locator('header').first().boundingBox())!
+  expect((await canvas.boundingBox())!.y).toBeCloseTo(headerBox.y + headerBox.height, 0)
   await panel.getByRole('tab', { name: 'Design', exact: true }).click()
   await expect(page.getByRole('tab', { name: 'Design', exact: true })).toHaveAttribute('aria-selected', 'true')
   await company.click()
@@ -46,19 +43,7 @@ test('canvas selects exact fields, keeps the page still, and toggles canvas edit
   await page.mouse.move(0, 0)
   await page.screenshot({ path: testInfo.outputPath('canvas-inspector.png') })
 
-  const editing = page.getByRole('switch', { name: 'Canvas editing', exact: true })
-  await editing.click()
-  await expect(editing).toHaveAttribute('aria-checked', 'false')
-  await expect(canvas.locator('[data-canvas-selected]')).toHaveCount(0)
-  await expect(canvas.getByRole('button')).toHaveCount(0)
-  await expect(page.locator('[data-canvas-element-label]')).toHaveCount(0)
-  await expect(canvas.getByText('Canvas Example Labs', { exact: true })).toBeVisible()
-  await expect(toolbar.getByText('View only', { exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Preview & export' })).toHaveText('Preview & export')
-  await page.screenshot({ path: testInfo.outputPath('canvas-view-only.png') })
-  await editing.click()
-  await expect(editing).toHaveAttribute('aria-checked', 'true')
-  await expect(canvas.locator('[data-canvas-selected]')).toHaveCount(1)
 
   await company.dblclick()
   const inline = canvas.locator('[contenteditable="true"]')
@@ -72,7 +57,7 @@ test('canvas selects exact fields, keeps the page still, and toggles canvas edit
   await expect(canvas.getByRole('button', { name: 'Edit company', exact: true }).nth(1)).toHaveText('Inline Example Labs')
 })
 
-test('mobile canvas opens the clicked entry in Content and supports view-only mode', async ({ page }, testInfo) => {
+test('mobile canvas opens the clicked entry in Content and fits narrow screens', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await createPopulatedEditor(page)
   const views = page.getByRole('navigation', { name: 'Editor views' })
@@ -84,10 +69,10 @@ test('mobile canvas opens the clicked entry in Content and supports view-only mo
   await expect(company).toBeFocused()
   await expect(company).toBeInViewport()
   await views.getByRole('button', { name: 'Canvas', exact: true }).click()
-  await page.getByRole('switch', { name: 'Canvas editing', exact: true }).click()
-  await expect(canvas.getByRole('button')).toHaveCount(0)
+  await expect(page.getByRole('toolbar', { name: 'Canvas editing controls' })).toHaveCount(0)
+  await expect(canvas.getByRole('button', { name: 'Edit company', exact: true }).nth(1)).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-  await page.screenshot({ path: testInfo.outputPath('canvas-view-only-mobile.png') })
+  await page.screenshot({ path: testInfo.outputPath('canvas-mobile.png') })
   await page.setViewportSize({ width: 320, height: 740 })
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   await expect(page.getByRole('button', { name: 'Preview & export' })).toBeInViewport()
@@ -220,9 +205,8 @@ test('contact labels stay beside their fields on a wide canvas', async ({ page }
   const label = page.locator('[data-canvas-element-label]')
   await expect(label).toHaveText('Phone')
   await expect(label).toBeVisible()
-  // Hover labels describe the pointer target; toolbar actions still describe
-  // the selected field they will actually edit.
-  await expect(page.getByRole('toolbar', { name: 'Canvas editing controls' }).getByText('Website', { exact: true })).toBeVisible()
+  // Hovering another field leaves the selected website unchanged.
+  await expect(canvas.locator('[data-canvas-selected]')).toHaveAttribute('data-canvas-label', 'Website')
   const field = (await phone.boundingBox())!
   const badge = (await label.boundingBox())!
   const dx = Math.max(field.x - badge.x - badge.width, badge.x - field.x - field.width, 0)

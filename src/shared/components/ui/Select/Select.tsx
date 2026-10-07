@@ -13,6 +13,8 @@ export function Select({
   helperText,
   placeholder,
   className,
+  popupClassName,
+  selectedIcon,
   id: externalId,
   value,
   defaultValue,
@@ -42,6 +44,8 @@ export function Select({
         disabled={disabled}
         status={error ? 'error' : undefined}
         className={clsx(styles.select, className)}
+        classNames={popupClassName ? { popup: { root: popupClassName } } : undefined}
+        menuItemSelectedIcon={selectedIcon}
         aria-invalid={!!error}
         aria-describedby={error ? errorId : undefined}
         onChange={(newValue: string) => {

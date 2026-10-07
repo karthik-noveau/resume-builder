@@ -44,6 +44,7 @@ vi.mock('pdf-lib', async (importOriginal) => {
 vi.mock('./font.embedder', () => {
   return {
     FontEmbedder: vi.fn().mockImplementation(() => ({
+      finalize: vi.fn().mockResolvedValue(undefined),
       // pdf.generator.ts measures text width via the embedded PDFFont to
       // wrap lines — a bare {} mock is missing that method entirely.
       getFont: vi.fn().mockResolvedValue({

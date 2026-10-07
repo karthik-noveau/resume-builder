@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { RecoveryDialog } from '@/features/resume/components/RecoveryDialog'
+import { History } from 'lucide-react'
 import { Link } from 'react-router'
 import { ArrowLeft, CircleHelp, ListChecks } from 'lucide-react'
 import { clsx } from 'clsx'
@@ -55,6 +58,7 @@ export function Toolbar({
   onReset,
   onStartTour,
 }: ToolbarProps) {
+  const [historyOpen, setHistoryOpen] = useState(false)
   return (
     <div className={clsx(styles.root, mobile.controls)}>
       {/* Left: brand + back + title + autosave */}
@@ -94,8 +98,18 @@ export function Toolbar({
         <ResetButton onReset={onReset} />
       </div>
 
+      {historyOpen && <RecoveryDialog resumeId={resumeId} onClose={() => setHistoryOpen(false)} />}
       {/* Right: guided setup + export */}
       <div className={styles.rightGroup}>
+        <button
+          type="button"
+          className={styles.tourButton}
+          aria-label="Version history"
+          title="Version history"
+          onClick={() => setHistoryOpen(true)}
+        >
+          <History size={17} aria-hidden="true" />
+        </button>
         <button
           type="button"
           onClick={onStartTour}
@@ -119,12 +133,14 @@ export function Toolbar({
           orientation="vertical"
           className={clsx(styles.dividerDesktop, styles.dividerTall)}
         />
-        <ShareButton resumeId={resumeId} />
-        <ExportButton
-          onPreview={onPreview}
-          previewLoading={previewLoading}
-          disabled={exportDisabled}
-        />
+        <div className={styles.documentActions}>
+          <ShareButton resumeId={resumeId} />
+          <ExportButton
+            onPreview={onPreview}
+            previewLoading={previewLoading}
+            disabled={exportDisabled}
+          />
+        </div>
       </div>
     </div>
   )

@@ -6,9 +6,10 @@ export interface DrawerProps {
   isOpen: boolean
   onClose: () => void
   position?: DrawerPosition
-  title?: string
+  title?: ReactNode
   children: ReactNode
   width?: string
   flush?: boolean
   onAfterOpen?: () => void
+  rootClassName?: string
 }

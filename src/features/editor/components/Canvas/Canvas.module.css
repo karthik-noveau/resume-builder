@@ -110,69 +110,6 @@
   background-color: rgb(var(--color-primary) / 6%);
 }
 
-.canvasToolbar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 46px;
-  padding: 6px 12px;
-  flex-shrink: 0;
-  border-bottom: 1px solid rgb(var(--color-divider));
-  background: rgb(var(--color-surface));
-  color: rgb(var(--color-text-secondary));
-  font-size: var(--text-sm);
-}
-
-.canvasContext {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 0 1 auto;
-  margin-left: auto;
-  min-width: 0;
-}
-
-.canvasContext svg { flex-shrink: 0; }
-.canvasContext span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.canvasToolbar button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 32px;
-  padding: 4px 8px;
-  flex-shrink: 0;
-  border: 1px solid transparent;
-  border-radius: var(--radius-control);
-  background: transparent;
-  color: rgb(var(--color-text-secondary));
-  cursor: pointer;
-}
-
-.canvasToolbar button:hover { background: rgb(var(--color-surface-elevated)); color: rgb(var(--color-text-primary)); }
-.canvasToolbar button:focus-visible { outline: 2px solid rgb(var(--color-primary)); outline-offset: 2px; }
-.canvasToolbar .editingToggle { gap: 10px; border-color: rgb(var(--color-divider)); }
-.editingSwitch {
-  position: relative;
-  flex-shrink: 0;
-  width: 30px;
-  height: 18px;
-  border-radius: 20px;
-  background: rgb(var(--color-text-muted) / 45%);
-}
-.editingSwitch::after {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #fff;
-}
-.editingToggle[aria-checked='true'] .editingSwitch { background: rgb(var(--color-primary)); }
-.editingToggle[aria-checked='true'] .editingSwitch::after { transform: translateX(12px); }
 
 /* Only the deepest target under the pointer gets a hover outline. */
 .canvasNode[data-canvas-target]:hover:not(:has([data-canvas-target]:hover)):not([data-canvas-selected]):not([data-canvas-decoration='divider']) {
@@ -245,10 +182,6 @@
 }
 
 .dividerHitTarget:focus-visible { outline: none; }
-
-@media (max-width: 1023px) {
-  .canvasToolbar button { min-height: 40px; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .editableLeaf,

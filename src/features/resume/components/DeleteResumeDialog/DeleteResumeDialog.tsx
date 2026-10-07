@@ -21,7 +21,7 @@ export function DeleteResumeDialog({
       onClose={onClose}
       onConfirm={onConfirm}
       title="Delete Resume"
-      description={`"${resumeTitle}" will be permanently deleted. This cannot be undone.`}
+      description={`"${resumeTitle}" will move to Trash. You can restore it from your workspace.`}
       confirmLabel="Delete"
       cancelLabel="Keep"
       variant="danger"

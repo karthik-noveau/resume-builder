@@ -5,6 +5,15 @@ import { getGuidedMockPatch, getGuidedStepErrors, hasGuidedStepContent, type Gui
 const steps: GuidedStep[] = ['personal', 'summary', 'experience', 'education', 'skills']
 
 describe('guided setup requirements', () => {
+  it('allows an explicit no-experience choice, but still validates any work entries added later', () => {
+    const resume = createEmptyResume('meridian')
+    resume.noWorkExperience = true
+    expect(getGuidedStepErrors(resume, 'experience')).toEqual([])
+    expect(hasGuidedStepContent(resume, 'experience')).toBe(true)
+    resume.experience = createSampleResume('meridian').experience
+    resume.experience[0].company = ''
+    expect(getGuidedStepErrors(resume, 'experience')).toContain('Company for experience 1 is required.')
+  })
   it.each(steps)('requires %s content and accepts complete example entries', (step) => {
     const resume = createEmptyResume('meridian')
     expect(getGuidedStepErrors(resume, step).length).toBeGreaterThan(0)

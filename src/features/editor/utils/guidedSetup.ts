@@ -30,6 +30,7 @@ export function getGuidedStepErrors(resume: Resume, step: GuidedStep): string[] 
       required(resume.summary.content, 'Summary')
       break
     case 'experience':
+      if (resume.noWorkExperience && !resume.experience.length) break
       if (!resume.experience.length) errors.push('Add at least one work experience entry.')
       resume.experience.forEach((entry, i) => {
         required(entry.company, `Company for experience ${i + 1}`)
@@ -56,6 +57,7 @@ export function getGuidedStepErrors(resume: Resume, step: GuidedStep): string[] 
 }
 
 export function hasGuidedStepContent(resume: Resume, step: GuidedStep): boolean {
+  if (step === 'experience' && resume.noWorkExperience && !resume.experience.length) return true
   if (step === 'personal') {
     return Object.values(resume.personalInfo).some((value: unknown) => typeof value === 'string' && !!value.trim())
   }

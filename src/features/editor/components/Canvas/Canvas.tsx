@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { FileText, MousePointer2 } from 'lucide-react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { LayoutTree } from '@/shared/types/layout.types'
 import type { SectionType } from '@/shared/types/resume.types'
 import { CanvasPage } from './CanvasPage'
@@ -9,7 +8,6 @@ import { CANVAS_PAGE_GAP_PX, PAGE_DIMENSIONS_PX } from './canvas.constants'
 import { Skeleton } from '@/shared/components/ui/Skeleton/Skeleton'
 import { EditorErrorBoundary } from '../EditorErrorBoundary'
 import { useEditorStore } from '@/shared/stores/editor.store'
-import { findStyleNode } from '../../utils/findStyleNode'
 import styles from './Canvas.module.css'
 
 interface CanvasProps {
@@ -73,11 +71,8 @@ export function Canvas({
   const activePage = useEditorStore((s) => s.activePage)
   const setActivePage = useEditorStore((s) => s.setActivePage)
   const pageCount = layoutTree?.pages.length ?? 0
-  const [inspecting, setInspecting] = useState(true)
-  const [elementLabel, setElementLabel] = useState<string | null>(null)
   const editingKey = useEditorStore((s) => s.editingKey)
   const styleTarget = useEditorStore((s) => s.styleTarget)
-  const selectedNode = useMemo(() => findStyleNode(layoutTree, styleTarget?.key), [layoutTree, styleTarget?.key])
 
   /**
    * Shrink-to-fit factor for viewports narrower than a page. An A4 page is
@@ -163,28 +158,11 @@ export function Canvas({
 
   return (
     <div className={styles.viewport}>
-      <div className={styles.canvasToolbar} role="toolbar" aria-label="Canvas editing controls">
-        <div className={styles.canvasContext}>
-          {inspecting ? <MousePointer2 size={15} aria-hidden="true" /> : <FileText size={15} aria-hidden="true" />}
-          <span>{inspecting ? selectedNode?.styleLabel ?? elementLabel ?? 'Click content to edit' : 'View only'}</span>
-        </div>
-        <button
-          type="button"
-          className={styles.editingToggle}
-          role="switch"
-          aria-label="Canvas editing"
-          aria-checked={inspecting}
-          onClick={() => setInspecting((value) => !value)}
-        >
-          Canvas editing
-          <span className={styles.editingSwitch} aria-hidden="true" />
-        </button>
-      </div>
       <div
         ref={containerRef}
         data-editor-tour="canvas"
         className={styles.scrollArea}
-        onClick={inspecting ? onCanvasClick : undefined}
+        onClick={onCanvasClick}
         aria-label="Resume canvas"
         tabIndex={0}
       >
@@ -229,7 +207,6 @@ export function Canvas({
                     onSectionClick={onSectionClick}
                     onEntryClick={onEntryClick}
                     onBackgroundClick={onCanvasClick}
-                    interactive={inspecting}
                   />
                 </div>
               ))
@@ -241,8 +218,8 @@ export function Canvas({
         </div>
       </div>
 
-      {inspecting && !editingKey && <CanvasElementLabel canvasRef={containerRef} layoutTree={layoutTree} scale={scale}
-        selectionKey={styleTarget?.key ?? selectedEntryId ?? selectedSectionId ?? ''} onLabelChange={setElementLabel} />}
+      {!editingKey && <CanvasElementLabel canvasRef={containerRef} layoutTree={layoutTree} scale={scale}
+        selectionKey={styleTarget?.key ?? selectedEntryId ?? selectedSectionId ?? ''} />}
 
       {pageCount > 1 && (
         <PageIndicator

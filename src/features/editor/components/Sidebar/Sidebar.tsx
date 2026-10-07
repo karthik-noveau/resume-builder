@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { clsx } from 'clsx'
-import { ChevronDown, LayoutGrid, MousePointerClick, Settings2 } from 'lucide-react'
+import { ChevronDown, LayoutGrid, Settings2 } from 'lucide-react'
 import type { Resume, SectionType } from '@/shared/types/resume.types'
 import type { LayoutTree } from '@/shared/types/layout.types'
 import { SectionList } from './SectionList'
@@ -43,10 +43,6 @@ export function Sidebar({
           list, and anything between the two reads as part of it. */}
       <div className={styles.evaluation}>
         <AtsEvaluation resume={resume} layoutTree={layoutTree} />
-        <div className={styles.editingHint} role="note" aria-label="Canvas editing tip">
-          <span className={styles.hintIcon}><MousePointerClick size={16} aria-hidden="true" /></span>
-          <p><strong>Double-click a text field</strong> on the resume to edit it.</p>
-        </div>
       </div>
 
       {/* Section order lives here; entries are reordered inside their own

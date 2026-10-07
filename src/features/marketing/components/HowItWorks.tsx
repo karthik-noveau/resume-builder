@@ -25,9 +25,11 @@ export function HowItWorks() {
   return (
     <section id="how-it-works" className={styles.section} aria-labelledby="steps-heading">
       <div className={styles.header}>
-        <p className={styles.eyebrow}>FROM START TO SEND</p>
+        <p className={styles.eyebrow}>03 / YOUR NEXT CHAPTER</p>
         <h2 id="steps-heading">
-          Three steps. <em>You’re ready.</em>
+          From a blank page
+          <br />
+          to <em>what’s next.</em>
         </h2>
         <p>A straightforward process for a resume that does you justice.</p>
       </div>

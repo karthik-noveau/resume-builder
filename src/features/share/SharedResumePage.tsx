@@ -6,9 +6,11 @@ import { Spinner } from '@/shared/components/ui/Spinner/Spinner'
 import { Seo } from '@/shared/components/Seo/Seo'
 import { importSharedResume } from './share.service'
 import styles from './Share.module.css'
+import { SharedResumeView } from './SharedResumeView'
 
 export function SharedResumePage() {
-  const { hash } = useLocation()
+  const { hash, search } = useLocation()
+  if (new URLSearchParams(search).get('mode') === 'view') return <SharedResumeView key={hash} hash={hash} />
   return <SharedResumeImport key={hash} hash={hash} />
 }
 

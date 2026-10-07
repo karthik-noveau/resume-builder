@@ -1,5 +1,6 @@
 import { safeLink } from '@/shared/utils/safeLink'
-import { useCallback, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { fontRuns } from '@/shared/utils/fontRuns'
 import { ICON_PATHS, ICON_VIEWBOX_PX } from '@/features/templates/engine/icons'
 import type { LayoutNode, EditRef, IconName, PersonalInfoPanelField } from '@/shared/types/layout.types'
 import { layoutStylesToCSS } from './canvas.utils'
@@ -19,6 +20,11 @@ interface CanvasLeafProps {
 
 export function CanvasLeaf({ node, interactive = true }: CanvasLeafProps) {
   const css = layoutStylesToCSS(node.styles)
+  const text = node.content ?? ''
+  const runs = text ? fontRuns(text, node.styles.fontFamily, node.styles.fontWeight) : undefined
+  const content = runs?.some(run => run.fallback)
+    ? runs.map((run, index) => <span key={index} style={{ fontFamily: run.key.replace(/-\d+$/, '') }}>{run.text}</span>)
+    : text
 
   switch (node.type) {
     case 'text':
@@ -28,7 +34,7 @@ export function CanvasLeaf({ node, interactive = true }: CanvasLeafProps) {
       if (!interactive) {
         return (
           <div style={{ ...css, width: '100%', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-            {node.content ?? ''}
+            {content}
           </div>
         )
       }
@@ -37,17 +43,18 @@ export function CanvasLeaf({ node, interactive = true }: CanvasLeafProps) {
           <EditableLeaf
             editRef={node.editRef}
             displayContent={node.content ?? ''}
+            renderedContent={content}
             css={css}
             styleKey={node.styleKey}
           />
         )
       }
       if (node.panelTarget === 'personal-info') {
-        return <PanelLinkedLeaf displayContent={node.content ?? ''} css={css} field={node.panelField} />
+        return <PanelLinkedLeaf displayContent={node.content ?? ''} renderedContent={content} css={css} field={node.panelField} />
       }
       return (
         <div style={{ ...css, width: '100%', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-          {node.content ?? ''}
+          {content}
         </div>
       )
 
@@ -58,7 +65,7 @@ export function CanvasLeaf({ node, interactive = true }: CanvasLeafProps) {
             •
           </span>
           <span style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-            {node.content ?? ''}
+            {content}
           </span>
         </div>
       )
@@ -75,7 +82,7 @@ export function CanvasLeaf({ node, interactive = true }: CanvasLeafProps) {
             padding: '1px 6px',
           }}
         >
-          {node.content ?? ''}
+          {content}
         </span>
       )
 
@@ -174,7 +181,7 @@ function openPersonalInfo(e: React.MouseEvent | React.KeyboardEvent, field?: Per
   useEditorStore.getState().openPersonalInfo(field)
 }
 
-function PanelLinkedLeaf({ displayContent, css, field }: { displayContent: string; css: CSSProperties; field?: PersonalInfoPanelField }) {
+function PanelLinkedLeaf({ displayContent, renderedContent, css, field }: { displayContent: string; renderedContent?: ReactNode; css: CSSProperties; field?: PersonalInfoPanelField }) {
   return (
     <button
       type="button"
@@ -183,7 +190,7 @@ function PanelLinkedLeaf({ displayContent, css, field }: { displayContent: strin
       className={styles.panelLinkedLeaf}
       style={{ ...css, width: '100%', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}
     >
-      {displayContent}
+      {renderedContent ?? displayContent}
     </button>
   )
 }
@@ -282,11 +289,13 @@ function describeEditRef(editRef: EditRef): string {
 function EditableLeaf({
   editRef,
   displayContent,
+  renderedContent,
   css,
   styleKey,
 }: {
   editRef: EditRef
   displayContent: string
+  renderedContent?: ReactNode
   css: CSSProperties
   styleKey?: string
 }) {
@@ -405,7 +414,7 @@ function EditableLeaf({
         whiteSpace: 'pre-wrap',
       }}
     >
-      {displayContent}
+      {renderedContent ?? displayContent}
     </div>
   )
 }

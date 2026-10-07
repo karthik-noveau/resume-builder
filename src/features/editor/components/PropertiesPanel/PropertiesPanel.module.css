@@ -16,7 +16,7 @@
   top: 0;
   z-index: 5;
   display: block;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-4) var(--space-3);
   border-bottom: 1px solid rgb(var(--color-divider));
   background: rgb(var(--color-surface) / 88%);
   backdrop-filter: blur(16px);
@@ -82,9 +82,7 @@
 }
 
 .modeTab {
-  /* --control-md, so the tabs stand at the same height as the selects and
-     inputs in the panel below them rather than at a one-off 28px. */
-  min-height: var(--control-md);
+  min-height: calc(var(--control-md) + var(--space-1-5));
   min-width: 0;
   padding: 0 6px;
   display: inline-flex;

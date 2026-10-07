@@ -4,8 +4,10 @@ import {
   pushGraphicsState, popGraphicsState, beginText, endText,
   setFontAndSize, setTextMatrix, setFillingRgbColor, showText,
   clip, endPath,
+  PDFHexString, PDFName, PDFOperator, PDFOperatorNames, setTextRenderingMode,
 } from 'pdf-lib'
 import type { PDFFont } from 'pdf-lib'
+import type { ImageAsset } from '@/shared/types/storage.types'
 import type { LayoutTree, LayoutNode, LayoutPage } from '@/shared/types/layout.types'
 import { FontEmbedder } from './font.embedder'
 import { ImageEmbedder } from './image.embedder'
@@ -13,16 +15,18 @@ import { LinkHandler } from './link.handler'
 import { ICON_PATHS, ICON_VIEWBOX_PX } from '../../templates/engine/icons'
 import { shapePath } from './pdf.shapes'
 import { wrapTextLines } from '@/shared/utils/textMeasurement'
+import { fontRuns, runWidth } from '@/shared/utils/fontRuns'
+import type { LayoutStyles } from '@/shared/types/layout.types'
 
 export class PdfGenerator {
   private fontEmbedder!: FontEmbedder
   private imageEmbedder!: ImageEmbedder
   private linkHandler!: LinkHandler
 
-  async generate(layoutTree: LayoutTree): Promise<Uint8Array> {
+  async generate(layoutTree: LayoutTree, images?: Map<string, ImageAsset>): Promise<Uint8Array> {
     const pdfDoc = await PDFDocument.create()
     this.fontEmbedder = new FontEmbedder(pdfDoc)
-    this.imageEmbedder = new ImageEmbedder(pdfDoc)
+    this.imageEmbedder = new ImageEmbedder(pdfDoc, images)
     this.linkHandler = new LinkHandler()
 
     for (const pageLayout of layoutTree.pages) {
@@ -30,6 +34,7 @@ export class PdfGenerator {
       await this.drawNodes(page, pageLayout.nodes, pageLayout, 0, 0)
     }
 
+    await this.fontEmbedder.finalize()
     return await pdfDoc.save()
   }
 
@@ -90,6 +95,54 @@ export class PdfGenerator {
       endText(),
       popGraphicsState(),
     )
+  }
+
+  /** Positioned shaped glyphs preserve Indic marks; ActualText preserves the logical text. */
+  private async drawUnicodeLine(page: PDFPage, text: string, x: number, y: number, styles: LayoutStyles, tracking: number) {
+    const runs = fontRuns(text, styles.fontFamily, styles.fontWeight, true) ?? []
+    const { r, g, b } = this.parseColor(styles.color)
+    page.pushOperators(PDFOperator.of(PDFOperatorNames.BeginMarkedContentSequence, [
+      PDFName.of('Span'), page.doc.context.obj({ ActualText: PDFHexString.fromText(text) }).toString(),
+    ]))
+    for (const run of runs) {
+      const font = await this.fontEmbedder.getRunFont(run.key, run.buffer)
+      const encoded = run.fallback ? '' : font.encodeText(run.text).asString()
+      const shaped = run.font.layout(run.text)
+      const scale = styles.fontSize / run.font.unitsPerEm
+      const fontKey = page.node.newFontDictionary(font.name, font.ref)
+      page.pushOperators(pushGraphicsState(), beginText(), setCharacterSpacing(0), setFillingRgbColor(r, g, b), setFontAndSize(fontKey, styles.fontSize))
+      let advance = 0
+      const characters = Array.from(run.text)
+      shaped.glyphs.forEach((glyph, index) => {
+        const code = run.fallback
+          ? this.fontEmbedder.encodeGlyph(run.key, glyph.id, glyph.advanceWidth * 1000 / run.font.unitsPerEm, '\uFEFF')
+          : encoded.slice(index * 4, index * 4 + 4)
+        const position = shaped.positions[index]
+        page.pushOperators(
+          setTextMatrix(1, 0, styles.fontStyle === 'italic' ? 0.2126 : 0, 1,
+            x + advance + (run.fallback ? position.xOffset * scale : 0),
+            y + (run.fallback ? position.yOffset * scale : 0)),
+          showText(PDFHexString.of(code)),
+        )
+        advance += (run.fallback ? position.xAdvance : glyph.advanceWidth) * scale + glyph.codePoints.length * tracking
+      })
+      if (run.fallback) {
+        // Keep selection/search in logical order even when the shaping engine
+        // reorders Indic marks. The positioned glyphs above supply appearance;
+        // this exact source-text layer supplies selectable characters.
+        const advances = characters.map(character => /\p{Mn}|\p{Cf}/u.test(character) ? 0
+          : run.font.glyphForCodePoint(character.codePointAt(0)!).advanceWidth)
+        const total = advances.reduce((sum, width) => sum + width, 0) || 1
+        const source = characters.map((character, index) => this.fontEmbedder.encodeGlyph(
+          run.key, 0, advances[index] / total * runWidth(run) * 1000, character,
+        )).join('')
+        page.pushOperators(setTextMatrix(1, 0, 0, 1, x, y), setCharacterSpacing(tracking),
+          setTextRenderingMode(3), showText(PDFHexString.of(source)), setTextRenderingMode(0))
+      }
+      page.pushOperators(endText(), popGraphicsState())
+      x += runWidth(run) * styles.fontSize + Array.from(run.text).length * tracking
+    }
+    page.pushOperators(PDFOperator.of(PDFOperatorNames.EndMarkedContent))
   }
 
   private async drawNode(
@@ -157,6 +210,7 @@ export class PdfGenerator {
       case 'entry-body':
       case 'tag':
         if (content) {
+          const unicode = fontRuns(content, styles.fontFamily, styles.fontWeight, true)?.some(run => run.fallback)
           const font = await this.fontEmbedder.getFont(styles.fontFamily, styles.fontWeight)
           const fontSize = styles.fontSize
           const lineHeight = styles.lineHeight * fontSize
@@ -171,7 +225,8 @@ export class PdfGenerator {
            * Every template letterspaces its section titles, so without this the
            * export wrapped at different words than the preview did. */
           const widthOf = (text: string) =>
-            font.widthOfTextAtSize(text, fontSize) + Math.max(0, text.length - 1) * tracking
+            (unicode ? (fontRuns(text, styles.fontFamily, styles.fontWeight, true) ?? []).reduce((sum, run) => sum + runWidth(run) * fontSize, 0)
+              : font.widthOfTextAtSize(text, fontSize)) + Math.max(0, Array.from(text).length - 1) * tracking
 
           // Explicit breaks are part of the layout (notably stacked names).
           // Never pass them through to drawText: pdf-lib would apply its own
@@ -198,7 +253,9 @@ export class PdfGenerator {
 
             const { r, g, b, a } = this.parseColor(styles.color)
             const baselineY = lineY + (lineHeight * 0.25)
-            if (styles.fontStyle === 'italic') {
+            if (unicode) {
+              await this.drawUnicodeLine(page, line, drawX, baselineY, styles, tracking)
+            } else if (styles.fontStyle === 'italic') {
               this.drawObliqueText(page, line, drawX, baselineY, fontSize, font, { r, g, b })
             } else {
               page.drawText(line, {

@@ -18,17 +18,18 @@ export function TemplateShowcase() {
   return (
     <section id="templates" className={styles.section} aria-labelledby="templates-heading">
       <div className={styles.header}>
-        <div>
-          <p className={styles.eyebrow}>FIND YOUR STARTING POINT</p>
+        <div className={styles.headerCopy}>
+          <p className={styles.eyebrow}>01 / THE TEMPLATE COLLECTION</p>
           <h2 id="templates-heading" className={styles.heading}>
-            Good design. <em>Great first impressions.</em>
+            Find your kind of <em>standout.</em>
           </h2>
           <p className={styles.subtext}>
-            Professional layouts for every kind of experience. Pick one and make it yours.
+            Pick a layout you love. Make it yours in minutes.
           </p>
         </div>
         <Link to="/templates" className={styles.allLink}>
-          Explore all {ALL_TEMPLATES.length} templates <ArrowUpRight size={17} aria-hidden="true" />
+          Explore all {ALL_TEMPLATES.length} templates
+          <span className={styles.linkArrow}><ArrowUpRight size={17} aria-hidden="true" /></span>
         </Link>
       </div>
       <div className={styles.collectionBar}>

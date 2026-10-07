@@ -2,7 +2,7 @@ import { useId } from 'react'
 import { Pause, Play } from 'lucide-react'
 import styles from './HeroBackdrop.module.css'
 
-const WAVE = 'M-160 800 C180 800 210 470 550 500 S1060 140 1600 160'
+const WAVE = 'M-160 570 C80 270 210 890 580 690 S1060 190 1600 440'
 
 interface HeroBackdropProps {
   paused: boolean
@@ -44,7 +44,8 @@ export function HeroBackdrop({ paused, onToggleMotion }: HeroBackdropProps) {
             <path className={styles.trace} d={WAVE} pathLength="1" />
           </svg>
         </div>
-        <span className={styles.grid} />
+        <span className={styles.orbit} />
+        <span className={styles.smallOrbit} />
       </div>
       <button
         type="button"

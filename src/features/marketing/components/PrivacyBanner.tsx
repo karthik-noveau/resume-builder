@@ -31,7 +31,7 @@ export function PrivacyBanner() {
         <span className={styles.icon}>
           <ShieldCheck size={25} strokeWidth={1.5} aria-hidden="true" />
         </span>
-        <p className={styles.eyebrow}>BUILT AROUND YOUR PRIVACY</p>
+        <p className={styles.eyebrow}>02 / PERSONAL STAYS PERSONAL</p>
         <h2 id="privacy-heading">
           Your resume.
           <br />

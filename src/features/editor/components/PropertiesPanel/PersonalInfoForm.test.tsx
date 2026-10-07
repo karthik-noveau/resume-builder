@@ -146,7 +146,7 @@ describe('profile image options', () => {
     expect(useResumeStore.getState().activeResume?.personalInfo).toEqual({ ...original.personalInfo, profileImage: 'new-upload' })
     expect(useResumeStore.getState().activeResume?.settings).toEqual({ ...original.settings, showProfileImage: true, profileImageStyle: 'avatar' })
     expect(useResumeStore.getState().activeResume?.experience).toEqual(original.experience)
-    expect(imageService.deleteImage).toHaveBeenCalledWith('existing-upload')
+    expect(imageService.deleteImage).not.toHaveBeenCalled()
     expect(useEditorStore.getState().undoStack[0]).toEqual(original)
   })
 })

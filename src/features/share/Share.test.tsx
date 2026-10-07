@@ -82,7 +82,7 @@ describe('sharing a resume', () => {
     await user.click(screen.getByRole('button', { name: 'Share resume' }))
     await user.click(await screen.findByRole('button', { name: 'Copy link' }))
     expect(await screen.findByText('Copy the selected link manually.')).toBeInTheDocument()
-    const input = screen.getByRole<HTMLTextAreaElement>('textbox', { name: 'Share link' })
+    const input = screen.getByRole<HTMLInputElement>('textbox', { name: 'Share link' })
     expect(input.selectionStart).toBe(0)
     expect(input.selectionEnd).toBe(link.length)
   })

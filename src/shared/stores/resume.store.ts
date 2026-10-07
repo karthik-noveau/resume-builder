@@ -18,6 +18,7 @@ import type { ParsedResumeData } from '@/features/resume/utils/resumeParser'
 import { resumeService } from '@/shared/services/resume.service'
 import { clearResumeDraft, recoverResumeDraft } from '@/shared/services/resumeDraft.service'
 import { logger } from '@/shared/services/logger'
+import { ResumeConflictError } from '@/shared/types/storage.types'
 import { useEditorStore } from './editor.store'
 import {
   createEmptyExperience,
@@ -101,9 +102,11 @@ interface ResumeState {
   isSaving: boolean
   isDirty: boolean
   error: string | null
+  conflict: boolean
 }
 
 interface ResumeActions {
+  resolveConflict(choice: 'reload' | 'copy'): Promise<string>
   loadResumeList(): Promise<void>
   loadResume(id: string): Promise<void>
   createResume(
@@ -191,6 +194,20 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   isSaving: false,
   isDirty: false,
   error: null,
+  conflict: false,
+
+  async resolveConflict(choice) {
+    const draft = get().activeResume
+    if (!draft) throw new Error('Open a resume first.')
+    const resume = choice === 'copy'
+      ? await resumeService.copyDraft(draft)
+      : await resumeService.getResume(draft.id)
+    if (!resume) throw new Error('This resume was deleted. Save your draft as a copy instead.')
+    clearResumeDraft(draft.id)
+    useEditorStore.getState().clearHistory()
+    set({ activeResume: resume, isDirty: false, error: null, conflict: false })
+    return resume.id
+  },
 
   // ─── Load ───────────────────────────────────────────────────────────────────
   async loadResumeList() {
@@ -824,22 +841,27 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
     set({ isSaving: true })
     pendingSave = (async () => {
       try {
-        await resumeService.updateResume(activeResume.id, activeResume)
+        const saved = await resumeService.updateResume(activeResume.id, { ...activeResume, revision: activeResume.revision ?? 0 })
         // An earlier in-flight write must not discard a newer recovery draft.
         if (get().activeResume === activeResume) clearResumeDraft(activeResume.id)
         set((state) => ({
           isSaving: false,
+          activeResume: state.activeResume?.id === activeResume.id
+            ? { ...state.activeResume, revision: saved?.revision ?? activeResume.revision }
+            : state.activeResume,
           // Only this snapshot was saved; edits made during the write remain dirty.
           isDirty: state.activeResume === activeResume ? false : state.isDirty,
           resumeList: state.resumeList.map((resume) =>
             resume.id === activeResume.id ? activeResume : resume
           ),
           error: null,
+          conflict: false,
         }))
         logger.debug('Resume autosaved', { id: activeResume.id })
       } catch (err) {
         logger.error('Autosave failed', err)
-        set({ isSaving: false, error: 'Failed to save resume' })
+        set({ isSaving: false, conflict: err instanceof ResumeConflictError,
+          error: err instanceof ResumeConflictError ? err.message : 'Failed to save resume' })
       }
     })().finally(() => {
       pendingSave = null

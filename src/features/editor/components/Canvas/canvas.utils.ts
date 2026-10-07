@@ -4,10 +4,10 @@ import type { CSSProperties } from 'react'
 import { PT_TO_PX } from './canvas.constants'
 
 const FONT_FAMILY_CSS: Record<FontFamily, string> = {
-  Inter: 'Inter, system-ui, sans-serif',
-  SourceSerifPro: 'SourceSerifPro, Georgia, serif',
-  Manrope: 'Manrope, system-ui, sans-serif',
-  IBMPlexSans: 'IBMPlexSans, system-ui, sans-serif',
+  Inter: 'Inter, NotoSans, NotoSansTamil, NotoSansDevanagari, system-ui, sans-serif',
+  SourceSerifPro: 'SourceSerifPro, NotoSans, NotoSansTamil, NotoSansDevanagari, Georgia, serif',
+  Manrope: 'Manrope, NotoSans, NotoSansTamil, NotoSansDevanagari, system-ui, sans-serif',
+  IBMPlexSans: 'IBMPlexSans, NotoSans, NotoSansTamil, NotoSansDevanagari, system-ui, sans-serif',
 }
 
 export function fontFamilyToCSS(family: FontFamily): string {

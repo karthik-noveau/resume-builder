@@ -3,11 +3,12 @@ import type { PDFDocument, PDFImage } from 'pdf-lib'
 import { storageService } from '@/shared/services/storage.service'
 import { logger } from '@/shared/services/logger'
 import { getBuiltinImageUrl } from '@/shared/utils/profileAvatar'
+import type { ImageAsset } from '@/shared/types/storage.types'
 
 export class ImageEmbedder {
   private embeddedImages = new Map<string, PDFImage>()
 
-  constructor(private pdfDoc: PDFDocument) {}
+  constructor(private pdfDoc: PDFDocument, private images?: Map<string, ImageAsset>) {}
 
   async getImage(imageId: string): Promise<PDFImage | null> {
     if (this.embeddedImages.has(imageId)) {
@@ -23,7 +24,7 @@ export class ImageEmbedder {
         this.embeddedImages.set(imageId, image)
         return image
       }
-      const asset = await storageService.getImage(imageId)
+      const asset = this.images?.get(imageId) ?? await storageService.getImage(imageId)
       if (!asset) return null
 
       let image: PDFImage

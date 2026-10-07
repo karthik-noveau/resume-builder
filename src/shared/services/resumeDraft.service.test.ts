@@ -30,7 +30,7 @@ it('recovers the latest edit even when an older write finishes after its checkpo
   saved.updatedAt = '2026-01-01T00:00:00.000Z'
   let finishRead!: (resume: Resume) => void
   const read = vi.spyOn(storageService, 'getResume').mockImplementationOnce(() => new Promise(resolve => { finishRead = resolve }))
-  const write = vi.spyOn(storageService, 'saveResume').mockResolvedValueOnce(undefined)
+  const write = vi.spyOn(storageService, 'commitResume').mockImplementationOnce(resume => Promise.resolve({ ...resume, revision: 1 }))
   vi.useFakeTimers()
   try {
     vi.setSystemTime(new Date('2026-01-01T00:00:01.000Z'))

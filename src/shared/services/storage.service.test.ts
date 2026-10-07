@@ -8,6 +8,12 @@ const records = vi.hoisted(() => new Map<string, Resume>())
 
 vi.mock('@/shared/db/database', () => ({
   db: {
+    transaction: vi.fn((_mode, _resumes, _versions, run: () => Promise<unknown>) => run()),
+    versions: {
+      put: vi.fn().mockResolvedValue(undefined),
+      where: () => ({ equals: () => ({ sortBy: () => Promise.resolve([]) }) }),
+      bulkDelete: vi.fn().mockResolvedValue(undefined),
+    },
     resumes: {
       put: vi.fn((resume: Resume) => {
         records.set(resume.id, structuredClone(resume))

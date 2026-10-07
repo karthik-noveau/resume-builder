@@ -1,29 +1,29 @@
 .section {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 32px 68px;
+  composes: container from '../../../shared/styles/pageContainer.module.css';
+  padding-bottom: 68px;
   display: grid;
   grid-template-columns: 0.95fr 1.05fr;
-  align-items: center;
+  /* Keep both columns anchored while answers add height below their questions. */
+  align-items: start;
   gap: 66px;
 }
 .privacy {
-  border-radius: 18px;
-  padding: 39px;
-  background: var(--gradient-panel);
+  border-radius: var(--home-radius-panel);
+  padding: 42px;
+  background: color-mix(in srgb, #afd1b9 22%, var(--home-surface));
   color: var(--home-ink);
-  border: 1px solid var(--home-line);
+  border: 0;
 }
 .icon {
   box-shadow: 0 4px 14px var(--home-shadow);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 45px;
-  height: 45px;
+  width: 56px;
+  height: 56px;
   background: var(--home-surface);
   border: 1px solid var(--home-line);
-  border-radius: 9px;
+  border-radius: 50%;
   color: var(--home-muted);
   margin-bottom: 24px;
 }
@@ -34,13 +34,13 @@
   color: var(--home-accent);
 }
 .privacy > .eyebrow {
-  color: var(--home-accent);
+  color: var(--home-ink);
 }
 .privacy h2 {
   font-family: var(--home-display);
-  font-size: 37px;
-  font-weight: 800;
-  letter-spacing: -1.2px;
+  font-size: 48px;
+  font-weight: 500;
+  letter-spacing: -2px;
   line-height: 1.15;
   margin-top: 15px;
 }
@@ -75,7 +75,14 @@
   line-height: 1.8;
 }
 .faq details {
-  border-bottom: 1px solid var(--home-line);
+  border: 1px solid var(--home-line);
+  border-radius: 22px;
+  background: var(--home-surface);
+  padding-inline: 22px;
+  margin-top: 10px;
+}
+.faq details[open] {
+  background: var(--home-soft);
 }
 .faq summary {
   display: flex;
@@ -136,9 +143,6 @@
   }
 }
 @media (max-width: 480px) {
-  .section {
-    padding-inline: 20px;
-  }
   .privacy {
     padding: 28px;
   }

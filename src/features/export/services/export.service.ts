@@ -2,6 +2,8 @@ import type { Resume } from '@/shared/types/resume.types'
 import { templateRenderer } from '@/features/templates/engine/template.renderer'
 import { getTemplateById } from '@/features/templates/registry/template.registry'
 import type { PdfGenerator } from './pdf.generator'
+import type * as PdfGeneratorModule from './pdf.generator'
+import type { ImageAsset } from '@/shared/types/storage.types'
 import { logger } from '@/shared/services/logger'
 import { useThemeStore, resolveResumeTheme } from '@/shared/stores/theme.store'
 
@@ -18,16 +20,16 @@ export class ExportService {
    * into the EditorPage chunk for a page that may never export anything.
    * The promise is cached, so a second export reuses the loaded module.
    */
-  private generatorPromise?: Promise<PdfGenerator>
+  private generatorPromise?: Promise<typeof PdfGeneratorModule>
 
-  private loadGenerator(): Promise<PdfGenerator> {
+  private async loadGenerator(): Promise<PdfGenerator> {
     this.generatorPromise ??= import('./pdf.generator')
-      .then((m) => new m.PdfGenerator())
       .catch((error: unknown) => {
         this.generatorPromise = undefined
         throw error
       })
-    return this.generatorPromise
+    const module = await this.generatorPromise
+    return new module.PdfGenerator()
   }
 
   async exportToPdf(resume: Resume): Promise<void> {
@@ -44,7 +46,7 @@ export class ExportService {
     }
   }
 
-  async generatePdf(resume: Resume): Promise<GeneratedPdf> {
+  async generatePdf(resume: Resume, images?: Map<string, ImageAsset>): Promise<GeneratedPdf> {
     // Export the current draft, including incomplete fields and sections.
     // Content requirements belong to editing guidance, not PDF generation.
     // Let React paint the opening dialog before layout/font work occupies the
@@ -58,7 +60,7 @@ export class ExportService {
 
     logger.debug('Generating PDF bytes')
     const generator = await this.loadGenerator()
-    const bytes = await generator.generate(layoutTree)
+    const bytes = await generator.generate(layoutTree, images)
 
     return { bytes, fileName: this.buildFileName(resume) }
   }
@@ -93,7 +95,7 @@ export class ExportService {
 
   private buildFileName(resume: Resume): string {
     const name = resume.personalInfo.fullName
-      .replace(/[^a-zA-Z0-9\s]/g, '')
+      .replace(/[^\p{L}\p{M}\p{N}\s-]/gu, '')
       .trim()
       .replace(/\s+/g, '_')
     return `${name || 'Resume'}_${new Date().toISOString().split('T')[0]}.pdf`

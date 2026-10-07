@@ -1,4 +1,4 @@
-import { Columns2, RectangleVertical, Search, SlidersHorizontal } from 'lucide-react'
+import { Check, Columns2, LayoutGrid, RectangleVertical, Search, SlidersHorizontal } from 'lucide-react'
 import { clsx } from 'clsx'
 import { Select } from '@/shared/components/ui/Select/Select'
 import {
@@ -23,7 +23,13 @@ export function TemplateFilters({
 }: TemplateFiltersProps) {
   return (
     <div className={clsx(styles.filters, compact && styles.compact, className)}>
-      <div className={styles.group} role="group" aria-label="Filter by column layout">
+      <div
+        className={styles.group}
+        role="group"
+        aria-label="Filter by column layout"
+        data-active-layout={value.layout === 'All' && hasTemplateFilters(value) ? 'none' : value.layout}
+      >
+        <span className={styles.selectionPill} aria-hidden="true" />
         <button
           type="button"
           onClick={() => onChange(DEFAULT_TEMPLATE_FILTERS)}
@@ -31,7 +37,8 @@ export function TemplateFilters({
           aria-pressed={!hasTemplateFilters(value)}
           className={clsx(styles.filterButton, !hasTemplateFilters(value) && styles.active)}
         >
-          All<span className={styles.allSuffix}> Templates</span>
+          <LayoutGrid size={14} aria-hidden="true" />
+          <span>All<span className={styles.allSuffix}> Templates</span></span>
         </button>
         {(
           [
@@ -52,7 +59,7 @@ export function TemplateFilters({
             aria-pressed={value.layout === id}
             className={clsx(styles.filterButton, value.layout === id && styles.active)}
           >
-            <Icon size={13} aria-hidden="true" />
+            <Icon size={14} aria-hidden="true" />
             <span className={styles.fullLabel}>{label}</span>
             <span className={styles.mobileLabel} aria-hidden="true">
               {mobileLabel}
@@ -60,12 +67,14 @@ export function TemplateFilters({
           </button>
         ))}
       </div>
-      <div className={styles.styleFilter}>
+      <div className={clsx(styles.styleFilter, value.style && value.style !== 'All' && styles.styleActive)}>
         <Select
           label="Style"
           hideLabel
-          icon={<SlidersHorizontal size={14} aria-hidden="true" />}
+          icon={<SlidersHorizontal size={15} aria-hidden="true" />}
           className={styles.styleSelect}
+          popupClassName={styles.styleDropdown}
+          selectedIcon={<Check size={14} strokeWidth={2.5} aria-hidden="true" />}
           value={value.style ?? 'All'}
           onChange={(event) =>
             onChange({ ...value, style: event.target.value as TemplateFilterValues['style'] })

@@ -98,14 +98,12 @@ export function PersonalInfoForm({
         await imageService.deleteImage(asset.id)
         return
       }
-      const previousId = resume.personalInfo.profileImage
       updateResume({
         personalInfo: { ...resume.personalInfo, profileImage: asset.id },
         settings: { ...resume.settings, profileImageStyle: 'avatar', showProfileImage: true },
       })
-      // Drop the replaced blob — image rows are otherwise only cleaned up when
-      // the whole resume is deleted, so each change leaked one indefinitely.
-      if (previousId) await imageService.deleteImage(previousId)
+      // Undo and saved versions still reference earlier photos. Keep those
+      // assets until the resume is permanently deleted from Trash.
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to upload photo')
     } finally {
@@ -114,9 +112,7 @@ export function PersonalInfoForm({
   }
 
   const removePhoto = () => {
-    const previousId = personalInfo.profileImage
     updatePersonalInfo({ profileImage: undefined })
-    if (previousId) void imageService.deleteImage(previousId)
   }
 
   return (

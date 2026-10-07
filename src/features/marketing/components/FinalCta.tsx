@@ -9,9 +9,9 @@ export function FinalCta() {
         <div className={styles.copy}>
           <p className={styles.eyebrow}>YOUR NEXT CHAPTER STARTS HERE</p>
           <h2 id="cta-heading">
-            Ready for your
+            Make your
             <br />
-            <span>next opportunity?</span>
+            <span>next move.</span>
           </h2>
           <p className={styles.subtext}>Put your best work on paper. Make your next move.</p>
         </div>

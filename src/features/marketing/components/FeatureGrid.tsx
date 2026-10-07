@@ -37,11 +37,11 @@ export function FeatureGrid() {
       <div className={styles.panel}>
         <div className={styles.top}>
           <div className={styles.copy}>
-            <p className={styles.eyebrow}>MORE CONTROL. LESS COMPROMISE.</p>
+            <p className={styles.eyebrow}>02 / MAKE IT PERSONAL</p>
             <h2 id="features-heading">
-              Small details.
+              A little you.
               <br />
-              <em>A big difference.</em>
+              <em>In every detail.</em>
             </h2>
             <p className={styles.description}>
               Get the look right without fighting the formatting. Adjust your colors, choose your

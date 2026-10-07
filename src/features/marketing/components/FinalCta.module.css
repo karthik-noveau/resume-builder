@@ -1,41 +1,52 @@
 .section {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 32px;
+  composes: container from '../../../shared/styles/pageContainer.module.css';
 }
 .panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 35px;
-  padding: 56px;
-  background: var(--gradient-panel);
-  color: var(--home-ink);
-  border: 1px solid var(--home-line);
-  border-radius: 20px;
+  padding: 70px 64px;
+  background: #d9cdf6;
+  color: #21182e;
+  border-radius: 48px;
+}
+.panel::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 700px;
+  height: 700px;
+  border: 1px solid #c1a9e9;
+  border-radius: 50%;
+  left: 45%;
+  top: -140px;
+  box-shadow:
+    0 0 0 50px #ccb9ed40,
+    0 0 0 100px #ccb9ed30;
 }
 .eyebrow {
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 1.5px;
-  color: var(--home-muted);
+  letter-spacing: 1.4px;
+  color: #514061;
 }
 .copy h2 {
   font-family: var(--home-display);
-  font-size: 47px;
-  font-weight: 800;
-  line-height: 1.12;
-  letter-spacing: -1.5px;
-  margin-top: 17px;
-}
-.copy h2 > span {
-  color: var(--home-emphasis);
+  font-size: 82px;
+  font-weight: 500;
+  line-height: 1.03;
+  letter-spacing: -5px;
+  margin-top: 24px;
 }
 .subtext {
-  color: var(--home-muted);
   font-size: 13px;
   line-height: 1.8;
-  margin-top: 19px;
+  margin-top: 25px;
+  color: #514061;
 }
 .action {
   display: flex;
@@ -44,10 +55,15 @@
   flex-shrink: 0;
 }
 .arrow {
-  color: var(--home-emphasis);
-  margin-bottom: 22px;
+  width: 115px;
+  height: 115px;
+  stroke-width: 0.8;
+  margin-bottom: 20px;
 }
 .action > a {
+  --home-button-bg: #21182e;
+  --home-button-ink: #fff;
+  --home-button-hover: #49335e;
   min-width: 217px;
 }
 .note {
@@ -55,58 +71,66 @@
   align-items: center;
   gap: 7px;
   font-size: 10px;
-  color: var(--home-muted);
+  color: #514061;
   margin-top: 14px;
 }
-.note svg {
-  color: var(--home-emphasis);
-}
-@media (max-width: 850px) {
+@media (max-width: 900px) {
   .panel {
-    padding: 39px 34px;
+    padding: 50px 40px;
   }
   .copy h2 {
-    font-size: 37px;
+    font-size: 64px;
+    letter-spacing: -3px;
   }
   .action > a {
-    min-width: 190px;
+    min-width: 185px;
     font-size: 12px;
-    gap: 18px;
+    gap: 15px;
+  }
+  .arrow {
+    width: 90px;
+    height: 90px;
   }
 }
-@media (max-width: 600px) {
-  .section {
-    padding-inline: 20px;
-  }
+@media (max-width: 650px) {
   .panel {
+    padding: 40px 28px;
+    border-radius: 32px;
     flex-direction: column;
     align-items: flex-start;
-    padding: 31px 27px;
-    gap: 27px;
+    gap: 28px;
   }
   .copy h2 {
-    font-size: 34px;
-    letter-spacing: -1px;
+    font-size: 58px;
   }
   .eyebrow {
     font-size: 8px;
-    letter-spacing: 1.1px;
   }
   .subtext {
     font-size: 12px;
-    max-width: 260px;
-  }
-  .arrow {
-    display: none;
+    margin-top: 20px;
+    max-width: 240px;
   }
   .action {
     align-items: flex-start;
   }
-  .action > a {
-    min-height: 46px;
-    min-width: 180px;
+  .arrow {
+    position: absolute;
+    right: 25px;
+    bottom: 45px;
+    width: 45px;
+    height: 45px;
+    margin: 0;
   }
   .note {
     font-size: 9px;
+  }
+}
+@media (max-width: 360px) {
+  .copy h2 {
+    font-size: 49px;
+  }
+  .arrow {
+    display: none;
   }
 }

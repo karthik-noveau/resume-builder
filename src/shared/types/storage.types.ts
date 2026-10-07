@@ -30,3 +30,10 @@ export class ValidationError extends Error {
     this.name = 'ValidationError'
   }
 }
+
+export class ResumeConflictError extends Error {
+  constructor() {
+    super('This resume changed in another tab. Reload the saved version or save your draft as a copy.')
+    this.name = 'ResumeConflictError'
+  }
+}

@@ -53,6 +53,13 @@ const router = createBrowserRouter([
               return { Component: SharedResumePage }
             },
           },
+          {
+            path: '*',
+            lazy: async () => {
+              const { NotFound } = await import('@/shared/pages/NotFound')
+              return { Component: NotFound }
+            },
+          },
         ],
       },
       {
@@ -67,13 +74,6 @@ const router = createBrowserRouter([
         lazy: async () => {
           const { GuidedEditorPage } = await import('@/features/editor/pages/GuidedEditorPage')
           return { Component: GuidedEditorPage }
-        },
-      },
-      {
-        path: '*',
-        lazy: async () => {
-          const { NotFound } = await import('@/shared/pages/NotFound')
-          return { Component: NotFound }
         },
       },
     ],

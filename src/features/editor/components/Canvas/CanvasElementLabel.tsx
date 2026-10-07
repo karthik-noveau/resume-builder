@@ -7,7 +7,6 @@ interface Props {
   layoutTree: LayoutTree | null
   selectionKey: string
   scale: number
-  onLabelChange: (label: string | null) => void
 }
 
 type Box = Pick<DOMRect, 'left' | 'top' | 'right' | 'bottom'>
@@ -15,7 +14,7 @@ const overlaps = (a: Box, b: Box) => a.left < b.right + 3 && a.right > b.left - 
   && a.top < b.bottom + 3 && a.bottom > b.top - 3
 
 /** One unscaled label for the hovered, focused or selected element. */
-export function CanvasElementLabel({ canvasRef, layoutTree, selectionKey, scale, onLabelChange }: Props) {
+export function CanvasElementLabel({ canvasRef, layoutTree, selectionKey, scale }: Props) {
   const labelRef = useRef<HTMLSpanElement>(null)
   const hovered = useRef<HTMLElement | null>(null)
   const focused = useRef<HTMLElement | null>(null)
@@ -47,11 +46,6 @@ export function CanvasElementLabel({ canvasRef, layoutTree, selectionKey, scale,
       canvas.removeEventListener('focusout', blur)
     }
   }, [canvasRef, layoutTree, selectionKey])
-
-  useLayoutEffect(() => {
-    onLabelChange(label)
-    return () => onLabelChange(null)
-  }, [label, onLabelChange])
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current
@@ -96,7 +90,7 @@ export function CanvasElementLabel({ canvasRef, layoutTree, selectionKey, scale,
       const ys = [element.top - height - gap, element.bottom + gap,
         Math.max(element.top + gap, bounds.top), Math.min(element.bottom - height - gap, bounds.bottom - height)]
       // Try above and below before one nearby alternate row. When crowded,
-      // keep the name in the toolbar instead of detaching it from its field.
+      // hide the badge instead of detaching it from its field.
       for (let offset = 0; offset < 2; offset++) {
         for (const y of ys) {
           const top = y + (y < element.top ? -1 : 1) * offset * (height + gap)

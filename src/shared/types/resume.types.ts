@@ -193,6 +193,10 @@ export interface TemplateColorOverrides {
 
 export interface Resume {
   id: string
+  /** Optimistic concurrency token; legacy drafts start at zero. */
+  revision?: number
+  /** Explicit guided-setup choice; existing work entries are still validated. */
+  noWorkExperience?: boolean
   schemaVersion: 1
   title: string
   createdAt: string

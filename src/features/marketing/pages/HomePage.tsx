@@ -2,9 +2,7 @@ import { PageLayout } from '@/shared/components/layout/PageLayout'
 import { Seo } from '@/shared/components/Seo/Seo'
 import { HeroSection } from '../components/HeroSection'
 import { TemplateShowcase } from '../components/TemplateShowcase'
-import { FeatureGrid } from '../components/FeatureGrid'
 import { PrivacyBanner } from '../components/PrivacyBanner'
-import { HowItWorks } from '../components/HowItWorks'
 import { FinalCta } from '../components/FinalCta'
 import { SiteFooter } from '../components/SiteFooter'
 import { RevealSection } from '../components/RevealSection'
@@ -43,12 +41,6 @@ export function HomePage() {
       <HeroSection />
       <RevealSection>
         <TemplateShowcase />
-      </RevealSection>
-      <RevealSection>
-        <FeatureGrid />
-      </RevealSection>
-      <RevealSection>
-        <HowItWorks />
       </RevealSection>
       <RevealSection>
         <PrivacyBanner />
