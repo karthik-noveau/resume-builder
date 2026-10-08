@@ -1,11 +1,20 @@
+import { AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
 import { Share2 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/Button/Button'
 import { ShareDialog } from './ShareDialog'
 import styles from './Share.module.css'
 
-export function ShareButton({ resumeId }: { resumeId: string }) {
-  const [open, setOpen] = useState(false)
+interface ShareButtonProps {
+  resumeId: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}
+
+export function ShareButton({ resumeId, open, onOpenChange }: ShareButtonProps) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isOpen = open ?? internalOpen
+  const setOpen = onOpenChange ?? setInternalOpen
   return (
     <>
       <Button
@@ -17,7 +26,7 @@ export function ShareButton({ resumeId }: { resumeId: string }) {
         <Share2 size={15} aria-hidden="true" />
         <span>Share</span>
       </Button>
-      {open && <ShareDialog resumeId={resumeId} onClose={() => setOpen(false)} />}
+      <AnimatePresence>{isOpen && <ShareDialog resumeId={resumeId} onClose={() => setOpen(false)} />}</AnimatePresence>
     </>
   )
 }

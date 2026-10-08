@@ -101,6 +101,7 @@
   --duration-fast: 150ms;
   --duration-normal: 250ms;
   --duration-slow: 350ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* Warm elevation scale: base layers use a fixed navy-slate (15 23 42 —
      the same value as light mode's --color-text-primary, but written as a

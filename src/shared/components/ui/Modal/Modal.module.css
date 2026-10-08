@@ -15,14 +15,15 @@
   background: rgb(var(--color-surface));
 }
 
-/* Fade previews in place so dialog controls stay stationary. */
+/* Keep controls in place while the dialog and backdrop fade together. */
 .previewModal:global(.resume-preview-enter),
 .previewModal:global(.resume-preview-appear) {
-  animation: previewEnter 180ms ease-out both paused;
+  animation: previewEnter 240ms ease-out both paused;
 }
 
 .previewModal:global(.resume-preview-leave) {
-  animation: previewLeave 140ms ease-in both paused;
+  animation: previewLeave 180ms ease-in both paused;
+  pointer-events: none;
 }
 
 .previewModal:global(.resume-preview-enter-active),
@@ -64,11 +65,12 @@
 /* Keep dialog actions stationary from the first frame: scaling a modal can move a button between pointerdown and pointerup and lose a click. */
 .modal:global(.resume-dialog-enter),
 .modal:global(.resume-dialog-appear) {
-  animation: dialogEnter 140ms ease-out both paused;
+  animation: dialogEnter 240ms ease-out both paused;
 }
 
 .modal:global(.resume-dialog-leave) {
-  animation: dialogLeave 100ms ease-in both paused;
+  animation: dialogLeave 180ms ease-in both paused;
+  pointer-events: none;
 }
 
 .modal:global(.resume-dialog-enter-active),

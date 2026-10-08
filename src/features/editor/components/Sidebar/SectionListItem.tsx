@@ -72,7 +72,9 @@ export function SectionListItem({
         className={clsx(styles.selectButton, isSelected && styles.selectButtonActive)}
         aria-current={isSelected ? 'true' : undefined}
       >
-        <Icon size={15} aria-hidden="true" className={styles.icon} />
+        <span className={styles.iconTile}>
+          <Icon size={15} aria-hidden="true" className={styles.icon} />
+        </span>
         <span className={styles.label}>{label}</span>
         {count > 0 && (
           <span className={styles.count}>{count}</span>
@@ -87,6 +89,7 @@ export function SectionListItem({
       {/* Visibility toggle */}
       <button
         aria-label={isVisible ? `Hide ${label}` : `Show ${label}`}
+        aria-pressed={isVisible}
         onClick={onToggleVisibility}
         className={clsx(styles.visibilityButton, styles.revealable)}
       >

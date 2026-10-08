@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Collapse } from '@/shared/components/ui/Collapse/Collapse'
 import { clsx } from 'clsx'
 import { ChevronDown, LayoutGrid, Settings2 } from 'lucide-react'
 import type { Resume, SectionType } from '@/shared/types/resume.types'
@@ -70,6 +71,7 @@ export function Sidebar({
       <div className={styles.footerBlocks}>
         <FooterBlock
           label="Template"
+          instant={Boolean(tourStep)}
           tourTarget="template-panel"
           icon={<LayoutGrid size={14} aria-hidden="true" />}
           open={tourStep === 'template' || (tourStep !== 'page-setup' && Boolean(openBlocks.template))}
@@ -80,6 +82,7 @@ export function Sidebar({
 
         <FooterBlock
           label="Page setup"
+          instant={Boolean(tourStep)}
           tourTarget="page-setup"
           icon={<Settings2 size={14} aria-hidden="true" />}
           open={tourStep === 'page-setup' || (tourStep !== 'template' && Boolean(openBlocks.pageSetup))}
@@ -93,12 +96,13 @@ export function Sidebar({
 }
 
 function FooterBlock({
-  label, icon, open, onToggle, children, tourTarget,
+  label, icon, open, onToggle, children, tourTarget, instant,
 }: {
   label: string
   tourTarget: string
   icon: React.ReactNode
   open: boolean
+  instant: boolean
   onToggle: () => void
   children: React.ReactNode
 }) {
@@ -121,7 +125,7 @@ function FooterBlock({
           aria-hidden="true"
         />
       </button>
-      {open && <div className={styles.footerBody}>{children}</div>}
+      <Collapse open={open} instant={instant}><div className={styles.footerBody}>{children}</div></Collapse>
     </section>
   )
 }

@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import { Select as AntSelect } from 'antd'
+import { ChevronDown } from 'lucide-react'
 import { clsx } from 'clsx'
 import type { SelectProps } from './Select.types'
 import styles from './Select.module.css'
@@ -38,6 +39,7 @@ export function Select({
         id={id}
         aria-labelledby={labelId}
         prefix={icon}
+        suffixIcon={<ChevronDown size={16} strokeWidth={2} className={styles.chevron} aria-hidden="true" />}
         value={value}
         defaultValue={defaultValue}
         placeholder={placeholder}

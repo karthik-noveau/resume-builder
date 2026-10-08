@@ -56,8 +56,10 @@ export function TemplateCard({ resume }: { resume: Resume }) {
         data-editor-tour="template"
         aria-haspopup="dialog"
         aria-expanded={isPickerOpen}
+        aria-label="Change template"
       >
-        <span>Change template</span>
+        <span className={styles.changeLabel}>Change template</span>
+        <span className={styles.mobileChangeLabel} aria-hidden="true">Change</span>
         <ArrowRight size={15} className={styles.actionArrow} aria-hidden="true" />
       </button>
 

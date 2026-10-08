@@ -72,32 +72,93 @@
 
 .toolbar {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding: 10px;
+  border: 1px solid rgb(var(--color-divider) / 85%);
+  border-radius: 18px;
+  background-color: rgb(var(--color-surface) / 85%);
+  box-shadow: 0 2px 8px rgb(30 26 52 / 2%);
+}
+
+.libraryLabel {
+  display: flex;
+  align-items: center;
   gap: 8px;
-  margin-bottom: 20px;
+  padding-inline: 4px 12px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-@media (min-width: 640px) {
-  .toolbar {
-    align-items: center;
-  }
+.libraryLabel > svg {
+  color: rgb(var(--color-primary));
 }
 
-@media (min-width: 640px) {
-  .toolbar {
-    flex-direction: row;
-  }
+.resultCount {
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding-inline: 6px;
+  border-radius: 8px;
+  background: rgb(var(--color-primary) / 8%);
+  color: rgb(var(--color-primary));
+  font-size: 11px;
+}
+
+.trashButton:global(.ant-btn) {
+  flex-shrink: 0;
+  gap: 8px;
+  min-height: var(--dashboard-control-height);
+  margin-inline-start: 0;
+  padding: 5px 10px 5px 6px;
+  border: 1px solid rgb(var(--color-divider));
+  border-radius: 12px;
+  background-color: rgb(var(--color-surface) / 85%);
+  color: rgb(var(--color-text-secondary));
+  box-shadow: 0 1px 2px rgb(30 26 52 / 3%);
+  touch-action: manipulation;
+}
+
+.trashIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background-color: rgb(var(--color-primary) / 8%);
+  color: rgb(var(--color-primary));
+}
+
+.trashArrow {
+  flex-shrink: 0;
+  color: rgb(var(--color-text-muted));
+}
+
+.trashButton:global(.ant-btn):not(:disabled):hover {
+  border-color: rgb(var(--color-primary) / 45%);
+  background-color: rgb(var(--color-surface));
+  color: rgb(var(--color-primary));
+  box-shadow: 0 2px 6px rgb(var(--color-primary) / 8%);
+}
+
+.trashButton:hover .trashArrow {
+  color: inherit;
 }
 
 .searchWrap {
   position: relative;
-  flex: 1;
+  flex: 1 1 160px;
+  min-width: 0;
+  margin-inline-start: auto;
 }
 
 @media (min-width: 640px) {
   .searchWrap {
-    max-width: 20rem;
+    max-width: 18rem;
   }
 }
 
@@ -114,9 +175,9 @@
   width: 100%;
   height: var(--dashboard-control-height);
   padding: 0 16px 0 40px;
-  background-color: rgb(var(--color-surface));
-  border: 1px solid rgb(var(--color-divider));
-  border-radius: var(--radius-control);
+  background-color: rgb(var(--color-background));
+  border: 1px solid transparent;
+  border-radius: 10px;
   font-size: var(--text-base);
   color: rgb(var(--color-text-primary));
   transition:
@@ -141,12 +202,17 @@
 
 .sortWrap {
   width: 100%;
+  flex-shrink: 0;
+  min-width: 0;
 }
 
 .sortSelect:global(.ant-select) {
   height: var(--dashboard-control-height);
   min-height: var(--dashboard-control-height);
   padding-inline: 12px;
+  border-radius: 10px;
+  border-color: transparent;
+  background-color: rgb(var(--color-background));
 }
 
 @media (max-width: 639px), (pointer: coarse) {
@@ -167,8 +233,22 @@
 
 @media (min-width: 640px) {
   .sortWrap {
-    width: 12rem;
+    width: 180px;
   }
+}
+
+@media (max-width: 1023px) {
+  .libraryLabel {
+    display: none;
+  }
+
+  .searchWrap {
+    max-width: none;
+  }
+}
+
+.toolbar:not(:has(.searchWrap)) > .trashButton {
+  margin-inline-start: auto;
 }
 
 .grid {
@@ -196,15 +276,17 @@
 }
 
 .skeletonCard {
+  padding: 8px;
   background-color: rgb(var(--color-surface));
   border: 1px solid rgb(var(--color-divider));
-  border-radius: var(--radius-large);
+  border-radius: var(--radius-xl);
   overflow: hidden;
 }
 
 .skeletonThumb {
-  height: 244px;
+  height: 202px;
   width: 100%;
+  border-radius: 14px;
 }
 
 .errorState {
@@ -235,7 +317,7 @@
 }
 
 .skeletonInfo {
-  padding: 16px;
+  padding: 18px 6px 10px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -268,7 +350,7 @@
     --gradient-brand: none;
     --gradient-brand-hover: none;
     display: grid;
-    grid-template-columns: 44px minmax(0, 1fr) minmax(0, 1.25fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
   }
 
   .headerActions button:global(.ant-btn) {
@@ -296,19 +378,34 @@
 
   .toolbar {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 148px;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px;
     margin-bottom: 16px;
+    padding: 8px;
+    border-radius: 16px;
   }
 
   .searchWrap {
+    grid-column: 1 / -1;
     min-width: 0;
+    width: 100%;
+    margin: 0;
+  }
+
+  .sortWrap {
+    max-width: 192px;
+    width: 100%;
+  }
+
+  .trashButton:global(.ant-btn) {
+    grid-column: 2;
+    border-radius: 12px;
   }
 
   .searchInput,
   .sortSelect:global(.ant-select) {
     border-radius: 12px;
-    background-color: rgb(var(--color-surface));
+    background-color: rgb(var(--color-background));
   }
 
   .sortSelect:global(.ant-select) {

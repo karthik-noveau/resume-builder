@@ -1,8 +1,9 @@
 @media (prefers-reduced-motion: no-preference) {
   .section {
-    transition: opacity 700ms ease;
+    transition: opacity 400ms ease, transform 400ms var(--ease-out);
   }
   .section[data-revealed='false'] {
     opacity: 0;
+    transform: translateY(12px);
   }
 }

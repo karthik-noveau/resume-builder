@@ -89,7 +89,9 @@
   font-weight: 600;
 }
 .tabs {
-  display: flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-self: flex-start;
   gap: 4px;
   padding: 4px;
@@ -99,6 +101,7 @@
   flex-shrink: 0;
 }
 .tabs button {
+  position: relative;
   padding: 9px 16px;
   font-size: 13px;
   font-weight: 600;
@@ -107,9 +110,20 @@
   transition: background-color 150ms, color 150ms;
 }
 .tabs button[aria-pressed='true'] {
+  color: rgb(var(--color-primary));
+}
+.tabIndicator {
+  position: absolute;
+  inset: 4px auto 4px 4px;
+  width: calc((100% - 12px) / 2);
+  border-radius: 8px;
   background: rgb(var(--color-surface));
   box-shadow: 0 1px 4px rgb(15 23 42 / 9%);
-  color: rgb(var(--color-primary));
+  pointer-events: none;
+  transition: transform 280ms var(--ease-out);
+}
+.tabs[data-active-tab='job'] .tabIndicator {
+  transform: translateX(calc(100% + 4px));
 }
 .scrollArea {
   min-height: 0;

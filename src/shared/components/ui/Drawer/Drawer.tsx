@@ -1,5 +1,5 @@
 import { Drawer as AntDrawer } from 'antd'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { DrawerProps } from './Drawer.types'
 import { clsx } from 'clsx'
 import styles from './Drawer.module.css'
@@ -17,7 +17,34 @@ export function Drawer({
   rootClassName,
 }: DrawerProps) {
   const [panel, setPanel] = useState<HTMLDivElement | null>(null)
+  const returnFocus = useRef<HTMLElement | null>(null)
   useSwipeToClose(panel, isOpen, onClose)
+
+  useEffect(() => {
+    if (isOpen) return
+    // Remember the trigger before the drawer's focus trap takes ownership.
+    const rememberFocus = () => {
+      const active = document.activeElement
+      if (active instanceof HTMLElement && active !== document.body && !active.closest('.ant-drawer')) {
+        returnFocus.current = active
+      }
+    }
+    rememberFocus()
+    document.addEventListener('focusin', rememberFocus)
+    return () => document.removeEventListener('focusin', rememberFocus)
+  }, [isOpen])
+
+  useEffect(() => {
+    if (isOpen || panel) return
+    // Interrupted entrances can skip afterOpenChange. Wait for the actual
+    // panel removal, then restore focus after the focus trap has released it.
+    const frame = requestAnimationFrame(() => {
+      if (document.activeElement === document.body && returnFocus.current?.isConnected) {
+        returnFocus.current.focus({ preventScroll: true })
+      }
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [isOpen, panel])
 
   return (
     <AntDrawer

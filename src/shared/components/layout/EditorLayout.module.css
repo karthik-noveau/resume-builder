@@ -1,4 +1,5 @@
 .root {
+  animation: app-panel-enter 240ms ease-out;
   display: flex;
   flex-direction: column;
   height: var(--app-viewport-height, 100dvh);
@@ -18,12 +19,6 @@
   position: sticky;
   top: 0;
   z-index: 10;
-}
-
-@media (max-width: 1023px) {
-  .header {
-    height: calc(112px + env(safe-area-inset-top));
-  }
 }
 
 .body {
@@ -99,6 +94,8 @@
   color: rgb(var(--color-primary));
 }
 .mobileNav {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-shrink: 0;
   border-top: 1px solid rgb(var(--color-divider));
@@ -107,6 +104,7 @@
   gap: 8px;
 }
 .mobileNav button {
+  position: relative;
   flex: 1;
   min-height: 52px;
   display: flex;
@@ -119,12 +117,56 @@
   font-size: var(--text-sm);
 }
 .mobileNav button[aria-pressed='true'] {
-  background: rgb(var(--color-primary) / 10%);
   color: rgb(var(--color-primary));
   font-weight: 600;
+}
+.mobileNavIndicator {
+  position: absolute;
+  z-index: -1;
+  inset: 6px auto 6px 12px;
+  width: calc((100% - 40px) / 3);
+  border-radius: 10px;
+  background: rgb(var(--color-primary) / 10%);
+  transition: transform 280ms var(--ease-out);
+  pointer-events: none;
+}
+.mobileNav[data-active-view='design'] .mobileNavIndicator {
+  transform: translateX(calc(100% + 8px));
+}
+.mobileNav[data-active-view='preview'] .mobileNavIndicator {
+  transform: translateX(calc(200% + 16px));
 }
 .mobileNav button:focus-visible,
 .mobileSectionBar button:focus-visible {
   outline: 2px solid rgb(var(--color-primary));
   outline-offset: 2px;
+}
+
+/* The mobile outline is a neutral workspace with one clear drawer header. */
+.sectionsDrawer :global(.ant-drawer-section),
+.sectionsDrawer :global(.ant-drawer-header) {
+  background: rgb(var(--color-surface));
+}
+
+.sectionsDrawer :global(.ant-drawer-header) {
+  padding: max(8px, env(safe-area-inset-top)) 12px 8px 20px;
+  border-bottom: 1px solid rgb(var(--color-divider) / 65%);
+}
+
+.sectionsDrawer :global(.ant-drawer-header-title) {
+  flex-direction: row-reverse;
+  gap: 12px;
+}
+
+.sectionsDrawer :global(.ant-drawer-title) {
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.sectionsDrawer :global(.ant-drawer-close) {
+  margin-inline: 0;
+  border-radius: 10px;
+  background: rgb(var(--color-background));
+  color: rgb(var(--color-text-secondary));
 }

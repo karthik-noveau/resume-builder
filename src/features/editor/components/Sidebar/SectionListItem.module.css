@@ -139,3 +139,90 @@
     gap: 2px;
   }
 }
+
+.iconTile {
+  display: contents;
+}
+
+@media (max-width: 1023px) {
+  .row {
+    min-height: 50px;
+    padding: 2px;
+    gap: 0;
+    border: 1px solid rgb(var(--color-divider) / 65%);
+    border-radius: 12px;
+    background: rgb(var(--color-surface));
+  }
+
+  .rowSelected,
+  .rowSelected:hover {
+    border-color: rgb(var(--color-primary) / 35%);
+    background: rgb(var(--color-primary) / 6%);
+  }
+
+  .revealable {
+    opacity: 1;
+  }
+
+  .dragHandle,
+  .visibilityButton {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+  }
+
+  .dragHandle {
+    color: rgb(var(--color-text-muted) / 55%);
+  }
+
+  .selectButton {
+    padding: 0;
+    gap: 8px;
+    color: rgb(var(--color-text-primary));
+  }
+
+  .selectButtonActive {
+    color: rgb(var(--color-primary));
+  }
+
+  .iconTile {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: rgb(var(--color-background));
+    color: rgb(var(--color-text-secondary));
+  }
+
+  .rowSelected .iconTile {
+    background: rgb(var(--color-primary) / 9%);
+    color: rgb(var(--color-primary));
+  }
+
+  .label {
+    font-size: 13px;
+    font-weight: 550;
+  }
+
+  .count {
+    display: grid;
+    place-items: center;
+    min-width: 20px;
+    height: 20px;
+    margin: 0;
+    padding: 0 4px;
+    border-radius: 6px;
+    background: rgb(var(--color-background));
+    font-size: 10px;
+  }
+
+  .chevron {
+    display: none;
+  }
+
+  .visibilityButton[aria-pressed='true'] {
+    color: rgb(var(--color-primary));
+  }
+}

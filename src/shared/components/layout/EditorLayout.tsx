@@ -108,6 +108,7 @@ export function EditorLayout({
               title="Sections"
               width="320px"
               flush
+              rootClassName={styles.sectionsDrawer}
             >
               {sidebar}
             </Drawer>
@@ -115,7 +116,8 @@ export function EditorLayout({
         )}
       </div>
       {!isDesktop && (
-        <nav className={styles.mobileNav} aria-label="Editor views">
+        <nav className={styles.mobileNav} aria-label="Editor views" data-active-view={mobileView}>
+          <span className={styles.mobileNavIndicator} aria-hidden="true" />
           {(
             [
               { id: 'content', label: 'Content', Icon: FileText },

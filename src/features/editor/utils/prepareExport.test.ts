@@ -24,3 +24,10 @@ it('allows preview and export when a field has a validation message', async () =
   expect(await prepareExport()).toBe(resume)
   expect(document.activeElement).not.toBe(input)
 })
+it('preserves a dialog trigger so focus can return after closing', async () => {
+  const button = document.createElement('button')
+  document.body.append(button)
+  button.focus()
+  await prepareExport()
+  expect(document.activeElement).toBe(button)
+})

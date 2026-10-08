@@ -8,20 +8,21 @@ import styles from './ResetButton.module.css'
 
 interface ResetButtonProps {
   onReset: (options: ResetResumeOptions) => void
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 /** Design only. Content is the expensive half to lose, so it is never pre-ticked. */
 const DEFAULT_SELECTION: ResetResumeOptions = { content: false, appearance: true }
 
 /**
- * Reset, in the toolbar beside the other document controls.
- *
- * Nothing is destroyed by the button itself — it opens a dialog that asks what
- * to clear, arrives with the safe half ticked, and is undoable afterwards. That
- * is what makes it safe to sit in the open rather than behind a menu.
+ * Opens a confirmation from the toolbar or its compact overflow menu.
+ * Only appearance is selected by default, and the reset can be undone.
  */
-export function ResetButton({ onReset }: ResetButtonProps) {
-  const [confirming, setConfirming] = useState(false)
+export function ResetButton({ onReset, open, onOpenChange }: ResetButtonProps) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const confirming = open ?? internalOpen
+  const setConfirming = onOpenChange ?? setInternalOpen
   const [selection, setSelection] = useState<ResetResumeOptions>(DEFAULT_SELECTION)
 
   const close = () => {

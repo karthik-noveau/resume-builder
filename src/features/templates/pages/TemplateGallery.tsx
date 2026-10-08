@@ -1,3 +1,4 @@
+import { AnimatePresence } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { ArrowLeft, ArrowRight, Search } from 'lucide-react'
@@ -88,15 +89,17 @@ export function TemplateGallery() {
         </div>
       </div>
 
-      {preview && (
-        <TemplatePreviewDialog
-          key={preview.id}
-          template={preview}
-          onClose={() => setPreview(null)}
-          onSelect={() => void handleSelect(preview.id)}
-          pending={openingId !== null}
-        />
-      )}
+      <AnimatePresence>
+        {preview && (
+          <TemplatePreviewDialog
+            key={preview.id}
+            template={preview}
+            onClose={() => setPreview(null)}
+            onSelect={() => void handleSelect(preview.id)}
+            pending={openingId !== null}
+          />
+        )}
+      </AnimatePresence>
       {/* Main Content */}
       <div className={styles.main}>
         <div className={styles.mainInner}>

@@ -1,3 +1,4 @@
+import { AnimatePresence } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, Check, Search } from 'lucide-react'
 import { clsx } from 'clsx'
@@ -161,17 +162,19 @@ export function TemplatePickerModal({
           </div>
         </div>
       </Modal>
-      {preview && (
-        <TemplatePreviewDialog
-          key={preview.id}
-          template={preview}
-          onClose={() => setPreview(null)}
-          onSelect={() => void handleSelect(preview.id)}
-          pending={pendingId !== null}
-          current={preview.id === currentTemplateId}
-          error={error}
-        />
-      )}
+      <AnimatePresence>
+        {preview && (
+          <TemplatePreviewDialog
+            key={preview.id}
+            template={preview}
+            onClose={() => setPreview(null)}
+            onSelect={() => void handleSelect(preview.id)}
+            pending={pendingId !== null}
+            current={preview.id === currentTemplateId}
+            error={error}
+          />
+        )}
+      </AnimatePresence>
     </>
   )
 }

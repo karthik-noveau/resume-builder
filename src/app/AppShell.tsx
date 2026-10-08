@@ -13,6 +13,7 @@ import {
   ArrowUpRight,
 } from 'lucide-react'
 import { clsx } from 'clsx'
+import { motion } from 'framer-motion'
 import { useThemeStore } from '@/shared/stores/theme.store'
 import { Drawer } from '@/shared/components/ui/Drawer/Drawer'
 import { BrandLogo } from '@/shared/components/BrandMark/BrandMark'
@@ -57,7 +58,19 @@ export function AppShell() {
                     clsx(styles.navLink, isActive && styles.navLinkActive)
                   }
                 >
-                  {label}
+                  {({ isActive }) => (
+                    <>
+                      {label}
+                      {isActive && (
+                        <motion.span
+                          layoutId="site-navigation-indicator"
+                          className={styles.navIndicator}
+                          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                          aria-hidden="true"
+                        />
+                      )}
+                    </>
+                  )}
                 </NavLink>
               ))}
             </nav>
@@ -151,7 +164,7 @@ export function AppShell() {
         </div>
       </Drawer>
 
-      <div id="main-content" tabIndex={-1} className={styles.content}>
+      <div key={pathname} id="main-content" tabIndex={-1} className={styles.content}>
         <Outlet />
       </div>
     </div>

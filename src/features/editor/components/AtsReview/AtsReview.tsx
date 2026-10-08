@@ -297,7 +297,8 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
           </div>
         ) : (
           <>
-            <div className={styles.tabs} role="group" aria-label="Evaluation view">
+            <div className={styles.tabs} role="group" aria-label="Evaluation view" data-active-tab={tab}>
+              <span className={styles.tabIndicator} aria-hidden="true" />
               <button aria-pressed={tab === 'checks'} onClick={() => setTab('checks')}>
                 Resume checks
               </button>

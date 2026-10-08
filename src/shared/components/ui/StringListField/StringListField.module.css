@@ -43,7 +43,7 @@
 }
 
 .fieldSingle {
-  height: var(--control-md);
+  height: var(--editor-field-height, var(--control-md));
 }
 
 .fieldMultiline {

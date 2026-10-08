@@ -1,7 +1,8 @@
+import { AnimatePresence } from 'framer-motion'
 import { RecoveryDialog } from '../components/RecoveryDialog'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Plus, FileText, Search, Upload, ArrowUpDown, AlertCircle, Trash2 } from 'lucide-react'
+import { Plus, FileText, Files, Search, Upload, ArrowUpDown, AlertCircle, Trash2, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageLayout } from '@/shared/components/layout/PageLayout'
 import { Seo } from '@/shared/components/Seo/Seo'
@@ -168,10 +169,6 @@ export function Dashboard() {
             </p>
           </div>
           <div className={styles.headerActions}>
-            <Button variant="secondary" onClick={() => setTrashOpen(true)} aria-label="Trash" title="Trash">
-              <Trash2 size={16} aria-hidden="true" className={styles.mobileLabel} />
-              <span className={styles.desktopLabel}>Trash</span>
-            </Button>
             <Button
               variant="secondary"
               onClick={() => setShowImport(true)}
@@ -207,33 +204,52 @@ export function Dashboard() {
           </div>
         )}
 
-        {/* Search + sort */}
-        {!isLoading && resumeList.length > 0 && (
-          <div className={styles.toolbar}>
-            <div className={styles.searchWrap}>
-              <Search className={styles.searchIcon} size={16} aria-hidden="true" />
-              <input
-                type="text"
-                placeholder={isMobile ? 'Search…' : 'Search resumes…'}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="Search resumes"
-                className={styles.searchInput}
-              />
-            </div>
-            <div className={styles.sortWrap}>
-              <Select
-                label="Sort by"
-                hideLabel
-                className={styles.sortSelect}
-                icon={<ArrowUpDown size={16} aria-hidden="true" />}
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortBy)}
-                options={SORT_OPTIONS}
-              />
-            </div>
+        {/* Library controls stay available even when every resume is in Trash. */}
+        <div className={styles.toolbar}>
+          <div className={styles.libraryLabel}>
+            <Files size={17} aria-hidden="true" />
+            <span>Resumes</span>
+            <span className={styles.resultCount}>{displayedList.length}</span>
           </div>
-        )}
+          {!isLoading && resumeList.length > 0 && (
+            <>
+              <div className={styles.searchWrap}>
+                <Search className={styles.searchIcon} size={16} aria-hidden="true" />
+                <input
+                  type="text"
+                  placeholder={isMobile ? 'Search…' : 'Search resumes…'}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Search resumes"
+                  className={styles.searchInput}
+                />
+              </div>
+              <div className={styles.sortWrap}>
+                <Select
+                  label="Sort by"
+                  hideLabel
+                  className={styles.sortSelect}
+                  icon={<ArrowUpDown size={16} aria-hidden="true" />}
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortBy)}
+                  options={SORT_OPTIONS}
+                />
+              </div>
+            </>
+          )}
+          <Button
+            variant="secondary"
+            className={styles.trashButton}
+            onClick={() => setTrashOpen(true)}
+            aria-label="Trash"
+          >
+            <span className={styles.trashIcon} aria-hidden="true">
+              <Trash2 size={15} />
+            </span>
+            <span>Trash</span>
+            <ChevronRight size={14} className={styles.trashArrow} aria-hidden="true" />
+          </Button>
+        </div>
 
         {/* Content */}
         {isLoading ? (
@@ -267,7 +283,7 @@ export function Dashboard() {
               <ResumeCard
                 key={resume.id}
                 resume={resume}
-                previewWidth={isMobile ? 68 : 140}
+                previewWidth={isMobile ? 68 : 124}
                 onDuplicate={(id) => {
                   void handleDuplicate(id)
                 }}
@@ -281,7 +297,7 @@ export function Dashboard() {
         )}
       </div>
 
-      {trashOpen && <RecoveryDialog onClose={() => setTrashOpen(false)} />}
+      <AnimatePresence>{trashOpen && <RecoveryDialog onClose={() => setTrashOpen(false)} />}</AnimatePresence>
       <TemplatePickerModal
         isOpen={showTemplatePicker}
         onClose={() => setShowTemplatePicker(false)}

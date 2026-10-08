@@ -101,3 +101,58 @@
   outline: 2px solid rgb(var(--color-primary));
   outline-offset: 2px;
 }
+
+@media (max-width: 1023px) {
+  .root {
+    padding: 12px;
+    border-color: rgb(var(--color-divider) / 75%);
+    border-radius: 14px;
+    background: rgb(var(--color-surface));
+  }
+
+  .scoreRow {
+    min-height: 0;
+  }
+
+  .meter {
+    width: 48px;
+    height: 48px;
+  }
+
+  .score {
+    font-size: 17px;
+  }
+
+  .maximum {
+    font-size: 9px;
+  }
+
+  .label {
+    font-size: 13px;
+  }
+
+  .state {
+    margin-top: 3px;
+    font-size: 11px;
+  }
+
+  .estimate,
+  .checks {
+    margin-top: 2px;
+    font-size: 11px;
+  }
+
+  .caption {
+    margin-top: 8px;
+    min-height: 0;
+    font-size: 11px;
+  }
+
+  .toggle {
+    min-height: 44px;
+    margin-top: 6px;
+    padding: 8px 10px;
+    border: 0;
+    background: rgb(var(--color-primary) / 6%);
+  }
+}

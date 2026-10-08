@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ComponentType } from 'react'
+import { useCallback, useRef, useState, type ComponentType } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { clsx } from 'clsx'
 import {
@@ -45,12 +45,12 @@ import shareStyles from '@/features/share/Share.module.css'
 
 type StepIcon = ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>
 
-const STEPS: { id: GuidedStep; label: string; hint: string; Icon: StepIcon }[] = [
-  { id: 'personal', label: 'Personal details', hint: 'Contact & links', Icon: User },
-  { id: 'summary', label: 'Summary', hint: 'Your elevator pitch', Icon: AlignLeft },
-  { id: 'experience', label: 'Work experience', hint: 'Roles & achievements', Icon: Briefcase },
-  { id: 'education', label: 'Education', hint: 'Degrees & schools', Icon: GraduationCap },
-  { id: 'skills', label: 'Skills', hint: 'Tools & strengths', Icon: Zap },
+const STEPS: { id: GuidedStep; label: string; shortLabel: string; hint: string; Icon: StepIcon }[] = [
+  { id: 'personal', label: 'Personal details', shortLabel: 'Details', hint: 'Contact & links', Icon: User },
+  { id: 'summary', label: 'Summary', shortLabel: 'Summary', hint: 'Your elevator pitch', Icon: AlignLeft },
+  { id: 'experience', label: 'Work experience', shortLabel: 'Work', hint: 'Roles & achievements', Icon: Briefcase },
+  { id: 'education', label: 'Education', shortLabel: 'Education', hint: 'Degrees & schools', Icon: GraduationCap },
+  { id: 'skills', label: 'Skills', shortLabel: 'Skills', hint: 'Tools & strengths', Icon: Zap },
 ]
 
 export function GuidedEditorPage() {
@@ -65,7 +65,6 @@ export function GuidedEditorPage() {
   const [isNavigating, setIsNavigating] = useState(false)
   const navigationLock = useRef(false)
   const stepBodyRef = useRef<HTMLDivElement>(null)
-  const stepperRef = useRef<HTMLElement>(null)
   const formSavers = useRef(new Set<GuidedFormSave>())
   const registerSave = useCallback((save: GuidedFormSave) => {
     formSavers.current.add(save)
@@ -86,12 +85,6 @@ export function GuidedEditorPage() {
   const saveError = useResumeStore((s) => s.error)
   const updateResume = useResumeStore((s) => s.updateResume)
   const [isPickerOpen, setIsPickerOpen] = useState(false)
-
-  useEffect(() => {
-    stepperRef.current
-      ?.querySelector<HTMLElement>('[aria-current="step"]')
-      ?.scrollIntoView?.({ block: 'nearest', inline: 'center' })
-  }, [stepIndex, isDesktop, isLoading])
 
   const handleTemplateSwitch = (templateId: string) => {
     useTemplateStore.getState().switchTemplate(templateId)
@@ -262,7 +255,12 @@ export function GuidedEditorPage() {
         <div className={styles.main}>
           {/* Stepper (mobile/tablet) */}
           {!isDesktop && (
-            <nav ref={stepperRef} className={styles.mobileStepper} aria-label="Guided setup steps">
+            <nav className={styles.mobileStepper} aria-label="Guided setup steps">
+              <span
+                className={styles.mobileStepIndicator}
+                aria-hidden="true"
+                style={{ transform: `translateX(calc(${stepIndex * 100}% + ${stepIndex * 4}px))` }}
+              />
               <ol className={styles.mobileStepperList}>
                 {STEPS.map((step, i) => {
                   const isActive = i === stepIndex
@@ -275,12 +273,15 @@ export function GuidedEditorPage() {
                           void goToStep(i)
                         }}
                         aria-current={isActive ? 'step' : undefined}
+                        aria-label={step.label}
+                        disabled={isNavigating}
                         className={clsx(
                           styles.mobileStepButton,
                           isActive && styles.mobileStepButtonActive
                         )}
                       >
                         <span
+                          aria-hidden="true"
                           className={clsx(
                             styles.mobileStepNumber,
                             isActive
@@ -290,7 +291,7 @@ export function GuidedEditorPage() {
                         >
                           {isDone ? <Check size={10} strokeWidth={3} aria-hidden="true" /> : i + 1}
                         </span>
-                        {step.label}
+                        <span className={styles.mobileStepLabel}>{step.shortLabel}</span>
                       </button>
                     </li>
                   )
@@ -403,7 +404,7 @@ export function GuidedEditorPage() {
                 </div>
 
                 {/* Only the fields scroll — the card frame and its header stay put. */}
-                <div className={styles.stepCardBody} ref={stepBodyRef}>
+                <div key={currentStep.id} className={styles.stepCardBody} ref={stepBodyRef}>
                   {finishError && (
                     <div className={styles.validationNotice} role="alert">
                       {finishError}

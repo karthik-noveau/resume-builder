@@ -1,7 +1,8 @@
+import { AnimatePresence } from 'framer-motion'
 import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { Dropdown } from 'antd'
-import { MoreHorizontal, FolderOpen, Pencil, Copy, Trash2, Share2 } from 'lucide-react'
+import { MoreHorizontal, FolderOpen, Pencil, Copy, Trash2, Share2, ArrowUpRight, Clock3 } from 'lucide-react'
 import { ShareDialog } from '@/features/share/ShareDialog'
 import type { Resume } from '@/shared/types/resume.types'
 import { ResumePreview } from '@/shared/components/ResumePreview/ResumePreview'
@@ -25,7 +26,7 @@ function formatDate(iso: string): string {
   })
 }
 
-export function ResumeCard({ resume, previewWidth = 140, onDuplicate, onDelete, onRename }: ResumeCardProps) {
+export function ResumeCard({ resume, previewWidth = 124, onDuplicate, onDelete, onRename }: ResumeCardProps) {
   const navigate = useNavigate()
   const [isRenaming, setIsRenaming] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
@@ -95,48 +96,59 @@ export function ResumeCard({ resume, previewWidth = 140, onDuplicate, onDelete, 
 
       {/* Info */}
       <div className={styles.info}>
-        {isRenaming ? (
-          <input
-            ref={inputRef}
-            value={titleDraft}
-            onChange={(e) => setTitleDraft(e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-            onBlur={() => {
-              void commitRename()
-            }}
-            maxLength={120}
-            disabled={renaming}
-            aria-invalid={!!renameError}
-            aria-describedby={renameError ? `rename-error-${resume.id}` : undefined}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.currentTarget.blur()
-              }
-              if (e.key === 'Escape') {
-                cancelled.current = true
-                setIsRenaming(false)
-              }
-            }}
-            aria-label="Resume title"
-            className={styles.titleInput}
-          />
-        ) : (
-          <Link
-            className={styles.title}
-            to={`/editor/${resume.id}`}
-            aria-label={`Open resume: ${resume.title}`}
-          >
-            {resume.title}
-          </Link>
-        )}
+        <div className={styles.titleRow}>
+          {isRenaming ? (
+            <input
+              ref={inputRef}
+              value={titleDraft}
+              onChange={(e) => setTitleDraft(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
+              onBlur={() => {
+                void commitRename()
+              }}
+              maxLength={120}
+              disabled={renaming}
+              aria-invalid={!!renameError}
+              aria-describedby={renameError ? `rename-error-${resume.id}` : undefined}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.currentTarget.blur()
+                }
+                if (e.key === 'Escape') {
+                  cancelled.current = true
+                  setIsRenaming(false)
+                }
+              }}
+              aria-label="Resume title"
+              className={styles.titleInput}
+            />
+          ) : (
+            <Link
+              className={styles.title}
+              to={`/editor/${resume.id}`}
+              aria-label={`Open resume: ${resume.title}`}
+              title={resume.title}
+            >
+              {resume.title}
+            </Link>
+          )}
+          {!isRenaming && (
+            <span className={styles.openHint} aria-hidden="true">
+              <ArrowUpRight size={15} />
+            </span>
+          )}
+        </div>
         {renameError && isRenaming && (
           <p id={`rename-error-${resume.id}`} className={styles.renameError} role="alert">
             {renameError}
           </p>
         )}
         <div className={styles.metadata}>
-          <span>{templateName}</span>
-          <time dateTime={resume.updatedAt}>{formatDate(resume.updatedAt)}</time>
+          <span className={styles.templateBadge}>{templateName}</span>
+          <time className={styles.updatedAt} dateTime={resume.updatedAt} title={`Last edited ${formatDate(resume.updatedAt)}`}>
+            <Clock3 size={12} aria-hidden="true" />
+            {formatDate(resume.updatedAt)}
+          </time>
         </div>
       </div>
 
@@ -185,9 +197,11 @@ export function ResumeCard({ resume, previewWidth = 140, onDuplicate, onDelete, 
           </button>
         </Dropdown>
       </div>
-      {isSharing && (
-        <ShareDialog resumeId={resume.id} resume={resume} onClose={() => setIsSharing(false)} />
-      )}
+      <AnimatePresence>
+        {isSharing && (
+          <ShareDialog resumeId={resume.id} resume={resume} onClose={() => setIsSharing(false)} />
+        )}
+      </AnimatePresence>
     </article>
   )
 }

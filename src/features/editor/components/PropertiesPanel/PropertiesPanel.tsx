@@ -1,3 +1,4 @@
+import { Collapse } from '@/shared/components/ui/Collapse/Collapse'
 import { useEffect, useRef, useState } from 'react'
 import { clsx } from 'clsx'
 import { ChevronDown, ChevronLeft, FileText, Globe2, MousePointerClick, Palette, UserRound } from 'lucide-react'
@@ -216,6 +217,7 @@ export function PropertiesPanel({ resume, layoutTree, selectedSectionType, onCle
               because the selected element is what you came here for. */}
           <DesignAccordion
             label="Global design"
+            instant={Boolean(tourStep)}
             tourTarget="global-design"
             description="Fonts, colours and text styles"
             icon={<Globe2 size={15} aria-hidden="true" />}
@@ -229,6 +231,7 @@ export function PropertiesPanel({ resume, layoutTree, selectedSectionType, onCle
 
           <DesignAccordion
             label="Selected design"
+            instant={Boolean(tourStep)}
             tourTarget="selected-design"
             description="Only what you select on the page"
             icon={<MousePointerClick size={15} aria-hidden="true" />}
@@ -244,13 +247,14 @@ export function PropertiesPanel({ resume, layoutTree, selectedSectionType, onCle
 }
 
 function DesignAccordion({
-  label, description, icon, open, onToggle, children, tourTarget,
+  label, description, icon, open, onToggle, children, tourTarget, instant,
 }: {
   label: string
   tourTarget: string
   description: string
   icon: React.ReactNode
   open: boolean
+  instant: boolean
   onToggle: () => void
   children: React.ReactNode
 }) {
@@ -274,7 +278,7 @@ function DesignAccordion({
           aria-hidden="true"
         />
       </button>
-      {open && <div className={styles.accordionBody}>{children}</div>}
+      <Collapse open={open} instant={instant}><div className={styles.accordionBody}>{children}</div></Collapse>
     </section>
   )
 }

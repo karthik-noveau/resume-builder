@@ -3,10 +3,12 @@ import { APP_THEME_COLORS } from '@/shared/theme/appTheme'
 import type { ThemeColors } from '@/shared/types/theme.types'
 
 /** Maps the app chrome's light/dark palette onto antd's ConfigProvider tokens. */
-function toAntdTokens(colors: ThemeColors): ThemeConfig['token'] {
+function toAntdTokens(colors: ThemeColors, reducedMotion: boolean): ThemeConfig['token'] {
   return {
-    // Keep menus, tooltips, and drawers stationary when they open.
-    motion: false,
+    motion: !reducedMotion,
+    motionDurationFast: '0.15s',
+    motionDurationMid: '0.22s',
+    motionDurationSlow: '0.28s',
     colorPrimary: colors.primary,
     colorPrimaryHover: colors.primaryHover,
     colorPrimaryActive: colors.primaryActive,
@@ -40,9 +42,9 @@ function toAntdTokens(colors: ThemeColors): ThemeConfig['token'] {
 }
 
 /** Builds the antd ConfigProvider theme config for the app's UI chrome (not resume color presets). */
-export function getAntdThemeConfig(isDark: boolean): ThemeConfig {
+export function getAntdThemeConfig(isDark: boolean, reducedMotion = false): ThemeConfig {
   return {
     algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
-    token: toAntdTokens(APP_THEME_COLORS[isDark ? 'dark' : 'light']),
+    token: toAntdTokens(APP_THEME_COLORS[isDark ? 'dark' : 'light'], reducedMotion),
   }
 }

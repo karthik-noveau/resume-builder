@@ -95,6 +95,7 @@
 }
 
 .card {
+  animation: app-panel-enter 220ms ease-out;
   position: relative;
   display: flex;
   flex-direction: column;

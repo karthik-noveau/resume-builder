@@ -1,4 +1,5 @@
 .root {
+  --editor-field-height: 40px;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -74,6 +75,7 @@
   background: rgb(var(--color-surface));
   box-shadow: 0 1px 2px rgb(15 23 42 / 8%), 0 2px 6px rgb(15 23 42 / 5%);
   pointer-events: none;
+  transition: transform 280ms var(--ease-out);
 }
 
 /* Its own width plus the gap lands it exactly on the second column. */
@@ -132,6 +134,7 @@
 }
 
 .selectedSection {
+  animation: app-panel-enter 220ms ease-out;
   margin: var(--space-3) var(--space-3) var(--space-5);
   padding: var(--space-4);
   border: 1px solid rgb(var(--color-divider));
@@ -141,6 +144,7 @@
 }
 
 .designBody {
+  animation: app-panel-enter 220ms ease-out;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -288,16 +292,15 @@
   transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease, background-color var(--duration-fast) ease !important;
 }
 
-/* One height, one radius, one type size for every control in the panel.
-   They previously measured 40px (antd select), 40px (colour picker) and 37px
-   (the number inputs) with radii of 10px and 8px and type at 14px and 13px —
-   three different controls sharing one grid row, none of them agreeing. */
+/* Keep text fields, selects and design controls aligned at a comfortable height. */
 .root :global(.ant-input),
 .root :global(.ant-input-number),
 .root :global(.ant-select-selector),
-.root :global(.ant-color-picker-trigger) {
-  min-height: var(--control-md) !important;
-  height: var(--control-md) !important;
+.root :global(.ant-color-picker-trigger),
+.root :global(.ant-select-single),
+.root :global(input[type="number"]:not(.ant-input-number-input)) {
+  min-height: var(--editor-field-height) !important;
+  height: var(--editor-field-height) !important;
   border-radius: var(--radius-control) !important;
   font-size: var(--text-base) !important;
 }
@@ -306,14 +309,18 @@
    default height; pinning ours leaves the text riding high without this. */
 .root :global(.ant-select-single .ant-select-selector .ant-select-selection-item),
 .root :global(.ant-select-single .ant-select-selector .ant-select-selection-placeholder) {
-  line-height: calc(var(--control-md) - 2px) !important;
+  line-height: calc(var(--editor-field-height) - 2px) !important;
+}
+
+.root :global(.ant-input-number-input) {
+  height: calc(var(--editor-field-height) - 2px);
 }
 
 /* Square: a colour trigger is a swatch, so it takes the control height in both
    directions instead of collapsing to its content width. */
 .root :global(.ant-color-picker-trigger) {
-  width: var(--control-md) !important;
-  min-width: var(--control-md) !important;
+  width: var(--editor-field-height) !important;
+  min-width: var(--editor-field-height) !important;
   justify-content: center;
   padding: var(--space-1);
   flex-shrink: 0;
@@ -359,6 +366,12 @@
   .modeTab,
   .modeThumb {
     transition: none !important;
+  }
+}
+
+@media (max-width: 1023px), (pointer: coarse) {
+  .root {
+    --editor-field-height: 44px;
   }
 }
 

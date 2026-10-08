@@ -2,7 +2,11 @@ import { useResumeStore } from '@/shared/stores/resume.store'
 
 /** Let blur-based edits commit, then export the draft without content checks. */
 export async function prepareExport() {
-  if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+  const active = document.activeElement
+  // Commit editable fields without clearing the dialog's return-focus button.
+  if (active instanceof HTMLElement && (
+    active.matches('input, textarea, select') || active.isContentEditable
+  )) active.blur()
   await new Promise<void>((resolve) => setTimeout(resolve, 0))
   return useResumeStore.getState().activeResume
 }

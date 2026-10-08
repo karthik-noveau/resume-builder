@@ -1,3 +1,4 @@
+import { AnimatePresence } from 'framer-motion'
 import { lazy, Suspense, useMemo, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import type { Resume } from '@/shared/types/resume.types'
@@ -85,23 +86,25 @@ export function AtsEvaluation({
           >
             Review &amp; fix <ArrowRight size={14} aria-hidden="true" />
           </button>
-          {open && (
-            <Suspense
-              fallback={
-                <p className={styles.caption} role="status">
-                  Opening resume review…
-                </p>
-              }
-            >
-              <AtsReview
-                key={resume.id}
-                resume={resume}
-                report={report}
-                templates={templates}
-                onClose={() => setOpen(false)}
-              />
-            </Suspense>
-          )}
+          <AnimatePresence>
+            {open && (
+              <Suspense
+                fallback={
+                  <p className={styles.caption} role="status">
+                    Opening resume review…
+                  </p>
+                }
+              >
+                <AtsReview
+                  key={resume.id}
+                  resume={resume}
+                  report={report}
+                  templates={templates}
+                  onClose={() => setOpen(false)}
+                />
+              </Suspense>
+            )}
+          </AnimatePresence>
         </>
       ) : (
         <div className={styles.caption}>

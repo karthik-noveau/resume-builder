@@ -6,12 +6,14 @@ interface ExportButtonProps {
   onPreview: () => void
   previewLoading?: boolean
   disabled?: boolean
+  compact?: boolean
 }
 
 export function ExportButton({
   onPreview,
   previewLoading,
   disabled,
+  compact = false,
 }: ExportButtonProps) {
   return (
     <div className={styles.actions} data-editor-tour="export">
@@ -22,8 +24,8 @@ export function ExportButton({
         loading={previewLoading}
         aria-label="Preview & export"
       >
-        <FileSearch size={15} aria-hidden="true" />
-        <span>Preview<span className={styles.exportLabel}> &amp; export</span></span>
+        {!compact && <FileSearch size={15} aria-hidden="true" />}
+        <span>Preview{!compact && <span className={styles.exportLabel}> &amp; export</span>}</span>
       </Button>
     </div>
   )

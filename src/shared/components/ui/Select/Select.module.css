@@ -28,6 +28,29 @@
   width: 100%;
 }
 
+.chevron {
+  display: block;
+  flex-shrink: 0;
+  color: rgb(var(--color-text-secondary));
+  pointer-events: none;
+  transition: transform var(--duration-fast), color var(--duration-fast);
+}
+
+.select:global(.ant-select-open) .chevron {
+  color: rgb(var(--color-primary));
+  transform: rotate(180deg);
+}
+
+.select:global(.ant-select-disabled) .chevron {
+  color: rgb(var(--color-text-muted) / 45%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}
+
 .error {
   font-size: var(--text-sm);
   color: rgb(var(--color-error));

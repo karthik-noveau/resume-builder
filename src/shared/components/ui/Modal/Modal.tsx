@@ -1,4 +1,6 @@
 import { Modal as AntModal } from 'antd'
+import { useEffect, useState } from 'react'
+import { usePresence } from 'framer-motion'
 import { clsx } from 'clsx'
 import type { ModalProps } from './Modal.types'
 import styles from './Modal.module.css'
@@ -24,9 +26,23 @@ export function Modal({
   className,
   maxWidth = 'md',
 }: ModalProps) {
+  // Lazy dialogs can render speculatively inside Suspense. Open only after
+  // mounting so a discarded render cannot leave an orphaned Escape handler.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  // Conditional dialogs remain mounted until antd finishes its exit animation.
+  const [isPresent, safeToRemove] = usePresence()
+  useEffect(() => {
+    if (!isPresent && !isOpen) safeToRemove?.()
+  }, [isPresent, isOpen, safeToRemove])
+
   return (
     <AntModal
-      open={isOpen}
+      open={mounted && isOpen && isPresent}
+      afterClose={() => {
+        if (!isPresent) safeToRemove?.()
+      }}
       centered={centered}
       onCancel={onClose}
       title={
