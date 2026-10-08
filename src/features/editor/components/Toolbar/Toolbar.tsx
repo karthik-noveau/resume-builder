@@ -81,7 +81,7 @@ export function Toolbar({
     <div className={clsx(styles.root, mobile.controls)}>
       {/* Left: brand + back + title + autosave */}
       <div className={styles.leftGroup}>
-        <Link to="/" aria-label="Resume Studio home" className={styles.brandLink}>
+        <Link to="/" aria-label="Resume Builder home" className={styles.brandLink}>
           <BrandMark size="sm" />
         </Link>
         <Divider

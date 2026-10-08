@@ -4,7 +4,7 @@ import { getBuiltinImageUrl } from '@/shared/utils/profileAvatar'
 
 /** Resolves an ImageAsset id (IndexedDB reference) to a displayable blob URL. */
 export function useResolvedImageUrl(imageId: string | undefined): string | null {
-  const [url, setUrl] = useState<string | null>(null)
+  const [url, setUrl] = useState<string | null>(() => getBuiltinImageUrl(imageId) ?? null)
 
   useEffect(() => {
     const builtinUrl = getBuiltinImageUrl(imageId)

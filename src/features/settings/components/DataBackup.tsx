@@ -150,7 +150,7 @@ export function DataBackup() {
           ref={input}
           type="file"
           accept=".json,application/json"
-          aria-label="Choose a Resume Studio backup"
+          aria-label="Choose a Resume Builder backup"
           className={styles.fileInput}
           onChange={(event) => {
             void readFile(event.target.files?.[0])

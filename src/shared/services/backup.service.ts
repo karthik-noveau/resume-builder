@@ -59,12 +59,12 @@ export function parseBackup(text: string): ResumeBackup {
   try {
     json = JSON.parse(text)
   } catch {
-    throw new Error('This file isn’t valid JSON. Choose a Resume Studio backup.')
+    throw new Error('This file isn’t valid JSON. Choose a Resume Builder backup.')
   }
   const result = backupSchema.safeParse(json)
   if (!result.success)
     throw new Error(
-      'This isn’t a supported Resume Studio backup. Export a new backup from Settings.'
+      'This isn’t a supported Resume Builder backup. Export a new backup from Settings.'
     )
   const backup = result.data
   const ids = new Set(backup.resumes.map((resume) => resume.id))
@@ -163,7 +163,7 @@ export function downloadBackup(text: string): void {
   const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }))
   const link = document.createElement('a')
   link.href = url
-  link.download = `Resume-Studio-Backup-${new Date().toISOString().slice(0, 10)}.json`
+  link.download = `Resume-Builder-Backup-${new Date().toISOString().slice(0, 10)}.json`
   document.body.append(link)
   link.click()
   link.remove()

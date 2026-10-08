@@ -40,6 +40,20 @@ const router = createBrowserRouter([
             },
           },
           {
+            path: 'guides',
+            lazy: async () => {
+              const { GuidesPage } = await import('@/features/marketing/pages/GuidesPage')
+              return { Component: GuidesPage }
+            },
+          },
+          {
+            path: 'guides/:slug',
+            lazy: async () => {
+              const { GuidesPage } = await import('@/features/marketing/pages/GuidesPage')
+              return { Component: GuidesPage }
+            },
+          },
+          {
             path: 'settings',
             lazy: async () => {
               const { Settings } = await import('@/features/settings/pages/Settings')
@@ -83,3 +97,13 @@ const router = createBrowserRouter([
 export function AppRouter() {
   return <RouterProvider router={router} />
 }
+
+/** Keep prerendered content visible until the initial lazy route is available. */
+// eslint-disable-next-line react-refresh/only-export-components -- Startup promise shares the single router instance.
+export const routerReady = router.state.initialized ? Promise.resolve() : new Promise<void>((resolve) => {
+  const unsubscribe = router.subscribe((state) => {
+    if (!state.initialized) return
+    unsubscribe()
+    resolve()
+  })
+})

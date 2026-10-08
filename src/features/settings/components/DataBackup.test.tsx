@@ -49,7 +49,7 @@ const backup: ResumeBackup = {
 function upload() {
   const file = new File(['{}'], 'backup.json', { type: 'application/json' })
   Object.defineProperty(file, 'text', { value: () => Promise.resolve('{}') })
-  fireEvent.change(screen.getByLabelText('Choose a Resume Studio backup'), {
+  fireEvent.change(screen.getByLabelText('Choose a Resume Builder backup'), {
     target: { files: [file] },
   })
 }

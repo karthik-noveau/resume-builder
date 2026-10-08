@@ -27,7 +27,7 @@ export function Settings() {
               </span>
               <div>
                 <h2 id="appearance-heading">Theme</h2>
-                <p>Choose how Resume Studio looks.</p>
+                <p>Choose how Resume Builder looks.</p>
               </div>
             </div>
             <fieldset className={styles.themeOptions}>

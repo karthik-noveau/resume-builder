@@ -1,0 +1,5 @@
+Mode: built-in imagegen edit
+Edit target: public/og-image.png
+Output: public/og-resume-builder.png
+
+Use case: text-localization. Asset type: social sharing Open Graph image for a web app. Image 1 is the edit target. Rebrand this exact graphic: replace the top-left brand text 'Resume Studio' with 'Resume Builder', using the same dark bold font, size, placement and baseline. Change the bottom feature text from '40 templates · Live editing · PDF export' to '41 templates · Live editing · PDF export'. Keep every other element unchanged: lavender background, purple document icon, headline 'Your next chapter starts here.', subtitle, call-to-action, right-side sample resume, all typography, spacing, dimensions and landscape composition. Preserve the original 1200 by 630 aspect ratio. Sharp and legible text; no new elements.

@@ -7,37 +7,12 @@ import { FinalCta } from '../components/FinalCta'
 import { SiteFooter } from '../components/SiteFooter'
 import { RevealSection } from '../components/RevealSection'
 import styles from './HomePage.module.css'
-import { ALL_TEMPLATES } from '@/features/templates/registry/template.registry'
-
-/** Rich-result markup for the landing page. Google accepts ld+json anywhere in the document. */
-const STRUCTURED_DATA = {
-  '@context': 'https://schema.org',
-  '@type': 'SoftwareApplication',
-  name: 'Resume Studio',
-  applicationCategory: 'BusinessApplication',
-  operatingSystem: 'Any',
-  description:
-    'Build, customise and export a professional resume entirely in your browser. No account, no upload — your data never leaves your device.',
-  offers: {
-    '@type': 'Offer',
-    price: '0',
-    priceCurrency: 'USD',
-  },
-}
+import { PUBLIC_PAGES, publicPageSchema } from '@/shared/seo/publicPages'
 
 export function HomePage() {
   return (
     <PageLayout className={styles.home}>
-      <Seo
-        title="Resume Studio — Build a professional resume in your browser"
-        description={`Create, customise and export a polished resume in minutes. Choose from ${ALL_TEMPLATES.length} templates, edit live, review ATS checks, and download a PDF. No account needed — everything stays on your device.`}
-        path="/"
-        appendSiteName={false}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
-      />
+      <Seo {...PUBLIC_PAGES.home} appendSiteName={false} structuredData={publicPageSchema('home')} />
       <HeroSection />
       <RevealSection>
         <TemplateShowcase />

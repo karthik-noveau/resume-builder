@@ -1,7 +1,7 @@
 /// <reference types="vitest/config" />
-import { defineConfig, loadEnv } from 'vite'
-import { writeFileSync } from 'node:fs'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { createReadStream, existsSync } from 'node:fs'
 import path from 'path'
 
 // Build and test config live together deliberately. They previously sat in two
@@ -10,37 +10,38 @@ import path from 'path'
 // `vitest/config` produced vite@5 plugin types that would not assign to vite@6
 // ones — `tsc -b` failed on exactly that. Using vite's own defineConfig with
 // the vitest type reference keeps a single vite version in play.
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), 'VITE_')
-  const siteUrl = new URL(env.VITE_SITE_URL || 'https://resume-studio.netlify.app')
-  if (!['http:', 'https:'].includes(siteUrl.protocol))
-    throw new Error('VITE_SITE_URL must be an HTTP(S) origin')
-  const origin = siteUrl.origin
-  return {
-    plugins: [
-      react(),
-      {
-        name: 'public-site-metadata',
-        apply: 'build',
-        writeBundle(options) {
-          const directory = options.dir ?? 'dist'
-          writeFileSync(
-            path.join(directory, 'robots.txt'),
-            `User-agent: *\nAllow: /$\nAllow: /templates\nDisallow: /app\nDisallow: /settings\nDisallow: /editor/\n\nSitemap: ${origin}/sitemap.xml\n`
-          )
-          writeFileSync(
-            path.join(directory, 'sitemap.xml'),
-            `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${origin}/</loc></url><url><loc>${origin}/templates</loc></url></urlset>\n`
-          )
-        },
+export default defineConfig({
+    plugins: [react(), {
+      name: 'production-route-preview',
+      configurePreviewServer(server) {
+        // Mirror Netlify's private shells and real 404s in production previews.
+        server.middlewares.use((request, response, next) => {
+          const pathname = new URL(request.url ?? '/', 'http://localhost').pathname
+          const isWorkspace = ['/app', '/app/', '/settings', '/settings/', '/share', '/share/'].includes(pathname) || pathname.startsWith('/editor/')
+          const output = path.resolve(server.config.root, server.config.build.outDir)
+          const asset = path.resolve(output, `.${pathname}`)
+          const isAsset = asset.startsWith(output + path.sep) && existsSync(asset)
+          const publicPage = path.join(asset, 'index.html')
+          if (!isWorkspace && isAsset && existsSync(publicPage)) {
+            response.setHeader('Content-Type', 'text/html; charset=utf-8')
+            createReadStream(publicPage).pipe(response)
+            return
+          }
+          if (!isWorkspace && (pathname === '/' || isAsset)) return next()
+          response.statusCode = isWorkspace ? 200 : 404
+          response.setHeader('Content-Type', 'text/html; charset=utf-8')
+          response.setHeader('X-Robots-Tag', 'noindex, nofollow')
+          createReadStream(path.join(output, isWorkspace ? 'workspace.html' : '404.html')).pipe(response)
+        })
       },
-    ],
+    }],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
       },
     },
     build: {
+      manifest: true,
       // Fontkit is shared by font-accurate layout measurement and PDF export.
       chunkSizeWarningLimit: 750,
       rollupOptions: {
@@ -75,5 +76,4 @@ export default defineConfig(({ mode }) => {
         exclude: ['src/tests/**', 'src/**/*.types.ts', 'src/**/*.d.ts', 'e2e/**', '*.config.*'],
       },
     },
-  }
 })

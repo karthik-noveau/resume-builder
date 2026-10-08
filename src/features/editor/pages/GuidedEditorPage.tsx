@@ -209,7 +209,7 @@ export function GuidedEditorPage() {
         {/* Top bar */}
         <header className={styles.header}>
           <div className={styles.headerLeft}>
-            <Link to="/" aria-label="Resume Studio home" className={styles.brandLink}>
+            <Link to="/" aria-label="Resume Builder home" className={styles.brandLink}>
               <BrandMark size="sm" />
             </Link>
             <Divider

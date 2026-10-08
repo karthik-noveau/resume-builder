@@ -1,4 +1,4 @@
-# Resume Studio
+# Resume Builder
 
 A local-first resume workspace built with React, TypeScript, Vite, and IndexedDB. It includes 41 templates, guided and visual editors, PDF preview/export, a rules-based ATS review, and editable backups.
 
@@ -25,9 +25,19 @@ CI runs the tests, lint, build, and production dependency audit on pull requests
 
 1. Copy `.env.example` to `.env.local` for a local build, or set `VITE_SITE_URL` in the host's environment. Use the actual public HTTPS origin, without a route or trailing slash.
 2. Build with `pnpm build` and publish `dist` over HTTPS.
-3. Netlify uses the included `netlify.toml`: SPA fallback, security headers, immutable hashed assets, and revalidated HTML. Other hosts need equivalent configuration.
+3. Netlify uses the included `netlify.toml`: prerendered public pages, private workspace rewrites, real HTTP 404 responses, security headers, immutable hashed assets, and revalidated HTML. Other hosts need equivalent configuration.
 4. Verify direct navigation to `/templates`, `/app`, `/settings`, and `/editor/<id>`, and the generated `robots.txt`/`sitemap.xml` on the deployed origin.
 5. Smoke-test creating a resume, reloading after an edit, PDF preview/download, and backup restore on the deployed site. Storage is origin-specific; localhost resumes do not automatically appear in production.
+
+## Brand and search visibility
+
+The public name is **Resume Builder** and the brand line is **Your story. Your next move.** Keep the single-line wordmark and violet document mark consistent. Public identity lives in `src/shared/seo/brand.ts`; public page titles, descriptions, and the structured-data graph live in `src/shared/seo/publicPages.ts`. Guide content lives in `src/features/marketing/content/guides.ts`; guide metadata and schema helpers live in `src/shared/config/`. Each published guide has a canonical URL, article metadata, breadcrumbs, and related links. Existing database names, backup formats, and storage keys deliberately retain their original identifiers so rebranding does not lose saved work.
+
+`pnpm build` renders the actual public React pages to `dist/index.html`, `dist/templates/index.html`, and the guide pages under `dist/guides/` using bundled fonts and sample resumes. This runs in Node without Chromium or network services. The browser preserves that HTML while fonts and the initial route load, then React owns the interface and metadata. `pnpm test:seo` checks the emitted HTML, schema, canonical URLs, sitemap, social assets, and private-page directives. CI runs it after the build.
+
+`VITE_SITE_URL` must be the final public origin. It controls every canonical URL, structured-data ID, social image URL, robots sitemap reference, and sitemap entry. The existing Netlify origin remains the default until a production domain is confirmed. Query variants of the gallery canonicalize to `/templates`. The sitemap includes the homepage, template gallery, guide index, and published guides. Private workspace and share pages send `noindex, nofollow` in both the initial HTML and Netlify response headers; do not block them in robots.txt, since crawlers must read those directives. Unknown paths return `404.html` with HTTP 404.
+
+After deploying, verify the domain in Google Search Console and submit `/sitemap.xml`. Check the live home, gallery, and guide URLs with URL Inspection and social preview tools. Changing domains also requires redirects from the old origin and a plan for existing browser-local resumes. Schema describes real features and free pricing; it deliberately contains no invented reviews, ratings, or rich-result promises. Search engines choose whether and how to display results.
 
 ## Import and editing
 

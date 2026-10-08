@@ -529,7 +529,7 @@ export default function AtsReview({ resume, report, templates, onClose }: Props)
                 <summary>How this evaluation works</summary>
                 <p>
                   The 100-point readiness score combines parsing conventions with writing
-                  guidelines. Weights and thresholds are Resume Studio heuristics, not an employer’s
+                  guidelines. Weights and thresholds are Resume Builder heuristics, not an employer’s
                   ATS score. Zero-point advisories do not change the score. English action-verb and
                   keyword checks have a limited vocabulary.
                 </p>

@@ -1,72 +1,57 @@
-/**
- * Per-page document metadata.
- *
- * React 19 hoists `<title>`, `<meta>` and `<link>` rendered anywhere in the
- * tree up into `<head>`, so this needs no helmet-style provider. The static
- * tags in index.html were removed for the same reason: React appends rather
- * than replaces, and two `<title>` elements mean the first one wins — which
- * would have pinned every route to the index.html title.
- */
-
-const SITE_NAME = 'Resume Studio'
-
-/** Override per environment with VITE_SITE_URL; canonical/og URLs must be absolute. */
-const SITE_URL = new URL(import.meta.env.VITE_SITE_URL || 'https://resume-studio.netlify.app')
-  .origin
-
-const DEFAULT_IMAGE = '/og-image.png'
+import { BRAND, SITE_ORIGIN, serializeJsonLd, siteUrl } from '@/shared/config/site'
 
 export interface SeoProps {
-  /** Page-specific title. The site name is appended unless `appendSiteName` is false. */
   title: string
   description: string
-  /** Absolute path for the canonical URL, e.g. `/templates`. Omit on noindex pages. */
   path?: string
-  /** Keep private/app routes out of the index. */
   noindex?: boolean
-  /** Root-relative path to the social share image. */
   image?: string
+  imageAlt?: string
   appendSiteName?: boolean
+  type?: 'website' | 'article'
+  structuredData?: Record<string, unknown>
   children?: React.ReactNode
 }
 
-export function Seo({
-  title,
-  description,
-  path,
-  noindex = false,
-  image = DEFAULT_IMAGE,
-  appendSiteName = true,
-  children,
+/** React 19 owns these tags after the build-time snapshot is handed over in main.tsx. */
+export function Seo({ title, description, path, noindex = false,
+  image = BRAND.socialImage, imageAlt = BRAND.socialImageAlt,
+  appendSiteName = true, type = 'website', structuredData, children,
 }: SeoProps) {
-  const fullTitle = appendSiteName ? `${title} · ${SITE_NAME}` : title
-  const canonical = path ? `${SITE_URL}${path}` : undefined
-  const imageUrl = `${SITE_URL}${image}`
+  const fullTitle = appendSiteName ? `${title} · ${BRAND.name}` : title
+  const canonical = !noindex && path ? siteUrl(path) : undefined
+  const imageUrl = new URL(image, SITE_ORIGIN).href
 
   return (
     <>
-      <title>{fullTitle}</title>
-      <meta name="description" content={description} />
-      <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
-      {canonical && <link rel="canonical" href={canonical} />}
-
-      {/* Open Graph and Twitter cards only matter where the page can be shared. */}
+      <title data-seo="true">{fullTitle}</title>
+      <meta data-seo="true" name="description" content={description} />
+      <meta data-seo="true" name="robots" content={noindex
+        ? 'noindex, nofollow'
+        : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
+      {canonical && <link data-seo="true" rel="canonical" href={canonical} />}
       {!noindex && (
         <>
-          <meta property="og:type" content="website" />
-          <meta property="og:site_name" content={SITE_NAME} />
-          <meta property="og:title" content={fullTitle} />
-          <meta property="og:description" content={description} />
-          <meta property="og:image" content={imageUrl} />
-          {canonical && <meta property="og:url" content={canonical} />}
-
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content={fullTitle} />
-          <meta name="twitter:description" content={description} />
-          <meta name="twitter:image" content={imageUrl} />
+          <meta data-seo="true" property="og:type" content={type} />
+          <meta data-seo="true" property="og:site_name" content={BRAND.name} />
+          <meta data-seo="true" property="og:locale" content="en_US" />
+          <meta data-seo="true" property="og:title" content={fullTitle} />
+          <meta data-seo="true" property="og:description" content={description} />
+          <meta data-seo="true" property="og:image" content={imageUrl} />
+          <meta data-seo="true" property="og:image:alt" content={imageAlt} />
+          <meta data-seo="true" property="og:image:type" content="image/png" />
+          <meta data-seo="true" property="og:image:width" content={String(BRAND.socialImageWidth)} />
+          <meta data-seo="true" property="og:image:height" content={String(BRAND.socialImageHeight)} />
+          {canonical && <meta data-seo="true" property="og:url" content={canonical} />}
+          <meta data-seo="true" name="twitter:card" content="summary_large_image" />
+          <meta data-seo="true" name="twitter:title" content={fullTitle} />
+          <meta data-seo="true" name="twitter:description" content={description} />
+          <meta data-seo="true" name="twitter:image" content={imageUrl} />
+          <meta data-seo="true" name="twitter:image:alt" content={imageAlt} />
         </>
       )}
-
+      {!noindex && structuredData && <script data-seo="true" type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(structuredData) }} />}
       {children}
     </>
   )

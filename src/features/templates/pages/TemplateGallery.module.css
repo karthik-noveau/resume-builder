@@ -288,6 +288,7 @@
   }
 
   .previewThumb {
+    --resume-preview-width: 116;
     border-radius: 2px;
     box-shadow: 0 6px 12px -4px rgb(30 26 52 / 18%);
   }
@@ -320,3 +321,17 @@
     height: 24px;
   }
 }
+
+.intro {
+  max-width: 560px;
+  margin-top: 10px;
+  font-size: var(--text-base);
+  color: rgb(var(--color-text-secondary));
+  line-height: 1.6;
+}
+
+@media (max-width: 359px) {
+  .previewThumb { --resume-preview-width: 96; }
+}
+
+.intro a { color: rgb(var(--color-primary)); text-decoration: underline; text-underline-offset: 3px; }

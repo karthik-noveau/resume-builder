@@ -5,12 +5,57 @@
 [build.environment]
   NODE_VERSION = "22"
 
-# react-router serves every route from the single entry point, so unknown paths
-# must fall through to index.html instead of 404ing on the CDN.
+# Static public pages are served directly. Only workspace routes use the SPA.
+[[redirects]]
+  from = "/app"
+  to = "/workspace.html"
+  status = 200
+
+[[redirects]]
+  from = "/settings"
+  to = "/workspace.html"
+  status = 200
+
+[[redirects]]
+  from = "/share"
+  to = "/workspace.html"
+  status = 200
+
+[[redirects]]
+  from = "/editor/*"
+  to = "/workspace.html"
+  status = 200
+
+# Unknown URLs return a real 404 rather than an indexable homepage copy.
 [[redirects]]
   from = "/*"
-  to = "/index.html"
-  status = 200
+  to = "/404.html"
+  status = 404
+
+[[headers]]
+  for = "/app"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/settings"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/share"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/editor/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/workspace.html"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
 
 [[headers]]
   for = "/*"
@@ -27,6 +72,6 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
-  for = "/index.html"
+  for = "/*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"

@@ -1,6 +1,6 @@
 import { AnimatePresence } from 'framer-motion'
 import { useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import { ArrowLeft, ArrowRight, Search } from 'lucide-react'
 import { clsx } from 'clsx'
 import { toast } from 'sonner'
@@ -8,6 +8,7 @@ import { useTemplateStore } from '@/shared/stores/template.store'
 import { useResumeStore } from '@/shared/stores/resume.store'
 import { Button } from '@/shared/components/ui/Button/Button'
 import { EmptyState } from '@/shared/components/ui/EmptyState/EmptyState'
+import { PUBLIC_PAGES, publicPageSchema } from '@/shared/seo/publicPages'
 import { Seo } from '@/shared/components/Seo/Seo'
 import { ResumePreview } from '@/shared/components/ResumePreview/ResumePreview'
 import { getTemplatePreviewTree } from '@/shared/utils/templatePreview'
@@ -15,14 +16,10 @@ import { TemplateFilters } from '@/shared/components/TemplateFilters/TemplateFil
 import { DEFAULT_TEMPLATE_FILTERS, filterTemplates } from '@/shared/utils/templateFilters'
 import { TemplatePreviewDialog } from '@/shared/components/TemplatePickerModal/TemplatePreviewDialog'
 import type { TemplateDefinition } from '@/shared/types/template.types'
-import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import styles from './TemplateGallery.module.css'
 
 export function TemplateGallery() {
   const navigate = useNavigate()
-  const isMobile = useMediaQuery('(max-width: 639px)')
-  const isNarrow = useMediaQuery('(max-width: 359px)')
-  const previewWidth = isMobile ? (isNarrow ? 96 : 116) : 200
   const [searchParams] = useSearchParams()
   const isCreateMode = searchParams.get('create') === 'true'
 
@@ -56,12 +53,8 @@ export function TemplateGallery() {
   }
 
   return (
-    <div className={styles.root}>
-      <Seo
-        title="Resume Templates"
-        description={`Browse ${availableTemplates.length} resume templates in one- and two-column layouts. Preview any template and start editing straight away — free and without an account.`}
-        path="/templates"
-      />
+    <main className={styles.root}>
+      <Seo {...PUBLIC_PAGES.templates} appendSiteName={false} structuredData={publicPageSchema('templates')} />
       <div className={styles.header}>
         <div className={styles.headerInner}>
           <div>
@@ -78,8 +71,9 @@ export function TemplateGallery() {
               </button>
             )}
             <h1 className={styles.heading}>
-              {isCreateMode ? 'Choose a template' : 'Templates'}
+              {isCreateMode ? 'Choose a template' : 'Resume templates'}
             </h1>
+            {!isCreateMode && <p className={styles.intro}>Find your fit. Make it yours. Every template is free to edit and download as a PDF. <Link to="/guides/resume-format">Find your resume format →</Link></p>}
             <p className={styles.subheading} role="status" aria-live="polite">
               {isCreateMode
                 ? 'You can change it later.'
@@ -121,13 +115,13 @@ export function TemplateGallery() {
                 >
                   <ResumePreview
                     layoutTree={getTemplatePreviewTree(tpl.id)}
-                    widthPx={previewWidth}
+                    widthPx={200}
                     className={styles.previewThumb}
                   />
                 </button>
 
-                <span className={styles.cardInfo}>
-                  <span className={styles.cardTitle}>{tpl.name}</span>
+                <div className={styles.cardInfo}>
+                  <h2 className={styles.cardTitle}>{tpl.name}</h2>
                   <button
                     type="button"
                     className={styles.selectAction}
@@ -147,7 +141,7 @@ export function TemplateGallery() {
                       </>
                     )}
                   </button>
-                </span>
+                </div>
               </article>
             ))}
           </div>
@@ -166,7 +160,7 @@ export function TemplateGallery() {
           )}
         </div>
       </div>
-    </div>
+    </main>
   )
 }
 

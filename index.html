@@ -4,20 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="theme-color" content="#7c3aed" />
-    <link rel="icon" type="image/svg+xml" href="/resume-studio-mark.svg?v=4" />
-    <!--
-      Title, description, robots, canonical and social tags are owned by the
-      <Seo> component so each route controls its own. They are deliberately
-      absent here: React 19 appends hoisted metadata rather than replacing it,
-      and with two <title> elements the browser uses the first one — a static
-      title here would override every route.
-    -->
+    <link rel="icon" type="image/svg+xml" href="/resume-builder-mark.svg?v=1" />
+    <meta name="application-name" content="Resume Builder" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preload" href="/fonts/Manrope-Bold.woff" as="font" type="font/woff" crossorigin />
+    <!--app-head-->
   </head>
   <body>
     <div id="root"></div>
     <noscript>
-      Resume Studio is a browser-based resume builder and needs JavaScript
-      enabled to run.
+      Resume Builder needs JavaScript enabled to create and edit resumes
+      in your browser.
     </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>

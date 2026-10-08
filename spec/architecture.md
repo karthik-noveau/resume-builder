@@ -1,6 +1,6 @@
 # Architecture
 
-Implementation blueprint for **Resume Studio**. This document describes the
+Implementation blueprint for **Resume Builder**. This document describes the
 application as it is actually built. It is the current authority; where it
 disagrees with `reference/doc-*.md`, this document wins and the difference is
 recorded under [Known drift](#known-drift).

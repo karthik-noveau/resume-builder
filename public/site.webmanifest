@@ -1,0 +1,20 @@
+{
+  "name": "Resume Builder",
+  "short_name": "Resume Builder",
+  "description": "A free resume builder with professional templates, live editing, and PDF downloads. No account or watermarks.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fcfbff",
+  "theme_color": "#7c3aed",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/resume-builder-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

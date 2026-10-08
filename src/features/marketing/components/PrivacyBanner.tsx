@@ -10,7 +10,7 @@ const QUESTIONS = [
   {
     question: 'Where is my resume saved?',
     answer:
-      'Your resume is saved in this browser on this device. It isn’t uploaded to a server. Download a PDF for applications, or an editable backup from Settings to move to another device. Clearing site data removes local resumes, so keep a backup of your work.',
+      'Your resume is saved in this browser on this device. It isn’t automatically uploaded to a server. Download a PDF for applications, or an editable backup from Settings to move to another device. Clearing site data removes local resumes, so keep a backup of your work.',
   },
   {
     question: 'Can I change templates later?',
@@ -38,15 +38,15 @@ export function PrivacyBanner() {
           <em>Your business.</em>
         </h2>
         <p className={styles.description}>
-          Your career story belongs to you. Everything you create stays in your browser, on your
-          device. That’s how we think it should be.
+          Your career story belongs to you. Resumes are saved in your browser, on your device.
+          You choose when to export or share them.
         </p>
         <ul className={styles.checks}>
           <li>
             <Check size={13} aria-hidden="true" /> No account needed
           </li>
           <li>
-            <Check size={13} aria-hidden="true" /> No resume uploads
+            <Check size={13} aria-hidden="true" /> Saved on your device
           </li>
         </ul>
       </div>

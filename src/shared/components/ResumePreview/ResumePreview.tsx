@@ -28,13 +28,14 @@ export const ResumePreview = memo(function ResumePreview({ layoutTree, widthPx, 
     <div
       className={className}
       style={{
-        width: widthPx,
-        height: heightPx,
+        width: `calc(var(--resume-preview-width, ${widthPx}) * 1px)`,
+        height: `calc(var(--resume-preview-width, ${widthPx}) * ${heightPx / widthPx}px)`,
         overflow: 'hidden',
         pointerEvents: 'none',
         position: 'relative',
         backgroundColor: '#ffffff',
       }}
+      data-nosnippet="true"
       aria-hidden="true"
       /* CanvasPage renders a <button> per section and entry — meaningful in the
          editor, but here they are scaled-down decoration. pointer-events and
@@ -47,7 +48,7 @@ export const ResumePreview = memo(function ResumePreview({ layoutTree, widthPx, 
       {page ? (
         <div
           style={{
-            transform: `scale(${widthPx / ptToPx(page.widthPt)})`,
+            transform: `scale(calc(var(--resume-preview-width, ${widthPx}) / ${ptToPx(page.widthPt)}))`,
             transformOrigin: 'top left',
           }}
         >

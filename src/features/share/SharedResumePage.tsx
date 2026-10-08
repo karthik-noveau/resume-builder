@@ -39,7 +39,7 @@ function SharedResumeImport({ hash }: { hash: string }) {
 
   return (
     <>
-      <Seo title="Shared resume" description="Open a shared Resume Studio resume." noindex />
+      <Seo title="Shared resume" description="View a resume shared with Resume Builder." noindex />
       <main className={styles.importPage}>
         <div className={styles.importCard}>
           {error ? (

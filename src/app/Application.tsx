@@ -1,22 +1,16 @@
 import { useEffect, useState } from 'react'
 import { AppRouter } from './router'
 import { fontRegistry } from '@/shared/services/font.registry'
-import { logger } from '@/shared/services/logger'
+import { fontsReady } from './bootstrap'
 import { Spinner } from '@/shared/components/ui/Spinner/Spinner'
 
-const fontsReady = fontRegistry.initialize()
-
 export function Application() {
-  const [ready, setReady] = useState(false)
+  const [ready, setReady] = useState(fontRegistry.isReady())
   useEffect(() => {
     let mounted = true
-    void fontsReady
-      .catch((error: unknown) => {
-        logger.error('Fonts unavailable; using fallback typography', error)
-      })
-      .finally(() => {
-        if (mounted) setReady(true)
-      })
+    void fontsReady.finally(() => {
+      if (mounted) setReady(true)
+    })
     return () => {
       mounted = false
     }
@@ -25,7 +19,7 @@ export function Application() {
     <AppRouter />
   ) : (
     <main className="app-loading">
-      <Spinner size={28} label="Opening Resume Studio…" />
+      <Spinner size={28} label="Opening Resume Builder…" />
     </main>
   )
 }

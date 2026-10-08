@@ -14,7 +14,7 @@ const SIZE_CLASSES: Record<NonNullable<BrandMarkProps['size']>, string> = {
 export function BrandMark({ size = 'sm', className }: BrandMarkProps) {
   return (
     <span className={clsx(styles.root, SIZE_CLASSES[size], className)} aria-hidden="true">
-      <img src="/resume-studio-mark.svg?v=4" width="40" height="40" alt="" className={styles.icon} draggable={false} />
+      <img src="/resume-builder-mark.svg?v=1" width="40" height="40" alt="" className={styles.icon} draggable={false} />
     </span>
   )
 }
@@ -25,7 +25,7 @@ export function BrandLogo() {
       <BrandMark size="md" />
       <span className={styles.wordmark}>
         <span className={styles.wordmarkResume}>Resume</span>{' '}
-        <span className={styles.wordmarkStudio}>Studio</span>
+        <span className={styles.wordmarkDescriptor}>Builder</span>
       </span>
     </span>
   )

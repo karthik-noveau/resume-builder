@@ -49,10 +49,14 @@ class FontRegistryImpl {
     return this.fallbackFonts.get(`${family}-${weight >= 600 ? 'Bold' : 'Regular'}`)
   }
 
-  async initialize(): Promise<void> {
+  async initialize(loadFont?: (path: string) => Promise<ArrayBuffer>): Promise<void> {
     const fallbacksReady = Promise.allSettled(
       FALLBACK_FAMILIES.flatMap((family) =>
         ['Regular', 'Bold'].map(async (cut) => {
+          if (loadFont) {
+            this.fallbackFonts.set(`${family}-${cut}`, await loadFont(`/fonts/${family}-${cut}.ttf`))
+            return
+          }
           const response = await fetch(`/fonts/${family}-${cut}.ttf`, {
             signal: AbortSignal.timeout(8000),
           })
@@ -63,6 +67,10 @@ class FontRegistryImpl {
     )
     const results = await Promise.allSettled(
       (Object.entries(FONT_FILES) as [FontKey, string][]).map(async ([key, path]) => {
+        if (loadFont) {
+          this.fonts.set(key, await loadFont(path))
+          return
+        }
         const controller = new AbortController()
         const timer = setTimeout(() => controller.abort(), 8000)
         try {

@@ -35,7 +35,7 @@
 }
 .intro h1 {
   font-family: var(--home-display);
-  font-size: clamp(70px, 7.3vw, 104px);
+  font-size: clamp(62px, 6.5vw, 92px);
   font-weight: 600;
   letter-spacing: -6px;
   line-height: 1.04;
@@ -398,7 +398,7 @@
 }
 @media (max-width: 1150px) {
   .intro h1 {
-    font-size: 86px;
+    font-size: 76px;
     letter-spacing: -5px;
   }
   .intro h1 > svg {
@@ -439,7 +439,7 @@
     padding: 38px 0 0;
   }
   .intro h1 {
-    font-size: clamp(64px, 11vw, 90px);
+    font-size: clamp(58px, 10vw, 82px);
   }
   .intro h1 > svg {
     right: -65px;
@@ -515,7 +515,7 @@
     box-shadow: 0 0 0 4px var(--home-soft);
   }
   .intro h1 {
-    font-size: clamp(50px, 14.5vw, 64px);
+    font-size: clamp(42px, 12.5vw, 56px);
     letter-spacing: -0.06em;
     line-height: 1.06;
     margin: 20px auto 16px;

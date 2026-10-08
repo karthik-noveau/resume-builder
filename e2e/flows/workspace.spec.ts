@@ -83,7 +83,7 @@ test('backup restore preserves an uploaded photo and rejects invalid files witho
   expect(backup.resumes).toHaveLength(1)
   expect(backup.images).toHaveLength(1)
   expect(backup.resumes[0].personalInfo.fullName).toBe('Backup Example')
-  const upload = page.getByLabel('Choose a Resume Studio backup')
+  const upload = page.getByLabel('Choose a Resume Builder backup')
   await upload.setInputFiles({ name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('{"invalid":true}') })
   await expect(page.getByRole('alert')).toBeVisible()
   await expect(page.getByRole('dialog')).toHaveCount(0)

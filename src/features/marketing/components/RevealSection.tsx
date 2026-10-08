@@ -26,7 +26,7 @@ export function RevealSection({ children }: { children: ReactNode }) {
     <div
       ref={container}
       className={styles.section}
-      data-revealed={revealed}
+      data-revealed={import.meta.env.SSR || revealed}
       onFocusCapture={() => setRevealed(true)}
     >
       {children}

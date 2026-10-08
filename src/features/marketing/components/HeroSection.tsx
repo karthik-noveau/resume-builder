@@ -65,12 +65,12 @@ export function HeroSection() {
       <div className={styles.main}>
         <div className={styles.intro}>
           <p className={styles.eyebrow}>
-            <span /> A LITTLE AMBITION. A LOT OF POSSIBILITY.
+            <span /> FREE RESUME BUILDER. MADE FOR YOU.
           </p>
           <h1 id="hero-heading">
-            Your next
+            Your resume.
             <br />
-            <span>big move.</span>
+            <span>Your way.</span>
             <MoveUpRight aria-hidden="true" />
           </h1>
           <p className={styles.description}>
@@ -79,10 +79,10 @@ export function HeroSection() {
           </p>
           <p className={styles.supporting}>
             <span className={styles.supportingFull}>
-              Create a resume that feels like you. Beautifully designed, effortlessly yours, and
-              always free.
+              Choose a professional template, make it your own, and download a polished PDF.
+              Always free. No sign-up.
             </span>
-            <span className={styles.supportingCompact}>Beautifully designed. Always free.</span>
+            <span className={styles.supportingCompact}>Free templates. Polished PDFs. No sign-up.</span>
           </p>
           <div className={styles.actions}>
             <PillCta to="/templates?create=true">Build my resume</PillCta>
@@ -176,7 +176,7 @@ export function HeroSection() {
           </p>
         </div>
       </div>
-      <ul className={styles.benefits} aria-label="Resume Studio benefits">
+      <ul className={styles.benefits} aria-label="Resume Builder benefits">
         <li>
           <span className={styles.benefitIcon}><LayoutTemplate size={21} aria-hidden="true" /></span>
           <div className={styles.benefitCopy}>

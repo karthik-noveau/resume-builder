@@ -24,7 +24,7 @@ export function TemplateShowcase() {
             Find your kind of <em>standout.</em>
           </h2>
           <p className={styles.subtext}>
-            Pick a layout you love. Make it yours in minutes.
+            Professional resume templates, from simple to modern. Pick your layout and make it yours.
           </p>
         </div>
         <Link to="/templates" className={styles.allLink}>

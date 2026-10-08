@@ -25,32 +25,48 @@
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.logo .md {
+  width: 36px;
+  height: 36px;
 }
 
 .wordmark {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.23em;
   font-family: var(--font-heading, var(--font-sans));
-  line-height: 1;
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: -0.7px;
   color: rgb(var(--color-text-primary));
   white-space: nowrap;
 }
 
 .wordmarkResume {
-  font-size: 18px;
   font-weight: 700;
-  letter-spacing: -0.7px;
 }
 
-.wordmarkStudio {
-  padding-left: 1px;
-  font-family: var(--font-sans);
-  font-size: 10px;
+.wordmarkDescriptor {
   font-weight: 600;
-  letter-spacing: 2.4px;
-  text-transform: uppercase;
   color: rgb(var(--color-text-secondary));
+}
+
+@media (max-width: 767px) {
+  .logo {
+    gap: 6px;
+  }
+
+  .logo .md {
+    width: 32px;
+    height: 32px;
+  }
+
+  .wordmark {
+    font-size: 16px;
+    letter-spacing: -0.45px;
+  }
 }
